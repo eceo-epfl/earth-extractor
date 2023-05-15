@@ -1,49 +1,33 @@
 #!/usr/bin/env python3
 import eodag
 import typer
-from typing import Annotated, Optional, List
-from enum import Enum
-
-
-
-class Satellites(str, Enum):
-    sentinel1 = "sentinel1"
-    sentinel2 = "sentinel2"
-    sentinel3 = "sentinel3"
-
+from typing import Annotated, Optional, List, Tuple
+from satdata.enums import Satellites, Levels
 
 # Initialise the Typer class
 app = typer.Typer(no_args_is_help=True)
-
-
-
-# @app.command()
-# def main(textstring):
-#     print(textstring)
-# def main(dag: eodag.EODataAccessGateway):
-
-
-#     search_results, _ = dag.search(
-#         productType="S2_MSI_L1C",
-#         start="2021-03-01",
-#         end="2021-03-31",
-#         geom={"lonmin": 1, "latmin": 43, "lonmax": 2, "latmax": 44}
-#     )
-#     product_paths = dag.download_all(search_results)
-
-#     return product_paths
 
 
 @app.command()
 def show_providers(
     satellites: Annotated[
         List[Satellites],
-        typer.Option("--add-satellite", help="Satellites to download from.")
-    ] = [Satellites.sentinel1, Satellites.sentinel2, Satellites.sentinel3]
+        typer.Option("--satellite",
+                     help="Satellite and its layer to consider.")
+    ] = [Satellites.SENTINEL1_L1],
 ) -> None:
     dag = eodag.EODataAccessGateway()
     print(satellites)
-    return
+
+    # Rearrange the Satellite:Level structure into tuples
+    satellite_level_choices = []
+    for satellite in satellites:
+        sat, level = satellite.split(':')
+        satellite_level_choices.append((sat, level))
+
+    print(satellite_level_choices)
+    # return
+    product_list = []
     for product in dag.list_product_types():
         # print(product['ID'])
         product_providers = dag.available_providers(product['ID'])
@@ -51,9 +35,13 @@ def show_providers(
         # print(product_providers)
         if (
             'scihub' in product_providers
-            and product['platform'].lower() in satellites
+            and (
+                (product['platform'], product['processingLevel'])
+                in satellite_level_choices)
+            # and product['platform'].lower() in satellites
+            # and product['processingLevel'] in levels
         ):
-            print(f"ID: {product['ID']} providers: {product_providers}")
+            print(f"ID: {product['ID']}", end=' ')
             exclude_keys = ['abstract', 'license', 'missionStartDate']
 
             # Exclude keys from print
@@ -63,6 +51,10 @@ def show_providers(
             }
             print(new_d)
             print()
+            product_list.append(product['ID'])
+
+    print(product_list)
+
 
 
 if __name__ == "__main__":
