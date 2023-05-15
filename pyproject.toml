@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "satdata"
+version = "0.1.0"
+description = ""
+authors = ["Evan Thomas <evan.thomas@epfl.ch>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+botocore = "1.29.133"
+eodag = "^2.10.0"
+eodag-sentinelsat = "^0.4.1"
+typer = "^0.9.0"
+rich = "^13.3.5"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
