@@ -1,15 +1,25 @@
+#!/usr/bin/env python3
 import eodag
 import typer
+from typing import Annotated, Optional, List
+from enum import Enum
+
+
+
+class Satellites(str, Enum):
+    sentinel1 = "sentinel1"
+    sentinel2 = "sentinel2"
+    sentinel3 = "sentinel3"
 
 
 # Initialise the Typer class
-app = typer.Typer(add_completion=False, no_args_is_help=True)
+app = typer.Typer(no_args_is_help=True)
 
 
 
-@app.command()
-def main(textstring):
-    print(textstring)
+# @app.command()
+# def main(textstring):
+#     print(textstring)
 # def main(dag: eodag.EODataAccessGateway):
 
 
@@ -25,9 +35,15 @@ def main(textstring):
 
 
 @app.command()
-def show_providers():
+def show_providers(
+    satellites: Annotated[
+        List[Satellites],
+        typer.Option("--add-satellite", help="Satellites to download from.")
+    ] = [Satellites.sentinel1, Satellites.sentinel2, Satellites.sentinel3]
+) -> None:
     dag = eodag.EODataAccessGateway()
-
+    print(satellites)
+    return
     for product in dag.list_product_types():
         # print(product['ID'])
         product_providers = dag.available_providers(product['ID'])
@@ -35,9 +51,7 @@ def show_providers():
         # print(product_providers)
         if (
             'scihub' in product_providers
-            and product['platform'].lower() in [
-                'sentinel1', 'sentinel2', 'sentinel3'
-            ]
+            and product['platform'].lower() in satellites
         ):
             print(f"ID: {product['ID']} providers: {product_providers}")
             exclude_keys = ['abstract', 'license', 'missionStartDate']
