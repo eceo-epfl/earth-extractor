@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "earth-explorer"
+name = "earth-extractor"
 version = "0.1.0"
 description = "A library to simplify the workflow of data acquisition from multiple satellite data providers"
 authors = ["Evan Thomas <evan.thomas@epfl.ch>"]

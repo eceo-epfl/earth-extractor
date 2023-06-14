@@ -2,7 +2,7 @@
 import eodag
 import typer
 from typing import Annotated, Optional, List, Tuple
-from earth_explorer.enums import Satellites, Levels
+from earth_extractor.enums import Satellites, Levels
 
 # Initialise the Typer class
 app = typer.Typer(no_args_is_help=True)
