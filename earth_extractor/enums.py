@@ -1,4 +1,5 @@
 from enum import Enum
+from pydantic import BaseModel, Field, root_validator
 
 
 class Satellites(str, Enum):
@@ -18,3 +19,35 @@ class Satellites(str, Enum):
 
     # Sentinel 3
     SENTINEL3_L1 = "SENTINEL3:L1"
+
+
+class ROI(BaseModel):
+    ''' Defines the region of interest to be used for the search
+
+    The region of interest is defined by a list of floats. The first two
+    floats define the top left corner of the rectangle, and the last two
+    floats define the bottom right corner of the rectangle. The coordinates
+    are in the WGS84 coordinate system.
+    '''
+
+    # Limit latitude to -90 to 90
+    latmin: float = Field(..., ge=-90, le=90)
+    lonmin: float = Field(..., ge=-180, le=180)
+    latmax: float = Field(..., ge=-90, le=90)
+    lonmax: float = Field(..., ge=-180, le=180)
+
+    @classmethod
+    def from_string(cls, v: str):
+        ''' Convert a string into a list of floats
+
+        The string is split by a comma (',') and each element is converted
+        into a float. The resulting list is returned.
+        '''
+
+        if isinstance(v, str):
+            values = [float(x) for x in v.split(',')]
+
+            return cls(
+                latmin=values[0], lonmin=values[1],
+                latmax=values[2], lonmax=values[3]
+            )
