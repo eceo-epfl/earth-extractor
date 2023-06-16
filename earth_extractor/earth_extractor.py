@@ -3,8 +3,19 @@ import eodag
 import datetime
 import typer
 from typing import Annotated, List
-from enums import Satellites, ROI
+from enums import Satellite, ProcessingLevel, ROI
+import logging
+from earth_extractor.config import constants
 
+# Define a console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(constants.LOGLEVEL_CONSOLE)
+console_handler.setFormatter(constants.LOGFORMAT_CONSOLE)
+logging.getLogger().addHandler(console_handler)
+
+# Define logger for this file
+logger = logging.getLogger(__name__)
+logger.setLevel(constants.LOGLEVEL_CONSOLE)
 
 # Initialise the Typer class
 app = typer.Typer(no_args_is_help=True)
@@ -29,26 +40,32 @@ def show_providers(
                      help="End datetime of the search.")
     ],
     satellites: Annotated[
-        List[Satellites],
+        List[Satellite],
         typer.Option("--satellite",
                      help="Satellite and its layer to consider.")
-    ] = [Satellites.SENTINEL1_L1],
-    no_confirmation: bool = typer.Option(False, "--no-confirmation",
-                                        help="Do not ask for confirmation before downloading")
-
+    ],
+    level: Annotated[
+        List[ProcessingLevel],
+        typer.Option("--level",
+                     help="Processing level to consider.")
+    ],
+    no_confirmation: bool = typer.Option(
+        False, "--no-confirmation",
+        help="Do not ask for confirmation before downloading"
+    )
 ) -> None:
     dag = eodag.EODataAccessGateway()
     # dag.set_preferred_provider("peps")
     # Convert the ROI string into a list of floats
     # roi: List[float] = [float(x) for x in roi.split(',')]
 
-    roi: ROI = ROI.from_string(roi)
+    roi = ROI.from_string(roi)
 
     # Rearrange the Satellite:Level structure into tuples
-    satellite_level_choices = []
-    for satellite in satellites:
-        sat, level = satellite.split(':')
-        satellite_level_choices.append((sat, level))
+    satellite_level_choices: List[str] = []
+    # for satellite in satellites:
+        # sat, level = satellite.split(':')
+        # satellite_level_choices.append((sat, level))
 
     print(satellite_level_choices)
     product_list = []
@@ -57,12 +74,12 @@ def show_providers(
         product_providers = dag.available_providers(product['ID'])
 
         # print(product_providers)
-        if (
-            (product['platform'], product['processingLevel'])
-            in satellite_level_choices
+        if (product['platform'] in satellites) and (product['processingLevel'] in level):
+            # (product['platform'], product['processingLevel'])
+            # in satellite_level_choices
             # and product['platform'].lower() in satellites
             # and product['processingLevel'] in levels
-        ):
+        # ):
             print(f"ID: {product['ID']}", end=' ')
             exclude_keys = ['abstract', 'license', 'missionStartDate']
 
@@ -77,9 +94,9 @@ def show_providers(
             print()
             product_list.append(product['ID'])
 
-    print("ROI:", roi)
-    print("Time:", start, end)
-    print(product_list)
+    logger.info(f"ROI: {roi}")
+    logger.info(f"Time: {start} {end}")
+    logger.info(product_list)
 
     results = []
     # Search for each satellite and level and combine results
@@ -88,6 +105,7 @@ def show_providers(
                              geom=roi.dict(), productType=product_id)
         results += res
 
+    # Prompt user before initiating download
     if not no_confirmation:
         input(
             f"The search found {len(results)} results. "
@@ -98,8 +116,9 @@ def show_providers(
     results = results[0:2]
     paths = dag.download_all(results)
 
-    print("The output files are located at:")
-    [print(path) for path in paths]
+    logger.info("The output files are located at:")
+    [logger.info(path) for path in paths]
+
 
 if __name__ == "__main__":
     app()
