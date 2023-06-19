@@ -3,9 +3,10 @@ import eodag
 import datetime
 import typer
 from typing import Annotated, List
-from enums import Satellite, ProcessingLevel, ROI
+from enums import Satellite, ProcessingLevel
+from earth_extractor.models import ROI
 import logging
-from config import constants, credentials
+from config import constants
 
 # Define a console handler
 console_handler = logging.StreamHandler()
@@ -59,42 +60,28 @@ def show_providers(
     # Convert the ROI string into a list of floats
     # roi: List[float] = [float(x) for x in roi.split(',')]
 
-    roi = ROI.from_string(roi)
+    roi_obj: ROI = ROI.from_string(roi)
 
     # Rearrange the Satellite:Level structure into tuples
     satellite_level_choices: List[str] = []
-    # for satellite in satellites:
-        # sat, level = satellite.split(':')
-        # satellite_level_choices.append((sat, level))
 
     print(satellite_level_choices)
     product_list = []
     for product in dag.list_product_types():
         # print(product['ID'])
-        product_providers = dag.available_providers(product['ID'])
+        # product_providers = dag.available_providers(product['ID'])
 
         # print(product_providers)
-        if (product['platform'] in satellites) and (product['processingLevel'] in level):
-            # (product['platform'], product['processingLevel'])
-            # in satellite_level_choices
-            # and product['platform'].lower() in satellites
-            # and product['processingLevel'] in levels
-        # ):
-            print(f"ID: {product['ID']}", end=' ')
-            exclude_keys = ['abstract', 'license', 'missionStartDate']
+        if (
+            (product['platform'] in satellites)
+            and (product['processingLevel'] in level)
+        ):
 
-            # Exclude keys from print
-            new_d = {
-                k: product[k] for k
-                in set(list(product.keys())) - set(exclude_keys)
-            }
-            # print(new_d)
-            # print(json.dumps(new_d, indent=4))
-            # print(new_d['processingLevel'])
+            print(f"ID: {product['ID']}", end=' ')
             print()
             product_list.append(product['ID'])
 
-    logger.info(f"ROI: {roi}")
+    logger.info(f"ROI: {roi_obj}")
     logger.info(f"Time: {start} {end}")
     logger.info(product_list)
 
@@ -102,7 +89,7 @@ def show_providers(
     # Search for each satellite and level and combine results
     for product_id in product_list:
         res = dag.search_all(start=start.isoformat(), end=end.isoformat(),
-                             geom=roi.dict(), productType=product_id)
+                             geom=roi_obj.dict(), productType=product_id)
         results += res
 
     # Prompt user before initiating download
@@ -117,22 +104,9 @@ def show_providers(
     paths = dag.download_all(results)
 
     logger.info("The output files are located at:")
-    [logger.info(path) for path in paths]
+    for path in paths:
+        logger.info(path)
 
 
 if __name__ == "__main__":
-    print(credentials.SCIHUB_USERNAME)
-    # app()
-    from providers import scihub
-
-    scihub.query()
-
-
-    # print(main())
-    # dag = eodag.EODataAccessGateway()
-
-    # data_types = dag.list_product_types()
-    # data_types = [(x['ID'], x['platform'], x['keywords']) for x in dag.list_product_types() if x['platform'] and 'sentinel' in x['platform'].lower()]
-    # for dtype in data_types:
-        # print(dtype)
-        # if 'sentinel'dtype[1]
+    app()

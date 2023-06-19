@@ -1,5 +1,5 @@
 from typing import Any, Dict, List
-from earth_extractor.classes import Satellite
+from earth_extractor.satellites import Satellite
 from earth_extractor.models import ROI
 import logging
 import datetime
@@ -31,7 +31,14 @@ class Provider:
 
         return []
 
-    def download_items(
+    def download_one(
+            self,
+            items: List[Any],
+    ) -> Any:
+
+        pass
+
+    def download_many(
             self,
             items: List[Any],
     ) -> Any:
