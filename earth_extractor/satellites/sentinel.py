@@ -1,5 +1,5 @@
-from classes import Satellite
-from enums import ProcessingLevel, Sensor
+from earth_extractor.classes import Satellite
+from earth_extractor.enums import ProcessingLevel, Sensor
 
 
 sentinel_1 = Satellite(
@@ -12,7 +12,7 @@ sentinel_1 = Satellite(
 sentinel_2 = Satellite(
     name="Sentinel-2",
     description="Sentinel 2",
-    processing_levels=[ProcessingLevel.L1, ProcessingLevel.L2A],
+    processing_levels=[ProcessingLevel.L1C, ProcessingLevel.L2A],
     sensors=[Sensor.MSI]
 )
 
@@ -22,5 +22,3 @@ sentinel_3 = Satellite(
     processing_levels=[ProcessingLevel.L1, ProcessingLevel.L2],
     sensors=[Sensor.OLCI, Sensor.SLSTR, Sensor.SRAL]
 )
-
-satellites = [sentinel_1, sentinel_2, sentinel_3]

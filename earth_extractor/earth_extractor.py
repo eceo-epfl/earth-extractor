@@ -5,7 +5,7 @@ import typer
 from typing import Annotated, List
 from enums import Satellite, ProcessingLevel, ROI
 import logging
-from earth_extractor.config import constants
+from config import constants, credentials
 
 # Define a console handler
 console_handler = logging.StreamHandler()
@@ -121,7 +121,13 @@ def show_providers(
 
 
 if __name__ == "__main__":
-    app()
+    print(credentials.SCIHUB_USERNAME)
+    # app()
+    from providers import scihub
+
+    scihub.query()
+
+
     # print(main())
     # dag = eodag.EODataAccessGateway()
 
