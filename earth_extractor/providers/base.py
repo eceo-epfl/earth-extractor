@@ -1,16 +1,18 @@
-from typing import Any, Dict, List
-from earth_extractor.satellites import Satellite
+from typing import Any, Dict, List, TYPE_CHECKING
 from earth_extractor.models import ROI
 import logging
 import datetime
+from earth_extractor.satellites import enums
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from earth_extractor.satellites.base import Satellite
 
 class Provider:
     def __init__(
         self,
         name: str,
-        satellites: Dict[Satellite, str],
+        satellites: Dict[enums.Satellite, str],
         description: str | None = None,
         uri: str | None = None,
     ):
@@ -21,7 +23,7 @@ class Provider:
 
     def query(
         self,
-        satellite: Satellite,
+        satellite: "Satellite",
         roi: ROI,
         start_date: datetime.datetime,
         end_date: datetime.datetime,

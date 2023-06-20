@@ -1,5 +1,5 @@
 from typing import List
-from earth_extractor.enums import ProcessingLevel, Sensor
+from earth_extractor.satellites import enums
 from earth_extractor.providers.base import Provider
 
 
@@ -8,10 +8,11 @@ class Satellite:
         self,
         query_provider: Provider,
         download_provider: Provider,
-        name: str,
+        name: enums.Satellite,
         description: str,
-        processing_levels: List[ProcessingLevel],
-        sensors: List[Sensor],
+        processing_levels: List[enums.ProcessingLevel],
+        default_level: enums.ProcessingLevel,  # Chosen if no user choice is given
+        sensors: List[enums.Sensor],
     ) -> None:
         ''' A satellite's data can be queried from one provider and downloaded
             from another, defining these allows the methods to be interchanged
@@ -29,6 +30,7 @@ class Satellite:
         self.name = name
         self.description = description
         self.processing_levels = processing_levels
+        self.default_level = default_level
         self.sensors = sensors
 
     def _validate_satellite_provider_compatiblity(

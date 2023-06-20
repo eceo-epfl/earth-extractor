@@ -1,20 +1,22 @@
 from earth_extractor.providers import Provider
-from earth_extractor.satellites import (
-    Satellite, sentinel_1, sentinel_2, sentinel_3
-)
+from earth_extractor.satellites import enums
 from earth_extractor.config import credentials
 from earth_extractor.models import ROI
-from typing import Any, List
+from typing import Any, List, TYPE_CHECKING
 from sentinelsat import SentinelAPI
 import logging
 import datetime
+
+if TYPE_CHECKING:
+    from earth_extractor.satellites.base import Satellite
+
 logger = logging.getLogger(__name__)
 
 
 class CopernicusOpenAccessHub(Provider):
     def query(
         self,
-        satellite: Satellite,
+        satellite: "Satellite",
         roi: ROI,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
@@ -33,7 +35,7 @@ class CopernicusOpenAccessHub(Provider):
 
         products = api.query(
             roi.to_wkt(),
-            platformname=self.satellites[satellite],
+            platformname=self.satellites[satellite.name],
             cloudcoverpercentage=(0, cloud_cover),
             date=(start_date, end_date),
         )
@@ -41,13 +43,13 @@ class CopernicusOpenAccessHub(Provider):
         return products
 
 
-copernicus_scihub = CopernicusOpenAccessHub(
+copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
     name="scihub",
     description="Copernicus Open Access Hub",
     uri="https://scihub.copernicus.eu",
     satellites={
-        sentinel_1: "Sentinel-1",
-        sentinel_2: "Sentinel-2",
-        sentinel_3: "Sentinel-3",
+        enums.Satellite.SENTINEL1: "Sentinel-1",
+        enums.Satellite.SENTINEL2: "Sentinel-2",
+        enums.Satellite.SENTINEL3: "Sentinel-3",
     }
 )

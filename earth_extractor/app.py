@@ -3,7 +3,7 @@ import eodag
 import datetime
 import typer
 from typing import Annotated, List
-from enums import Satellite, ProcessingLevel
+from earth_extractor.satellites.enums import Satellite, ProcessingLevel
 from earth_extractor.models import ROI
 import logging
 from config import constants
@@ -43,24 +43,29 @@ def show_providers(
     satellites: Annotated[
         List[Satellite],
         typer.Option("--satellite",
-                     help="Satellite and its layer to consider.")
-    ],
-    level: Annotated[
-        List[ProcessingLevel],
-        typer.Option("--level",
-                     help="Processing level to consider.")
+                     help="Satellite to consider. To define the processing "
+                     "levels, use the following format: "
+                     "<satellite>:<level1>:<level2>. If no level is specified "
+                     "a default level will be used (usually L1).")
     ],
     no_confirmation: bool = typer.Option(
         False, "--no-confirmation",
         help="Do not ask for confirmation before downloading"
     )
 ) -> None:
-    dag = eodag.EODataAccessGateway()
-    # dag.set_preferred_provider("peps")
-    # Convert the ROI string into a list of floats
-    # roi: List[float] = [float(x) for x in roi.split(',')]
-
     roi_obj: ROI = ROI.from_string(roi)
+
+    # Hold all satellite operations in a list to work on
+    satellite_operations = []
+
+    # Parse the satellite:level string into workable tuples
+    for satellite in satellites:
+        satellites_with_levels = satellite.split(':')
+        if len(satellites_with_levels) == 1:
+            satellite_operations.append(
+                (satellites_with_levels[0], ProcessingLevel.L1)
+            )
+
 
     # Rearrange the Satellite:Level structure into tuples
     satellite_level_choices: List[str] = []

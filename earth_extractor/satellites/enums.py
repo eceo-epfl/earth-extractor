@@ -1,18 +1,6 @@
 from enum import Enum
 
 
-class Satellite(str, Enum):
-    ''' Contains the supported satellites and levels supported by the library
-
-    As the constraint of each level is dependent on the satellite, the
-    satellite and level are combined into a single string, separated by a colon
-    (':'). For example SENTINEL1:L1 is L1 of the Sentinel 1.
-    '''
-    SENTINEL1 = "SENTINEL1"
-    SENTINEL2 = "SENTINEL2"
-    SENTINEL3 = "SENTINEL3"
-
-
 class ProcessingLevel(str, Enum):
     ''' Satellite processing levels
     As defined by:
@@ -38,3 +26,11 @@ class Sensor(str, Enum):
     OLCI = "OLCI"
     SLSTR = "SLSTR"
     SRAL = "SRAL"
+
+
+class Satellite(Enum):
+    ''' Contains the supported satellites supported by the library '''
+
+    SENTINEL1 = "SENTINEL1"
+    SENTINEL2 = "SENTINEL2"
+    SENTINEL3 = "SENTINEL3"

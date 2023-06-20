@@ -1,31 +1,34 @@
 from earth_extractor.satellites.base import Satellite
-from earth_extractor.enums import ProcessingLevel, Sensor
-from earth_extractor import providers
+from earth_extractor.satellites import enums
+from earth_extractor.providers import copernicus_scihub, asf, sinergise, nasa_cmr
 
 
 sentinel_1 = Satellite(
-    query_provider=providers.copernicus_scihub,
-    download_provider=providers.asf,
-    name="Sentinel-1",
+    query_provider=copernicus_scihub,
+    download_provider=asf,
+    name=enums.Satellite.SENTINEL1,
     description="Sentinel 1",
-    processing_levels=[ProcessingLevel.L1, ProcessingLevel.L2],
-    sensors=[Sensor.C_SAR]
+    processing_levels=[enums.ProcessingLevel.L1, enums.ProcessingLevel.L2],
+    default_level=enums.ProcessingLevel.L1,
+    sensors=[enums.Sensor.C_SAR]
 )
 
 sentinel_2 = Satellite(
-    query_provider=providers.copernicus_scihub,
-    download_provider=providers.sinergise,
-    name="Sentinel-2",
+    query_provider=copernicus_scihub,
+    download_provider=sinergise,
+    name=enums.Satellite.SENTINEL2,
     description="Sentinel 2",
-    processing_levels=[ProcessingLevel.L1C, ProcessingLevel.L2A],
-    sensors=[Sensor.MSI]
+    processing_levels=[enums.ProcessingLevel.L1C, enums.ProcessingLevel.L2A],
+    default_level=enums.ProcessingLevel.L1C,
+    sensors=[enums.Sensor.MSI]
 )
 
 sentinel_3 = Satellite(
-    query_provider=providers.nasa_cmr,
-    download_provider=providers.nasa_cmr,
-    name="Sentinel-3",
+    query_provider=nasa_cmr,
+    download_provider=nasa_cmr,
+    name=enums.Satellite.SENTINEL3,
     description="Sentinel 3",
-    processing_levels=[ProcessingLevel.L1, ProcessingLevel.L2],
-    sensors=[Sensor.OLCI, Sensor.SLSTR, Sensor.SRAL]
+    processing_levels=[enums.ProcessingLevel.L1, enums.ProcessingLevel.L2],
+    default_level=enums.ProcessingLevel.L1,
+    sensors=[enums.Sensor.OLCI, enums.Sensor.SLSTR, enums.Sensor.SRAL]
 )
