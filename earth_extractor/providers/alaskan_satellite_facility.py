@@ -9,6 +9,6 @@ logger = logging.getLogger(__name__)
 asf: Provider = Provider(
     name="Alaskan Satellite Facility",
     description="Alaskan Satellite Facility",
-    satellites=[(enums.Satellite.SENTINEL1, '')],
+    satellites={enums.Satellite.SENTINEL1: ''},
     uri="https://asf.alaska.edu"
 )

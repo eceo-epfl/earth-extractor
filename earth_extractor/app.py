@@ -2,11 +2,15 @@
 import eodag
 import datetime
 import typer
-from typing import Annotated, List
-from earth_extractor.satellites.enums import Satellite, ProcessingLevel
+from typing import Annotated, List, Tuple
+from earth_extractor.satellites import enums
 from earth_extractor.models import ROI
+from earth_extractor.satellites.base import Satellite as SatelliteClass
 import logging
-from config import constants
+from earth_extractor.config import constants
+from earth_extractor.cli_options import SatelliteChoices, Satellites
+from earth_extractor.utils import pair_satellite_with_level
+
 
 # Define a console handler
 console_handler = logging.StreamHandler()
@@ -19,13 +23,13 @@ logger = logging.getLogger(__name__)
 logger.setLevel(constants.LOGLEVEL_CONSOLE)
 
 # Initialise the Typer class
-app = typer.Typer(no_args_is_help=True)
+app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 
 @app.command()
 def show_providers(
     roi: Annotated[
-        str,
+        Tuple[float, float, float, float],
         typer.Option("--roi",
                      help="Region of interest to consider. "
                      "Format: lon_min,lat_min,lon_max,lat_max")
@@ -41,31 +45,30 @@ def show_providers(
                      help="End datetime of the search.")
     ],
     satellites: Annotated[
-        List[Satellite],
+        List[SatelliteChoices],
         typer.Option("--satellite",
-                     help="Satellite to consider. To define the processing "
-                     "levels, use the following format: "
-                     "<satellite>:<level1>:<level2>. If no level is specified "
-                     "a default level will be used (usually L1).")
+                     help="Satellite to consider. To add multiple satellites, "
+                     "use the option multiple times.")
     ],
     no_confirmation: bool = typer.Option(
         False, "--no-confirmation",
         help="Do not ask for confirmation before downloading"
     )
 ) -> None:
-    roi_obj: ROI = ROI.from_string(roi)
+    roi_obj: ROI = ROI.from_tuple(roi)
 
     # Hold all satellite operations in a list to work on
     satellite_operations = []
+    for sat in satellites:
+        satellite_operations.append(pair_satellite_with_level(sat))
 
     # Parse the satellite:level string into workable tuples
     for satellite in satellites:
         satellites_with_levels = satellite.split(':')
         if len(satellites_with_levels) == 1:
             satellite_operations.append(
-                (satellites_with_levels[0], ProcessingLevel.L1)
+                (satellites_with_levels[0], enums.ProcessingLevel.L1)
             )
-
 
     # Rearrange the Satellite:Level structure into tuples
     satellite_level_choices: List[str] = []

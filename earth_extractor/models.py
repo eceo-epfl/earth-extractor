@@ -33,6 +33,19 @@ class ROI(BaseModel):
                 latmax=values[2], lonmax=values[3]
             )
 
+    @classmethod
+    def from_tuple(cls, v: str):
+        ''' Convert a tuple into the ROI model
+
+        The order of the tuple is (latmin, lonmin, latmax, lonmax).
+        '''
+
+        if isinstance(v, tuple):
+            return cls(
+                latmin=v[0], lonmin=v[1],
+                latmax=v[2], lonmax=v[3]
+            )
+
     def __str__(self):
         return f"{self.latmin},{self.lonmin},{self.latmax},{self.lonmax}"
 

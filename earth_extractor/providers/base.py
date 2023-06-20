@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
 
+
 class Provider:
     def __init__(
         self,

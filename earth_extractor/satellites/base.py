@@ -56,3 +56,8 @@ class Satellite:
         '''
 
         return str(self.name)
+
+    def __repr__(self):
+        ''' Return the representable name of the satellite as a string. '''
+
+        return str(self.name)

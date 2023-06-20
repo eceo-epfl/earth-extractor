@@ -8,6 +8,6 @@ logger = logging.getLogger(__name__)
 sinergise: Provider = Provider(
     name="Sinergise",
     description="Sinergise",
-    satellites=[(enums.Satellite.SENTINEL2, '')],
+    satellites={enums.Satellite.SENTINEL2: ''},
     uri="https://www.sinergise.com"
 )
