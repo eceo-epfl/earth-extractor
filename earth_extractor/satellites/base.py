@@ -1,6 +1,7 @@
 from typing import List
 from earth_extractor.satellites import enums
 from earth_extractor.providers.base import Provider
+import functools
 
 
 class Satellite:
@@ -11,7 +12,6 @@ class Satellite:
         name: enums.Satellite,
         description: str,
         processing_levels: List[enums.ProcessingLevel],
-        default_level: enums.ProcessingLevel,  # Chosen if no user choice is given
         sensors: List[enums.Sensor],
     ) -> None:
         ''' A satellite's data can be queried from one provider and downloaded
@@ -21,17 +21,17 @@ class Satellite:
         self._query_provider = query_provider
         self._download_provider = download_provider
 
-        # Use the methods from the query and download providers
-        self.query = self._query_provider.query
-        self.download_one = self._download_provider.download_many
-        self.download_many = self._download_provider.download_many
-
         # General information about the satellite
         self.name = name
         self.description = description
         self.processing_levels = processing_levels
-        self.default_level = default_level
         self.sensors = sensors
+
+        # Use the methods from the query and download providers
+        self.query = functools.partial(self._query_provider.query,
+                                       satellite=self)
+        self.download_one = self._download_provider.download_many
+        self.download_many = self._download_provider.download_many
 
     def _validate_satellite_provider_compatiblity(
         self,

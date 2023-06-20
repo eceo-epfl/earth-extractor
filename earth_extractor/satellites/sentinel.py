@@ -9,7 +9,6 @@ sentinel_1 = Satellite(
     name=enums.Satellite.SENTINEL1,
     description="Sentinel 1",
     processing_levels=[enums.ProcessingLevel.L1, enums.ProcessingLevel.L2],
-    default_level=enums.ProcessingLevel.L1,
     sensors=[enums.Sensor.C_SAR]
 )
 
@@ -19,16 +18,14 @@ sentinel_2 = Satellite(
     name=enums.Satellite.SENTINEL2,
     description="Sentinel 2",
     processing_levels=[enums.ProcessingLevel.L1C, enums.ProcessingLevel.L2A],
-    default_level=enums.ProcessingLevel.L1C,
     sensors=[enums.Sensor.MSI]
 )
 
 sentinel_3 = Satellite(
-    query_provider=nasa_cmr,
+    query_provider=copernicus_scihub,
     download_provider=nasa_cmr,
     name=enums.Satellite.SENTINEL3,
     description="Sentinel 3",
     processing_levels=[enums.ProcessingLevel.L1, enums.ProcessingLevel.L2],
-    default_level=enums.ProcessingLevel.L1,
     sensors=[enums.Sensor.OLCI, enums.Sensor.SLSTR, enums.Sensor.SRAL]
 )

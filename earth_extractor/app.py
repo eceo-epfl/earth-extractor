@@ -56,64 +56,43 @@ def show_providers(
     )
 ) -> None:
     roi_obj: ROI = ROI.from_tuple(roi)
-
-    # Hold all satellite operations in a list to work on
+    logger.info(f"ROI: {roi_obj}")
+    # Parse the satellite:level string into a lsit of workable tuples
     satellite_operations = []
     for sat in satellites:
         satellite_operations.append(pair_satellite_with_level(sat))
 
-    # Parse the satellite:level string into workable tuples
-    for satellite in satellites:
-        satellites_with_levels = satellite.split(':')
-        if len(satellites_with_levels) == 1:
-            satellite_operations.append(
-                (satellites_with_levels[0], enums.ProcessingLevel.L1)
-            )
-
-    # Rearrange the Satellite:Level structure into tuples
-    satellite_level_choices: List[str] = []
-
-    print(satellite_level_choices)
-    product_list = []
-    for product in dag.list_product_types():
-        # print(product['ID'])
-        # product_providers = dag.available_providers(product['ID'])
-
-        # print(product_providers)
-        if (
-            (product['platform'] in satellites)
-            and (product['processingLevel'] in level)
-        ):
-
-            print(f"ID: {product['ID']}", end=' ')
-            print()
-            product_list.append(product['ID'])
+    for sat, level in satellite_operations:
+        logger.info(f"Satellite: {sat}, Level: {level}")
+        res = sat.query(roi=roi_obj, start_date=start, end_date=end)
+        logger.info(f"{sat}: Results qty {len(res)}")
+        # print(list(res.items())[0])
 
     logger.info(f"ROI: {roi_obj}")
     logger.info(f"Time: {start} {end}")
-    logger.info(product_list)
+    # logger.info(product_list)
 
-    results = []
-    # Search for each satellite and level and combine results
-    for product_id in product_list:
-        res = dag.search_all(start=start.isoformat(), end=end.isoformat(),
-                             geom=roi_obj.dict(), productType=product_id)
-        results += res
+    # results = []
+    # # Search for each satellite and level and combine results
+    # for product_id in product_list:
+    #     res = dag.search_all(start=start.isoformat(), end=end.isoformat(),
+    #                          geom=roi_obj.dict(), productType=product_id)
+    #     results += res
 
-    # Prompt user before initiating download
-    if not no_confirmation:
-        input(
-            f"The search found {len(results)} results. "
-            "(use the --no-confirmation flag to bypass this prompt)\n"
-            "Press enter to continue:"
-        )
+    # # Prompt user before initiating download
+    # if not no_confirmation:
+    #     input(
+    #         f"The search found {len(results)} results. "
+    #         "(use the --no-confirmation flag to bypass this prompt)\n"
+    #         "Press enter to continue:"
+    #     )
 
-    results = results[0:2]
-    paths = dag.download_all(results)
+    # results = results[0:2]
+    # paths = dag.download_all(results)
 
-    logger.info("The output files are located at:")
-    for path in paths:
-        logger.info(path)
+    # logger.info("The output files are located at:")
+    # for path in paths:
+    #     logger.info(path)
 
 
 if __name__ == "__main__":

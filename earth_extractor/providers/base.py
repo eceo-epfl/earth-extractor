@@ -2,10 +2,10 @@ from typing import Any, Dict, List, TYPE_CHECKING
 from earth_extractor.models import ROI
 import logging
 import datetime
-from earth_extractor.satellites import enums
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from earth_extractor.satellites import enums
     from earth_extractor.satellites.base import Satellite
 
 
@@ -13,7 +13,7 @@ class Provider:
     def __init__(
         self,
         name: str,
-        satellites: Dict[enums.Satellite, str],
+        satellites: Dict["enums.Satellite", str],
         description: str | None = None,
         uri: str | None = None,
     ):
