@@ -63,10 +63,11 @@ def show_providers(
         satellite_operations.append(pair_satellite_with_level(sat))
 
     for sat, level in satellite_operations:
-        logger.info(f"Satellite: {sat}, Level: {level}")
-        res = sat.query(roi=roi_obj, start_date=start, end_date=end)
+        logger.info(f"Satellite: {sat}, Level: {level.value}")
+        res = sat.query(processing_level=level, roi=roi_obj,
+                        start_date=start, end_date=end)
         logger.info(f"{sat}: Results qty {len(res)}")
-        # print(list(res.items())[0])
+        print(list(res.items())[0])
 
     logger.info(f"ROI: {roi_obj}")
     logger.info(f"Time: {start} {end}")

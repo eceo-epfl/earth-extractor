@@ -17,6 +17,7 @@ class CopernicusOpenAccessHub(Provider):
     def query(
         self,
         satellite: "Satellite",
+        processing_level: enums.ProcessingLevel,
         roi: ROI,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
@@ -33,10 +34,25 @@ class CopernicusOpenAccessHub(Provider):
                 f"Satellite {satellite.name} not supported by Copernicus "
                 f"Open Access Hub. Available satellites: {self.satellites}"
             )
-        logger.info(f"Satellite: {satellite.name} ({self.satellites[satellite.name]})")
+        logger.info(f"Satellite: {satellite.name} "
+                    f"({self.satellites[satellite.name]}"
+                    f"{processing_level.value}")
+        product_type = self.products.get(
+            (satellite.name, processing_level), None
+        )
+        if not product_type:
+            raise ValueError(
+                f"Processing level {processing_level.value} not supported "
+                f"by Copernicus Open Access Hub for satellite "
+                f"{satellite.name}. Available processing levels: "
+                f"{self.products}"
+            )
+
         products = api.query(
             roi.to_wkt(),
             platformname=self.satellites[satellite.name],
+            # producttype=product_type,
+            # processinglevel=processing_level.value,
             cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
             date=(start_date, end_date),
         )
@@ -52,5 +68,13 @@ copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
         enums.Satellite.SENTINEL1: "Sentinel-1",
         enums.Satellite.SENTINEL2: "Sentinel-2",
         enums.Satellite.SENTINEL3: "Sentinel-3",
+    },
+    products={
+        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): "GRD",
+        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L2): "SLC",
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): "S2MSI1C",
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): "S2MSI2A",
+        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L1): "OL_1_EFR___",
+        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L2): "OL_2_LFR___",
     }
 )

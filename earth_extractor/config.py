@@ -20,6 +20,10 @@ class Credentials(BaseSettings):
     SCIHUB_USERNAME: str | None = None
     SCIHUB_PASSWORD: str | None = None
 
+    # NASA API (For Alaska Satellite Facility)
+    NASA_USERNAME: str | None = None
+    NASA_PASSWORD: str | None = None
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'

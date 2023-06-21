@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, TYPE_CHECKING
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 from earth_extractor.models import ROI
 import logging
 import datetime
@@ -14,17 +14,23 @@ class Provider:
         self,
         name: str,
         satellites: Dict["enums.Satellite", str],
+        # processing_levels: Dict["enums.ProcessingLevel", str],
         description: str | None = None,
         uri: str | None = None,
+        products: Dict[
+            Tuple["enums.Satellite", "enums.ProcessingLevel"], str
+        ] = {},
     ):
         self.name = name
         self.description = description
         self.uri = uri
         self.satellites = satellites
+        self.products = products
 
     def query(
         self,
         satellite: "Satellite",
+        processing_level: "enums.ProcessingLevel",
         roi: ROI,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
