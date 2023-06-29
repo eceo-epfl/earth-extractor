@@ -14,7 +14,6 @@ class Provider:
         self,
         name: str,
         satellites: Dict["enums.Satellite", str],
-        # processing_levels: Dict["enums.ProcessingLevel", str],
         description: str | None = None,
         uri: str | None = None,
         products: Dict[
@@ -38,18 +37,33 @@ class Provider:
     ) -> List[Any]:
         ''' Query the provider for items matching the given parameters '''
 
-        return []
+        logger.error(
+            f"Query method not implemented for Provider: {self.name} "
+            f"({self.description})"
+        )
 
     def download_one(
-            self,
-            items: List[Any],
+        self,
+        search_origin: "Provider",
+        search_results: List[str],
+        download_dir: str = "data",
+        processes: int = 6
     ) -> Any:
 
-        pass
+        logger.error(
+            f"Download method not implemented for Provider: {self.name} "
+            f"({self.description})"
+        )
 
     def download_many(
-            self,
-            items: List[Any],
+        self,
+        search_origin: "Provider",
+        search_results: List[str],
+        download_dir: str = "data",
+        processes: int = 6
     ) -> Any:
 
-        pass
+        logger.error(
+            f"Download method not implemented for Provider: {self.name} "
+            f"({self.description})"
+        )

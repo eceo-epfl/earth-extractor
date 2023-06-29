@@ -57,44 +57,48 @@ def show_providers(
 ) -> None:
     roi_obj: ROI = ROI.from_tuple(roi)
     logger.info(f"ROI: {roi_obj}")
-    # Parse the satellite:level string into a lsit of workable tuples
+
+    # Parse the satellite:level string into a list of workable tuples
     satellite_operations = []
     for sat in satellites:
         satellite_operations.append(pair_satellite_with_level(sat))
 
+    # Perform a query for each satellite and level and append it to a list
+    all_results = []
     for sat, level in satellite_operations:
         logger.info(f"Satellite: {sat}, Level: {level.value}")
         res = sat.query(processing_level=level, roi=roi_obj,
                         start_date=start, end_date=end)
         logger.info(f"{sat}: Results qty {len(res)}")
-        print(list(res.items())[0])
 
+        # Append results to a list with associated satellite in order to use
+        # its defined download provider
+        all_results.append((sat, res))
+
+    # Sum results from all query results
+    total_qty = sum([len(res) for sat, res in all_results])
+
+    logger.info(f"Total results qty: {total_qty}")
     logger.info(f"ROI: {roi_obj}")
     logger.info(f"Time: {start} {end}")
-    # logger.info(product_list)
 
-    # results = []
-    # # Search for each satellite and level and combine results
-    # for product_id in product_list:
-    #     res = dag.search_all(start=start.isoformat(), end=end.isoformat(),
-    #                          geom=roi_obj.dict(), productType=product_id)
-    #     results += res
+    # Prompt user for confirmation before downloading
+    if not no_confirmation:
+        typer.confirm(
+            "Do you want to download the results? (use --no-confirmation to "
+            "skip this prompt)", abort=True
+        )
 
-    # # Prompt user before initiating download
-    # if not no_confirmation:
-    #     input(
-    #         f"The search found {len(results)} results. "
-    #         "(use the --no-confirmation flag to bypass this prompt)\n"
-    #         "Press enter to continue:"
-    #     )
+    # Download the results using the satellite's download provider
+    for sat, res in all_results:
+        logger.info(f"Downloading results for {sat}..."
+                    f"({len(res)} items)")
+        sat.download_many(search_results=res)
 
-    # results = results[0:2]
-    # paths = dag.download_all(results)
 
-    # logger.info("The output files are located at:")
-    # for path in paths:
-    #     logger.info(path)
+def main():
+    app()
 
 
 if __name__ == "__main__":
-    app()
+    main()
