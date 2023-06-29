@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import eodag
 import datetime
 import typer
 from typing import Annotated, List, Tuple

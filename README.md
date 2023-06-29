@@ -30,7 +30,7 @@ If poetry is not installed locally, install it first with:
 pip install poetry
 ```
 
-Then install the package with:
+Then clone the repository and install the package dependencies with:
 
 ```bash
 git clone https://github.com/eceo-epfl/earth-extractor
@@ -38,16 +38,37 @@ cd earth-extractor
 poetry install
 ```
 
+### Define user credentials
+
+Create a `.env` file in the root of the repository and add the following
+environment variables according to the services required:
+
+```bash
+# Copernicus Open Access Hub
+SCIHUB_USERNAME=<username>
+SCIHUB_PASSWORD=<password>
+
+# Alaskan Satellite Facility
+NASA_USERNAME=<username>
+NASA_PASSWORD=<password>
+```
+
+Credentials can be obtained from the respective providers:
+
+* [Copernicus Open Access Hub](https://scihub.copernicus.eu/dhus/#/self-registration)
+* [Alaskan Satellite Facility](https://urs.earthdata.nasa.gov/users/new)
+
+
 ## Example usage (CLI)
 
-Search for Sentinel-1 L2A data for Switzerland between the dates
+Search for Sentinel-1 L2 data for Switzerland between the dates
 2022-11-19 and 2022-11-29.
 
 ```bash
-earth_extractor/app.py \
+poetry run earth-extractor \
     --roi 45.81 5.95 47.81 10.5 \
     --start 2022-11-19 --end 2022-11-29 \
-    --satellite SENTINEL2:L2A
+    --satellite SENTINEL1:L2
 ```
 
 

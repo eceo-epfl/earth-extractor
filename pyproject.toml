@@ -11,7 +11,6 @@ earth-extractor = 'earth_extractor.app:main'
 [tool.poetry.dependencies]
 python = "^3.9"
 botocore = "1.29.133"
-eodag = "^2.10.0"
 typer = "^0.9.0"
 rich = "^13.3.5"
 pydantic = {extras = ["dotenv"], version = "^1.10.9"}
