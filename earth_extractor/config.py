@@ -6,6 +6,7 @@ import os
 class Constants(BaseSettings):
     DEFAULT_DOWNLOAD_DIR: str = os.path.join(os.getcwd(), 'data')
 
+    KEYRING_ID: str = "earth-extractor"
     # Logging
     LOGFILE_NAME: str = "helikite.log"
     LOGLEVEL_CONSOLE: str = "INFO"
@@ -18,23 +19,4 @@ class Constants(BaseSettings):
     )
 
 
-class Credentials(BaseSettings):
-    # User tokens
-    SCIHUB_USERNAME: str | None = None
-    SCIHUB_PASSWORD: str | None = None
-
-    # NASA API (For Alaska Satellite Facility)
-    NASA_USERNAME: str | None = None
-    NASA_PASSWORD: str | None = None
-
-    # Sinergise Sentinel Hub
-    SINERGISE_CLIENT_ID: str | None = None
-    SINERGISE_CLIENT_SECRET: str | None = None
-
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
-
-
 constants = Constants()
-credentials = Credentials()

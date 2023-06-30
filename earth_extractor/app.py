@@ -6,11 +6,12 @@ from earth_extractor.satellites import enums
 from earth_extractor.models import ROI
 from earth_extractor.satellites.base import Satellite as SatelliteClass
 import logging
-from earth_extractor.config import constants, credentials as cred
+from earth_extractor.config import constants
+from earth_extractor.core.credentials import credentials
+from earth_extractor.core.credentials import show_credential_list, set_all_credentials
 from earth_extractor.cli_options import SatelliteChoices, Satellites
 from earth_extractor.utils import pair_satellite_with_level
-from rich.console import Console
-from rich.table import Table
+
 
 
 # Define a console handler
@@ -115,20 +116,17 @@ def download(
 
 @app.command()
 def credentials(
-    set: bool = typer.Option(
-        False, help="Set credential"
+    set_all: bool = typer.Option(
+        False, help="Set all credentials"
     )
 ) -> None:
+    ''' Management of service credential keys'''
 
-    console = Console()
+    if set_all is True:
+        logger.info("Setting credentials")
+        set_all_credentials()
 
-    table = Table("Credential", "Value set")
-    for credential in cred.__fields__:
-        # print(credential, getattr(cred, credential) is not None)
-        table.add_row(credential,
-                      "[green]Yes[/green]" if getattr(cred, credential) is not None else "[red]No[/red]")
-    # table.add_row("Morty", "Plumbus")
-    console.print(table)
+    show_credential_list()
 
 
 @app.callback()

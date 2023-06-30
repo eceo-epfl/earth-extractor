@@ -4,7 +4,7 @@ import logging
 from typing import List, Any
 import asf_search
 import os
-from earth_extractor.config import credentials
+from earth_extractor.core.credentials import credentials
 from earth_extractor.config import constants
 
 

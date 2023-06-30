@@ -1,6 +1,6 @@
 
 from earth_extractor.providers import Provider
-from earth_extractor.config import credentials
+from earth_extractor.core.credentials import credentials
 from earth_extractor.models import ROI
 from typing import Any, List, TYPE_CHECKING
 from sentinelhub import CRS, BBox, DataCollection, SHConfig, SentinelHubCatalog
