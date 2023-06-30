@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-
 class SinergiseSentinelHub(Provider):
     def query(
         self,

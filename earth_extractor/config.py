@@ -3,6 +3,8 @@ import logging
 
 
 class Constants(BaseSettings):
+    DEFAULT_DOWNLOAD_DIR: str = "data"
+
     # Logging
     LOGFILE_NAME: str = "helikite.log"
     LOGLEVEL_CONSOLE: str = "INFO"

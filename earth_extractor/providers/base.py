@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 from earth_extractor.models import ROI
+from earth_extractor.config import constants
 import logging
 import datetime
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class Provider:
         self,
         search_origin: "Provider",
         search_results: List[str],
-        download_dir: str = "data",
+        download_dir: str = constants.DEFAULT_DOWNLOAD_DIR,
         processes: int = 6
     ) -> Any:
 
@@ -59,7 +60,7 @@ class Provider:
         self,
         search_origin: "Provider",
         search_results: List[str],
-        download_dir: str = "data",
+        download_dir: str = constants.DEFAULT_DOWNLOAD_DIR,
         processes: int = 6
     ) -> Any:
 

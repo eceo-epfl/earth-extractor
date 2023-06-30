@@ -6,6 +6,7 @@ from sentinelsat import SentinelAPI
 import logging
 import datetime
 from earth_extractor.satellites import enums
+from earth.extractor.config import constants
 
 if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
@@ -67,7 +68,7 @@ class CopernicusOpenAccessHub(Provider):
         self,
         search_origin: Provider,
         search_results: List[str],
-        download_dir: str = "data",
+        download_dir: str = constants.DEFAULT_DOWNLOAD_DIR,
         processes: int = 4,
         max_attempts: int = 50,
     ) -> None:
