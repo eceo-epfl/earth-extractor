@@ -50,14 +50,81 @@ class CopernicusOpenAccessHub(Provider):
 
         products = api.query(
             roi.to_wkt(),
-            platformname=self.satellites[satellite.name],
-            # producttype=product_type,
+            # platformname=self.satellites[satellite.name],
+            producttype=product_type,
             # processinglevel=processing_level.value,
             cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
             date=(start_date, end_date),
         )
 
         return products
+
+    def download_many(
+        self,
+        search_origin: Provider,
+        search_results: List[str],
+        download_dir: str = "data",
+        processes: int = 4,
+        max_attempts: int = 50,
+    ) -> None:
+        ''' Using the search results from query(), download the data
+
+        Parameters
+        ----------
+        search_origin : Provider
+            The provider of the search results
+        search_results : List[str]
+            The search results
+        download_dir : str
+            The directory to download the data to
+        processes : int
+            The number of processes to use for downloading
+
+        Returns
+        -------
+        None
+        '''
+
+        if isinstance(search_origin, CopernicusOpenAccessHub):
+            api = SentinelAPI(
+                credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
+            )
+            api.download_all(
+                search_results,
+                directory_path=download_dir,
+                n_concurrent_dl=processes,
+                checksum=True,
+                max_attempts=max_attempts,            )
+        else:
+            raise ValueError(
+                f"Download from {search_origin.name} to "
+                f"{self.name} not supported."
+            )
+
+    def process_search_results(
+        self,
+        origin: Provider,
+        results: Any
+    ) -> List[str]:
+        ''' Process search results to a compatible format for SCIHUB
+
+        Parameters
+        ----------
+        origin : Provider
+            The provider of the search results
+        results : Any
+            The search results
+
+        Returns
+        -------
+        List[str]
+            The search results in a compatible format
+        '''
+
+        if isinstance(origin, self.__class__):
+            return results
+
+        return []
 
 
 copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(

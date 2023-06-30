@@ -14,7 +14,7 @@ sentinel_1 = Satellite(
 
 sentinel_2 = Satellite(
     query_provider=copernicus_scihub,
-    download_provider=sinergise,
+    download_provider=copernicus_scihub,
     name=enums.Satellite.SENTINEL2,
     description="Sentinel 2",
     processing_levels=[enums.ProcessingLevel.L1C, enums.ProcessingLevel.L2A],
@@ -23,7 +23,7 @@ sentinel_2 = Satellite(
 
 sentinel_3 = Satellite(
     query_provider=copernicus_scihub,
-    download_provider=nasa_cmr,
+    download_provider=copernicus_scihub,
     name=enums.Satellite.SENTINEL3,
     description="Sentinel 3",
     processing_levels=[enums.ProcessingLevel.L1, enums.ProcessingLevel.L2],
