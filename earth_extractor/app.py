@@ -49,6 +49,9 @@ def show_providers(
                      help="Satellite to consider. To add multiple satellites, "
                      "use the option multiple times.")
     ],
+    cloud_cover: int = typer.Option(
+        100, "--cloud-cover", help="Maximum cloud cover percentage."
+    ),
     no_confirmation: bool = typer.Option(
         False, "--no-confirmation",
         help="Do not ask for confirmation before downloading"
@@ -66,8 +69,12 @@ def show_providers(
     all_results = []
     for sat, level in satellite_operations:
         logger.info(f"Satellite: {sat}, Level: {level.value}")
-        res = sat.query(processing_level=level, roi=roi_obj,
-                        start_date=start, end_date=end)
+        res = sat.query(
+            processing_level=level,
+            roi=roi_obj,
+            start_date=start,
+            end_date=end,
+            cloud_cover=cloud_cover)
         logger.info(f"{sat}: Results qty {len(res)}")
 
         # Append results to a list with associated satellite in order to use
@@ -90,9 +97,10 @@ def show_providers(
 
     # Download the results using the satellite's download provider
     for sat, res in all_results:
-        logger.info(f"Downloading results for {sat}..."
-                    f"({len(res)} items)")
-        sat.download_many(search_results=res)
+        if len(res) > 0:
+            logger.info(f"Downloading results for {sat}..."
+                        f"({len(res)} items)")
+            sat.download_many(search_results=res)
 
 
 def main():

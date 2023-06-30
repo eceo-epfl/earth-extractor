@@ -29,6 +29,10 @@ class CopernicusOpenAccessHub(Provider):
             credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
         )
 
+        # If cloud cover percentage is 100, set to None for API
+        if cloud_cover == 100:
+            cloud_cover = None
+
         if satellite.name not in self.satellites:
             raise ValueError(
                 f"Satellite {satellite.name} not supported by Copernicus "

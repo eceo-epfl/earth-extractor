@@ -3,6 +3,8 @@ from earth_extractor.satellites import enums
 from earth_extractor.providers import copernicus_scihub, asf, sinergise, nasa_cmr
 
 
+''' Define the Sentinel satellites '''
+
 sentinel_1 = Satellite(
     query_provider=copernicus_scihub,
     download_provider=asf,
