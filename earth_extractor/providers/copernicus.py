@@ -6,7 +6,7 @@ from sentinelsat import SentinelAPI
 import logging
 import datetime
 from earth_extractor.satellites import enums
-from earth.extractor.config import constants
+from earth_extractor.config import constants
 
 if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
@@ -55,9 +55,7 @@ class CopernicusOpenAccessHub(Provider):
 
         products = api.query(
             roi.to_wkt(),
-            # platformname=self.satellites[satellite.name],
             producttype=product_type,
-            # processinglevel=processing_level.value,
             cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
             date=(start_date, end_date),
         )
@@ -68,7 +66,7 @@ class CopernicusOpenAccessHub(Provider):
         self,
         search_origin: Provider,
         search_results: List[str],
-        download_dir: str = constants.DEFAULT_DOWNLOAD_DIR,
+        download_dir: str,
         processes: int = 4,
         max_attempts: int = 50,
     ) -> None:

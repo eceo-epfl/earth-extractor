@@ -43,11 +43,13 @@ class Provider:
             f"({self.description})"
         )
 
+        return []
+
     def download_one(
         self,
         search_origin: "Provider",
         search_results: List[str],
-        download_dir: str = constants.DEFAULT_DOWNLOAD_DIR,
+        download_dir: str,
         processes: int = 6
     ) -> Any:
 
@@ -55,12 +57,14 @@ class Provider:
             f"Download method not implemented for Provider: {self.name} "
             f"({self.description})"
         )
+
+        return
 
     def download_many(
         self,
         search_origin: "Provider",
         search_results: List[str],
-        download_dir: str = constants.DEFAULT_DOWNLOAD_DIR,
+        download_dir: str,
         processes: int = 6
     ) -> Any:
 
@@ -68,3 +72,5 @@ class Provider:
             f"Download method not implemented for Provider: {self.name} "
             f"({self.description})"
         )
+
+        return

@@ -6,9 +6,11 @@ from earth_extractor.satellites import enums
 from earth_extractor.models import ROI
 from earth_extractor.satellites.base import Satellite as SatelliteClass
 import logging
-from earth_extractor.config import constants
+from earth_extractor.config import constants, credentials as cred
 from earth_extractor.cli_options import SatelliteChoices, Satellites
 from earth_extractor.utils import pair_satellite_with_level
+from rich.console import Console
+from rich.table import Table
 
 
 # Define a console handler
@@ -25,8 +27,9 @@ logger.setLevel(constants.LOGLEVEL_CONSOLE)
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 
+
 @app.command()
-def show_providers(
+def download(
     roi: Annotated[
         Tuple[float, float, float, float],
         typer.Option("--roi",
@@ -49,6 +52,10 @@ def show_providers(
                      help="Satellite to consider. To add multiple satellites, "
                      "use the option multiple times.")
     ],
+    output_dir: str = typer.Option(
+        constants.DEFAULT_DOWNLOAD_DIR,
+        help="Output directory for the downloaded files."
+    ),
     cloud_cover: int = typer.Option(
         100, "--cloud-cover", help="Maximum cloud cover percentage."
     ),
@@ -100,12 +107,36 @@ def show_providers(
         if len(res) > 0:
             logger.info(f"Downloading results for {sat}..."
                         f"({len(res)} items)")
-            sat.download_many(search_results=res)
+            sat.download_many(
+                search_results=res,
+                download_dir=output_dir,
+            )
 
 
-def main():
+@app.command()
+def credentials(
+    set: bool = typer.Option(
+        False, help="Set credential"
+    )
+) -> None:
+
+    console = Console()
+
+    table = Table("Credential", "Value set")
+    for credential in cred.__fields__:
+        # print(credential, getattr(cred, credential) is not None)
+        table.add_row(credential,
+                      "[green]Yes[/green]" if getattr(cred, credential) is not None else "[red]No[/red]")
+    # table.add_row("Morty", "Plumbus")
+    console.print(table)
+
+
+@app.callback()
+def menu():
+    pass
+
+def main() -> None:
     app()
-
 
 if __name__ == "__main__":
     main()

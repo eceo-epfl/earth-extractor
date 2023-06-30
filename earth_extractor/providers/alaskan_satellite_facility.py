@@ -17,7 +17,7 @@ class AlaskanSatteliteFacility(Provider):
         self,
         search_origin: Provider,
         search_results: List[str],
-        download_dir: str = constants.DEFAULT_DOWNLOAD_DIR,
+        download_dir: str,
         processes: int = 6
     ) -> None:
 

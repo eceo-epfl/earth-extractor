@@ -1,9 +1,10 @@
 from pydantic import BaseSettings
 import logging
+import os
 
 
 class Constants(BaseSettings):
-    DEFAULT_DOWNLOAD_DIR: str = "data"
+    DEFAULT_DOWNLOAD_DIR: str = os.path.join(os.getcwd(), 'data')
 
     # Logging
     LOGFILE_NAME: str = "helikite.log"
