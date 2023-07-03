@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 import datetime
 import typer
-from typing import Annotated, List, Tuple
+from typing import Annotated, List, Tuple, Optional
 from earth_extractor.satellites import enums
 from earth_extractor.models import ROI
 from earth_extractor.satellites.base import Satellite as SatelliteClass
 import logging
 from earth_extractor.config import constants
-from earth_extractor.core.credentials import credentials
-from earth_extractor.core.credentials import show_credential_list, set_all_credentials
+from earth_extractor import core
 from earth_extractor.cli_options import SatelliteChoices, Satellites
 from earth_extractor.utils import pair_satellite_with_level
-
 
 
 # Define a console handler
@@ -113,20 +111,28 @@ def download(
                 download_dir=output_dir,
             )
 
-
 @app.command()
 def credentials(
+    delete: str = typer.Option(
+        None, help="Value to delete"
+    ),
     set_all: bool = typer.Option(
         False, help="Set all credentials"
-    )
+    ),
+    show_secrets: bool = typer.Option(
+        False, help="Display values of saved secrets"
+    ),
 ) -> None:
     ''' Management of service credential keys'''
 
-    if set_all is True:
+    if set_all:
         logger.info("Setting credentials")
-        set_all_credentials()
+        core.credentials.set_all_credentials()
 
-    show_credential_list()
+    if delete:
+        core.credentials.delete_credential(delete)
+
+    core.credentials.show_credential_list(show_secret=show_secrets)
 
 
 @app.callback()

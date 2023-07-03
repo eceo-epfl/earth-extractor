@@ -4,7 +4,7 @@ import logging
 from typing import List, Any
 import asf_search
 import os
-from earth_extractor.core.credentials import credentials
+from earth_extractor.core.credentials import get_credentials
 from earth_extractor.config import constants
 
 
@@ -38,8 +38,8 @@ class AlaskanSatteliteFacility(Provider):
 
         # Authenticate with ASF
         session = asf_search.ASFSession().auth_with_creds(
-            username=credentials.NASA_USERNAME,
-            password=credentials.NASA_PASSWORD
+            username=get_credentials().NASA_USERNAME,
+            password=get_credentials().NASA_PASSWORD
         )
 
         # Search for the granules

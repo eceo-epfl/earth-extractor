@@ -1,4 +1,7 @@
 import keyring
+import typer
+import enum
+from functools import lru_cache
 from rich.console import Console
 from rich.table import Table
 from pydantic import BaseSettings, root_validator
@@ -19,41 +22,97 @@ class Credentials(BaseSettings):
     SINERGISE_CLIENT_ID: str | None = None
     SINERGISE_CLIENT_SECRET: str | None = None
 
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
+    # class Config:
+    #     env_file = '.env'
+    #     env_file_encoding = 'utf-8'
 
-    @root_validator(pre=True)
+    @root_validator
     def populate_credentials_from_keyring(
         cls,
         values: Dict[str, str]
     ) -> None:
+        ''' Populate the credentials from the keyring '''
         for key in values.keys():
-            values[key] = keyring.get_credential(constants.KEYRING_ID, key)
+            values[key] = keyring.get_password(constants.KEYRING_ID, key)
 
         return values
 
 
-credentials = Credentials()
+def show_credential_list(
+    show_secret=False
+) -> None:
+    ''' Lists the credential keys in a table to the console
 
+    Parameters
+    ----------
+    show_secret : bool
+        If True, the secret values are shown in the table. If False, the
+        secret values are hidden. Default is False.
 
-def show_credential_list():
-    ''' Lists the credential keys in a table to the console '''
+    Returns
+    -------
+    None
+    '''
 
     console = Console()
+    credentials = get_credentials()
     table = Table(title="Credentials")
     table.add_column("Credential key", justify='left')
-    table.add_column("Value set", justify='center')
+
+    if show_secret:
+        table.add_column("Value", justify='left')
+    else:
+        table.add_column("Value set", justify='center')
 
     for cred_key in credentials.__fields__:
-        if getattr(credentials, cred_key) is not None:
-            indicator = "[green]Yes[/green]"
+        if show_secret:
+            value = getattr(credentials, cred_key)
         else:
-            indicator = "[red]No[/red]"
-        table.add_row(cred_key, indicator)
+            if getattr(credentials, cred_key) is not None:
+                value = "[green]Yes[/green]"
+            else:
+                value = "[red]No[/red]"
+        table.add_row(cred_key, value)
 
     console.print(table)
 
+
+def set_one_credential(key):
+    ''' Set a single credential key in the keyring '''
+
+    if key not in get_credentials().__fields__:
+        raise ValueError(f"Key '{key}' does not exist")
+
+    secret = keyring.get_password(constants.KEYRING_ID, key)
+    print(secret)
+    new_secret = typer.prompt(
+        key,
+        default='' if secret is None else secret,
+    )
+
+    if new_secret == '':
+        # Don't store '' in the keyring in case there are any, just delete
+        if secret == '':
+            print("!!")
+            keyring.delete_password(constants.KEYRING_ID, key)
+    else:
+        keyring.set_password(constants.KEYRING_ID, key, new_secret)
+
+
 def set_all_credentials():
-    for cred_key in credentials.__fields__:
-        print(keyring.get_credential("earth-extractor", cred_key))
+    ''' Set all credential keys in the keyring '''
+
+    for cred_key in get_credentials().__fields__:
+        set_one_credential(cred_key)
+
+
+def delete_credential(key):
+    if key not in get_credentials().__fields__:
+        raise ValueError(f"Key '{key}' does not exist")
+
+    keyring.delete_password(constants.KEYRING_ID, key)
+
+
+@lru_cache
+def get_credentials():
+    return Credentials()

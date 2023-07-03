@@ -1,5 +1,5 @@
 from earth_extractor.providers import Provider
-from earth_extractor.core.credentials import credentials
+from earth_extractor.core.credentials import get_credentials
 from earth_extractor.models import ROI
 from typing import Any, List, TYPE_CHECKING
 from sentinelsat import SentinelAPI
@@ -27,7 +27,8 @@ class CopernicusOpenAccessHub(Provider):
 
         logger.info("Querying Copernicus Open Access Hub")
         api = SentinelAPI(
-            credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
+            get_credentials().SCIHUB_USERNAME,
+            get_credentials().SCIHUB_PASSWORD
         )
 
         # If cloud cover percentage is 100, set to None for API

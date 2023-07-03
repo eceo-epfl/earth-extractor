@@ -1,6 +1,6 @@
 
 from earth_extractor.providers import Provider
-from earth_extractor.core.credentials import credentials
+from earth_extractor.core.credentials import get_credentials
 from earth_extractor.models import ROI
 from typing import Any, List, TYPE_CHECKING
 from sentinelhub import CRS, BBox, DataCollection, SHConfig, SentinelHubCatalog
@@ -27,8 +27,8 @@ class SinergiseSentinelHub(Provider):
 
         logger.info("Querying Sinergise Sentinel Hub")
         if (
-            credentials.SINERGISE_CLIENT_SECRET
-            or credentials.SINERGISE_CLIENT_ID
+            get_credentials().SINERGISE_CLIENT_SECRET
+            or get_credentials().SINERGISE_CLIENT_ID
         ) is None:
             raise ValueError(
                 "Sinergise Sentinel Hub credentials not found. "
@@ -37,8 +37,8 @@ class SinergiseSentinelHub(Provider):
             )
 
         config = SHConfig(
-            credentials.SINERGISE_CLIENT_ID,
-            credentials.SINERGISE_CLIENT_SECRET
+            get_credentials().SINERGISE_CLIENT_ID,
+            get_credentials().SINERGISE_CLIENT_SECRET
         )
         catalog = SentinelHubCatalog(config=config)
 
