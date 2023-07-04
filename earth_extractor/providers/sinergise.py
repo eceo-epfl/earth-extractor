@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+credentials = get_credentials()
+
 
 class SinergiseSentinelHub(Provider):
     def query(
@@ -27,8 +29,8 @@ class SinergiseSentinelHub(Provider):
 
         logger.info("Querying Sinergise Sentinel Hub")
         if (
-            get_credentials().SINERGISE_CLIENT_SECRET
-            or get_credentials().SINERGISE_CLIENT_ID
+            credentials.SINERGISE_CLIENT_SECRET
+            or credentials.SINERGISE_CLIENT_ID
         ) is None:
             raise ValueError(
                 "Sinergise Sentinel Hub credentials not found. "
@@ -37,8 +39,8 @@ class SinergiseSentinelHub(Provider):
             )
 
         config = SHConfig(
-            get_credentials().SINERGISE_CLIENT_ID,
-            get_credentials().SINERGISE_CLIENT_SECRET
+            credentials.SINERGISE_CLIENT_ID,
+            credentials.SINERGISE_CLIENT_SECRET
         )
         catalog = SentinelHubCatalog(config=config)
 

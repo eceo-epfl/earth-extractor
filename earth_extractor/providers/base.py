@@ -1,13 +1,14 @@
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 from earth_extractor.models import ROI
-from earth_extractor.config import constants
 import logging
 import datetime
-logger = logging.getLogger(__name__)
+import os
 
 if TYPE_CHECKING:
     from earth_extractor.satellites import enums
     from earth_extractor.satellites.base import Satellite
+
+logger = logging.getLogger(__name__)
 
 
 class Provider:
@@ -18,7 +19,7 @@ class Provider:
         description: str | None = None,
         uri: str | None = None,
         products: Dict[
-            Tuple["enums.Satellite", "enums.ProcessingLevel"], str
+            Tuple["enums.Satellite", "enums.ProcessingLevel"], Any
         ] = {},
     ):
         self.name = name
@@ -38,12 +39,10 @@ class Provider:
     ) -> List[Any]:
         ''' Query the provider for items matching the given parameters '''
 
-        logger.error(
+        raise NotImplementedError(
             f"Query method not implemented for Provider: {self.name} "
             f"({self.description})"
         )
-
-        return []
 
     def download_one(
         self,
@@ -53,12 +52,10 @@ class Provider:
         processes: int = 6
     ) -> Any:
 
-        logger.error(
+        raise NotImplementedError(
             f"Download method not implemented for Provider: {self.name} "
             f"({self.description})"
         )
-
-        return
 
     def download_many(
         self,
@@ -68,9 +65,16 @@ class Provider:
         processes: int = 6
     ) -> Any:
 
-        logger.error(
+        raise NotImplementedError(
             f"Download method not implemented for Provider: {self.name} "
             f"({self.description})"
         )
 
-        return
+    def create_download_folder(
+        self,
+        folder_name: str,
+    ) -> None:
+        ''' Create a download folder if it doesn't exist '''
+
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)

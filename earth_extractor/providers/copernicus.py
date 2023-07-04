@@ -2,17 +2,18 @@ from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.models import ROI
 from typing import Any, List, TYPE_CHECKING
-from sentinelsat import SentinelAPI
+import sentinelsat
 import logging
 import datetime
 from earth_extractor.satellites import enums
-from earth_extractor.config import constants
+from earth_extractor import core
 
 if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
 
 logger = logging.getLogger(__name__)
 
+credentials = get_credentials()
 
 class CopernicusOpenAccessHub(Provider):
     def query(
@@ -24,12 +25,17 @@ class CopernicusOpenAccessHub(Provider):
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
     ) -> List[Any]:
+        ''' Query the Copernicus Open Access Hub for data '''
 
         logger.info("Querying Copernicus Open Access Hub")
-        api = SentinelAPI(
-            get_credentials().SCIHUB_USERNAME,
-            get_credentials().SCIHUB_PASSWORD
-        )
+        try:
+            api = sentinelsat.SentinelAPI(
+                credentials.SCIHUB_USERNAME,
+                credentials.SCIHUB_PASSWORD
+            )
+        except sentinelsat.UnauthorizedError as e:
+            logger.error(f"ASF authentication error: {e}")
+            return []
 
         # If cloud cover percentage is 100, set to None for API
         if cloud_cover == 100:
@@ -54,12 +60,16 @@ class CopernicusOpenAccessHub(Provider):
                 f"{self.products}"
             )
 
-        products = api.query(
-            roi.to_wkt(),
-            producttype=product_type,
-            cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
-            date=(start_date, end_date),
-        )
+        try:
+            products = api.query(
+                roi.to_wkt(),
+                producttype=product_type,
+                cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
+                date=(start_date, end_date),
+            )
+        except sentinelsat.UnauthorizedError as e:
+            logger.error(f"ASF authentication error: {e}")
+            return []
 
         return products
 
@@ -68,8 +78,8 @@ class CopernicusOpenAccessHub(Provider):
         search_origin: Provider,
         search_results: List[str],
         download_dir: str,
-        processes: int = 4,
-        max_attempts: int = 50,
+        processes: int = core.config.constants.PARRALLEL_PROCESSES_DEFAULT,
+        max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
         ''' Using the search results from query(), download the data
 
@@ -90,8 +100,9 @@ class CopernicusOpenAccessHub(Provider):
         '''
 
         if isinstance(search_origin, CopernicusOpenAccessHub):
-            api = SentinelAPI(
-                credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
+            api = sentinelsat.SentinelAPI(
+                credentials.SCIHUB_USERNAME,
+                credentials.SCIHUB_PASSWORD
             )
             api.download_all(
                 search_results,

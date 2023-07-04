@@ -1,16 +1,22 @@
 from pydantic import BaseSettings
 import logging
 import os
+import datetime
 
 
 class Constants(BaseSettings):
     DEFAULT_DOWNLOAD_DIR: str = os.path.join(os.getcwd(), 'data')
 
+    MAX_DOWNLOAD_ATTEMPTS: int = 50
+
+    PARRALLEL_PROCESSES_DEFAULT: int = 4
+
     KEYRING_ID: str = "earth-extractor"
+
     # Logging
-    LOGFILE_NAME: str = "helikite.log"
-    LOGLEVEL_CONSOLE: str = "INFO"
+    LOGFILE_NAME: str = f"{datetime.datetime.utcnow()}.log"
     LOGLEVEL_FILE: str = "DEBUG"
+    LOGLEVEL_CONSOLE: str = "INFO"
     LOGFORMAT_CONSOLE: logging.Formatter = logging.Formatter(
         "%(asctime)s [%(levelname)-7.7s] %(message)s"
     )

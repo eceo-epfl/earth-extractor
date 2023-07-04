@@ -5,11 +5,13 @@ from typing import List, Any
 import asf_search
 import os
 from earth_extractor.core.credentials import get_credentials
-from earth_extractor.config import constants
+from earth_extractor import core
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(constants.LOGLEVEL_CONSOLE)
+logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+
+credentials = get_credentials()
 
 
 class AlaskanSatteliteFacility(Provider):
@@ -31,16 +33,17 @@ class AlaskanSatteliteFacility(Provider):
 
         # Add the ASF logger to the root logger
         logger.addHandler(asf_search.ASF_LOGGER)
-
-        # Create the download directory if it doesn't exist
-        if not os.path.exists(download_dir):
-            os.makedirs(download_dir)
+        self.create_download_folder(download_dir)  # Create the download folder
 
         # Authenticate with ASF
-        session = asf_search.ASFSession().auth_with_creds(
-            username=get_credentials().NASA_USERNAME,
-            password=get_credentials().NASA_PASSWORD
-        )
+        try:
+            session = asf_search.ASFSession().auth_with_creds(
+                username=credentials.NASA_USERNAME,
+                password=credentials.NASA_PASSWORD
+            )
+        except asf_search.ASFAuthenticationError as e:
+            logger.error(f"ASF authentication error: {e}")
+            return
 
         # Search for the granules
         res = asf_search.granule_search(search_file_ids)

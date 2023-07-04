@@ -1,30 +1,34 @@
 #!/usr/bin/env python3
 import datetime
 import typer
-from typing import Annotated, List, Tuple, Optional
-from earth_extractor.satellites import enums
+from typing import Annotated, List, Tuple
 from earth_extractor.models import ROI
-from earth_extractor.satellites.base import Satellite as SatelliteClass
 import logging
-from earth_extractor.config import constants
 from earth_extractor import core
-from earth_extractor.cli_options import SatelliteChoices, Satellites
+from earth_extractor.cli_options import SatelliteChoices
 from earth_extractor.utils import pair_satellite_with_level
-
+import atexit
 
 # Define a console handler
 console_handler = logging.StreamHandler()
-console_handler.setLevel(constants.LOGLEVEL_CONSOLE)
-console_handler.setFormatter(constants.LOGFORMAT_CONSOLE)
+console_handler.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+console_handler.setFormatter(core.config.constants.LOGFORMAT_CONSOLE)
 logging.getLogger().addHandler(console_handler)
 
-# Define logger for this file
+# Define a file handler for ERRORs
+error_handler = core.logging.ErrorFlagHandler()  # Watches for ERRORs
+logging.getLogger().addHandler(error_handler)
+atexit.register(error_handler.print_status)  # Print error status on exit
+
+# Define logger for this module
 logger = logging.getLogger(__name__)
-logger.setLevel(constants.LOGLEVEL_CONSOLE)
+logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+
+# Setup the file logger
+core.logging.setup_file_logger('.')
 
 # Initialise the Typer class
 app = typer.Typer(no_args_is_help=True, add_completion=False)
-
 
 
 @app.command()
@@ -52,7 +56,7 @@ def download(
                      "use the option multiple times.")
     ],
     output_dir: str = typer.Option(
-        constants.DEFAULT_DOWNLOAD_DIR,
+        core.config.constants.DEFAULT_DOWNLOAD_DIR,
         help="Output directory for the downloaded files."
     ),
     cloud_cover: int = typer.Option(
@@ -65,6 +69,7 @@ def download(
 ) -> None:
     roi_obj: ROI = ROI.from_tuple(roi)
     logger.info(f"ROI: {roi_obj}")
+    logger.info(f"Time: {start} {end}")
 
     # Parse the satellite:level string into a list of workable tuples
     satellite_operations = []
@@ -74,14 +79,18 @@ def download(
     # Perform a query for each satellite and level and append it to a list
     all_results = []
     for sat, level in satellite_operations:
-        logger.info(f"Satellite: {sat}, Level: {level.value}")
+        logger.debug(
+            f"Querying satellite Satellite: {sat}, Level: {level.value}"
+        )
         res = sat.query(
             processing_level=level,
             roi=roi_obj,
             start_date=start,
             end_date=end,
             cloud_cover=cloud_cover)
-        logger.info(f"{sat}: Results qty {len(res)}")
+        logger.info(
+            f"Satellite: {sat}, Level: {level.value}.\tQty ({len(res)})"
+        )
 
         # Append results to a list with associated satellite in order to use
         # its defined download provider
@@ -91,8 +100,7 @@ def download(
     total_qty = sum([len(res) for sat, res in all_results])
 
     logger.info(f"Total results qty: {total_qty}")
-    logger.info(f"ROI: {roi_obj}")
-    logger.info(f"Time: {start} {end}")
+
 
     # Prompt user for confirmation before downloading
     if not no_confirmation:
@@ -110,6 +118,7 @@ def download(
                 search_results=res,
                 download_dir=output_dir,
             )
+
 
 @app.command()
 def credentials(
@@ -137,10 +146,21 @@ def credentials(
 
 @app.callback()
 def menu():
-    pass
+    ''' The main menu of Typer
+
+    The @app.command() decorated functions are the subcommands of this menu.
+    '''
+    logger.info('Starting Earth Extractor')
+
 
 def main() -> None:
+    ''' The main function of the application
+
+    Used by the poetry entrypoint.
+    '''
+
     app()
+
 
 if __name__ == "__main__":
     main()

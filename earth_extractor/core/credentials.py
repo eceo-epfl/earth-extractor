@@ -1,12 +1,11 @@
 import keyring
 import typer
 import enum
-from functools import lru_cache
 from rich.console import Console
 from rich.table import Table
 from pydantic import BaseSettings, root_validator
 from typing import Dict
-from earth_extractor.config import constants
+from earth_extractor import core
 
 
 class Credentials(BaseSettings):
@@ -22,18 +21,16 @@ class Credentials(BaseSettings):
     SINERGISE_CLIENT_ID: str | None = None
     SINERGISE_CLIENT_SECRET: str | None = None
 
-    # class Config:
-    #     env_file = '.env'
-    #     env_file_encoding = 'utf-8'
-
     @root_validator
     def populate_credentials_from_keyring(
         cls,
-        values: Dict[str, str]
-    ) -> None:
+        values: Dict[str, str | None]
+    ) -> Dict[str, str | None]:
         ''' Populate the credentials from the keyring '''
         for key in values.keys():
-            values[key] = keyring.get_password(constants.KEYRING_ID, key)
+            values[key] = keyring.get_password(
+                core.config.constants.KEYRING_ID, key
+            )
 
         return values
 
@@ -62,7 +59,7 @@ def show_credential_list(
     if show_secret:
         table.add_column("Value", justify='left')
     else:
-        table.add_column("Value set", justify='center')
+        table.add_column("Value is set", justify='center')
 
     for cred_key in credentials.__fields__:
         if show_secret:
@@ -83,8 +80,7 @@ def set_one_credential(key):
     if key not in get_credentials().__fields__:
         raise ValueError(f"Key '{key}' does not exist")
 
-    secret = keyring.get_password(constants.KEYRING_ID, key)
-    print(secret)
+    secret = keyring.get_password(core.config.constants.KEYRING_ID, key)
     new_secret = typer.prompt(
         key,
         default='' if secret is None else secret,
@@ -93,10 +89,9 @@ def set_one_credential(key):
     if new_secret == '':
         # Don't store '' in the keyring in case there are any, just delete
         if secret == '':
-            print("!!")
-            keyring.delete_password(constants.KEYRING_ID, key)
+            keyring.delete_password(core.config.constants.KEYRING_ID, key)
     else:
-        keyring.set_password(constants.KEYRING_ID, key, new_secret)
+        keyring.set_password(core.config.constants.KEYRING_ID, key, new_secret)
 
 
 def set_all_credentials():
@@ -110,9 +105,8 @@ def delete_credential(key):
     if key not in get_credentials().__fields__:
         raise ValueError(f"Key '{key}' does not exist")
 
-    keyring.delete_password(constants.KEYRING_ID, key)
+    keyring.delete_password(core.config.constants.KEYRING_ID, key)
 
 
-@lru_cache
 def get_credentials():
     return Credentials()
