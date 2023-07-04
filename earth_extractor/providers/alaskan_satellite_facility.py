@@ -3,7 +3,6 @@ from earth_extractor.satellites import enums
 import logging
 from typing import List, Any
 import asf_search
-import os
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor import core
 

@@ -40,23 +40,28 @@ poetry install
 
 ### Define user credentials
 
-Create a `.env` file in the root of the repository and add the following
-environment variables according to the services required:
+User credentials are managed by the `keyring` library which make use of your
+operating system's secret keyring. The credentials are stored in the system
+and are retrieved by the library when required.
+
+In order to define them, use the following command:
 
 ```bash
-# Copernicus Open Access Hub
-SCIHUB_USERNAME=<username>
-SCIHUB_PASSWORD=<password>
-
-# Alaskan Satellite Facility
-NASA_USERNAME=<username>
-NASA_PASSWORD=<password>
+poetry run earth-extractor credentials --set
 ```
 
 Credentials can be obtained from the respective providers:
-
 * [Copernicus Open Access Hub](https://scihub.copernicus.eu/dhus/#/self-registration)
+    * `SCIHUB_USERNAME` and `SCIHUB_PASSWORD`
+
 * [Alaskan Satellite Facility](https://urs.earthdata.nasa.gov/users/new)
+    * `NASA_USERNAME` and `NASA_PASSWORD`
+
+* [Sinergise](https://www.sentinel-hub.com)
+    * `SINERGISE_CLIENT_ID` and `SINERGISE_CLIENT_SECRET`
+    * At the moment this is unused
+    * Obtain an [OAuth2 Client ID and Secret](https://docs.sentinel-hub.com/api/latest/api/overview/authentication/)
+    from the [user dashboard](https://apps.sentinel-hub.com/dashboard/#/account/settings)
 
 
 ## Example usage (CLI)
@@ -65,7 +70,7 @@ Search for Sentinel-1 L2 data for Switzerland between the dates
 2022-11-19 and 2022-11-29.
 
 ```bash
-poetry run earth-extractor \
+poetry run earth-extractor download \
     --roi 45.81 5.95 47.81 10.5 \
     --start 2022-11-19 --end 2022-11-29 \
     --satellite SENTINEL1:L2

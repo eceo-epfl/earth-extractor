@@ -1,6 +1,6 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
-from earth_extractor.models import ROI
+from earth_extractor.core.models import ROI
 from typing import Any, List, TYPE_CHECKING
 import sentinelsat
 import logging
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 credentials = get_credentials()
+
 
 class CopernicusOpenAccessHub(Provider):
     def query(
@@ -109,7 +110,8 @@ class CopernicusOpenAccessHub(Provider):
                 directory_path=download_dir,
                 n_concurrent_dl=processes,
                 checksum=True,
-                max_attempts=max_attempts,            )
+                max_attempts=max_attempts,
+            )
         else:
             raise ValueError(
                 f"Download from {search_origin.name} to "

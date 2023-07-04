@@ -1,6 +1,5 @@
 import keyring
 import typer
-import enum
 from rich.console import Console
 from rich.table import Table
 from pydantic import BaseSettings, root_validator

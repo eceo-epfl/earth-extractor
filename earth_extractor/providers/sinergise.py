@@ -1,9 +1,9 @@
 
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
-from earth_extractor.models import ROI
+from earth_extractor.core.models import ROI
 from typing import Any, List, TYPE_CHECKING
-from sentinelhub import CRS, BBox, DataCollection, SHConfig, SentinelHubCatalog
+from sentinelhub import DataCollection, SHConfig, SentinelHubCatalog
 import logging
 import datetime
 from earth_extractor.satellites import enums
@@ -65,18 +65,18 @@ class SinergiseSentinelHub(Provider):
                 f"{self.products}"
             )
 
+        raise NotImplementedError("Sinergise Sentinel Hub not implemented")
         # catalog.get_feature(product_type, )
-        products = api.query(
-            roi.to_wkt(),
-            platformname=self.satellites[satellite.name],
-            # producttype=product_type,
-            # processinglevel=processing_level.value,
-            cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
-            date=(start_date, end_date),
-        )
+        # products = api.query(
+        #     roi.to_wkt(),
+        #     platformname=self.satellites[satellite.name],
+        #     # producttype=product_type,
+        #     # processinglevel=processing_level.value,
+        #     cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
+        #     date=(start_date, end_date),
+        # )
 
-        return products
-
+        # return products
 
 
 sinergise: SinergiseSentinelHub = SinergiseSentinelHub(

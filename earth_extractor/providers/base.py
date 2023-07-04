@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
-from earth_extractor.models import ROI
+from earth_extractor.core.models import ROI
 import logging
 import datetime
 import os

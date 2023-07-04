@@ -2,11 +2,11 @@
 import datetime
 import typer
 from typing import Annotated, List, Tuple
-from earth_extractor.models import ROI
+from earth_extractor.core.models import ROI
 import logging
 from earth_extractor import core
 from earth_extractor.cli_options import SatelliteChoices
-from earth_extractor.utils import pair_satellite_with_level
+from earth_extractor.core.utils import pair_satellite_with_level
 import atexit
 
 # Define a console handler
@@ -101,7 +101,6 @@ def download(
 
     logger.info(f"Total results qty: {total_qty}")
 
-
     # Prompt user for confirmation before downloading
     if not no_confirmation:
         typer.confirm(
@@ -125,7 +124,7 @@ def credentials(
     delete: str = typer.Option(
         None, help="Value to delete"
     ),
-    set_all: bool = typer.Option(
+    set: bool = typer.Option(
         False, help="Set all credentials"
     ),
     show_secrets: bool = typer.Option(
@@ -134,8 +133,9 @@ def credentials(
 ) -> None:
     ''' Management of service credential keys'''
 
-    if set_all:
-        logger.info("Setting credentials")
+    if set:
+        logger.info("Setting credentials. Press enter to accept default "
+                    "value given in brackets.")
         core.credentials.set_all_credentials()
 
     if delete:
