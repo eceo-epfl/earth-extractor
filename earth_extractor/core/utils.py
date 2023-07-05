@@ -1,10 +1,11 @@
-from typing import Tuple
+from typing import Tuple, List, Any
 from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite as SatelliteClass
 from earth_extractor.cli_options import Satellites
 import shapely
 from shapely.geometry import GeometryCollection
 import pyproj
+import datetime
 
 
 def pair_satellite_with_level(
@@ -134,6 +135,71 @@ def buffer_in_metres(
     transformer = pyproj.Transformer.from_crs(
         crs_conv, crs_out, always_xy=True
     )
-    projected_geom = shapely.ops.transform(transformer.transform, buffered_geom)
+    projected_geom = shapely.ops.transform(
+        transformer.transform, buffered_geom
+    )
 
     return projected_geom
+
+
+# def download_by_frequency(
+#     start_date: datetime.datetime,
+#     end_date: datetime.datetime,
+#     frequency: str
+# ):
+#     '''
+#     '''
+
+class TemporalFrequency(str, enum.Enum):
+    ''' Enum for temporal frequency '''
+
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+    YEARLY = "yearly"
+
+
+def download_by_frequency(
+    start_date: datetime.datetime,
+    end_date: datetime.datetime,
+    frequency: TemporalFrequency,
+    query_results: List[Any]
+):
+    ''' With the given start and end dates, using a frequency, choose the
+        satellite image with the best cloud_cover percentage and download it.
+        If there are multiple images with the same cloud_cover percentage,
+        choose the one with the least cloud_cover percentage.
+
+    '''
+
+    # Get the frequency as a timedelta
+    if frequency == TemporalFrequency.DAILY:
+        freq = datetime.timedelta(days=1)
+    elif frequency == TemporalFrequency.WEEKLY:
+        freq = datetime.timedelta(days=7)
+    elif frequency == TemporalFrequency.MONTHLY:
+        freq = datetime.timedelta(days=30)
+    elif frequency == TemporalFrequency.YEARLY:
+        freq = datetime.timedelta(days=365)
+    else:
+        raise ValueError(
+            f"Invalid frequency choice: {frequency}. "
+            f"Valid choices are: {TemporalFrequency.__members__}"
+        )
+
+    # Create a list of dates between the start and end dates
+    dates = []
+    while start_date <= end_date:
+        dates.append(start_date)
+        start_date += freq
+
+    # Create a list of images that match the dates
+    images = []
+    for date in dates:
+        for image in query_results:
+            if date.date() == image.date:
+                images.append(image)
+
+
+    ## Filter through search results for cloud cover percentage
+    ## (other filters, too?)
