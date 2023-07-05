@@ -1,33 +1,38 @@
 #!/usr/bin/env python3
-import eodag
 import datetime
 import typer
 from typing import Annotated, List, Tuple
-from earth_extractor.satellites import enums
-from earth_extractor.models import ROI
-from earth_extractor.satellites.base import Satellite as SatelliteClass
+from earth_extractor.core.models import ROI
 import logging
-from earth_extractor.config import constants
-from earth_extractor.cli_options import SatelliteChoices, Satellites
-from earth_extractor.utils import pair_satellite_with_level
-
+from earth_extractor import core
+from earth_extractor.cli_options import SatelliteChoices
+from earth_extractor.core.utils import pair_satellite_with_level
+import atexit
 
 # Define a console handler
 console_handler = logging.StreamHandler()
-console_handler.setLevel(constants.LOGLEVEL_CONSOLE)
-console_handler.setFormatter(constants.LOGFORMAT_CONSOLE)
+console_handler.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+console_handler.setFormatter(core.config.constants.LOGFORMAT_CONSOLE)
 logging.getLogger().addHandler(console_handler)
 
-# Define logger for this file
+# Define a file handler for ERRORs
+error_handler = core.logging.ErrorFlagHandler()  # Watches for ERRORs
+logging.getLogger().addHandler(error_handler)
+atexit.register(error_handler.print_status)  # Print error status on exit
+
+# Define logger for this module
 logger = logging.getLogger(__name__)
-logger.setLevel(constants.LOGLEVEL_CONSOLE)
+logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+
+# Setup the file logger
+core.logging.setup_file_logger('.')
 
 # Initialise the Typer class
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 
 @app.command()
-def show_providers(
+def download(
     roi: Annotated[
         Tuple[float, float, float, float],
         typer.Option("--roi",
@@ -50,6 +55,13 @@ def show_providers(
                      help="Satellite to consider. To add multiple satellites, "
                      "use the option multiple times.")
     ],
+    output_dir: str = typer.Option(
+        core.config.constants.DEFAULT_DOWNLOAD_DIR,
+        help="Output directory for the downloaded files."
+    ),
+    cloud_cover: int = typer.Option(
+        100, "--cloud-cover", help="Maximum cloud cover percentage."
+    ),
     no_confirmation: bool = typer.Option(
         False, "--no-confirmation",
         help="Do not ask for confirmation before downloading"
@@ -57,44 +69,98 @@ def show_providers(
 ) -> None:
     roi_obj: ROI = ROI.from_tuple(roi)
     logger.info(f"ROI: {roi_obj}")
-    # Parse the satellite:level string into a lsit of workable tuples
+    logger.info(f"Time: {start} {end}")
+
+    # Parse the satellite:level string into a list of workable tuples
     satellite_operations = []
     for sat in satellites:
         satellite_operations.append(pair_satellite_with_level(sat))
 
+    # Perform a query for each satellite and level and append it to a list
+    all_results = []
     for sat, level in satellite_operations:
-        logger.info(f"Satellite: {sat}, Level: {level.value}")
-        res = sat.query(processing_level=level, roi=roi_obj,
-                        start_date=start, end_date=end)
-        logger.info(f"{sat}: Results qty {len(res)}")
-        print(list(res.items())[0])
+        logger.debug(
+            f"Querying satellite Satellite: {sat}, Level: {level.value}"
+        )
+        res = sat.query(
+            processing_level=level,
+            roi=roi_obj,
+            start_date=start,
+            end_date=end,
+            cloud_cover=cloud_cover)
+        logger.info(
+            f"Satellite: {sat}, Level: {level.value}.\tQty ({len(res)})"
+        )
 
-    logger.info(f"ROI: {roi_obj}")
-    logger.info(f"Time: {start} {end}")
-    # logger.info(product_list)
+        # Append results to a list with associated satellite in order to use
+        # its defined download provider
+        all_results.append((sat, res))
 
-    # results = []
-    # # Search for each satellite and level and combine results
-    # for product_id in product_list:
-    #     res = dag.search_all(start=start.isoformat(), end=end.isoformat(),
-    #                          geom=roi_obj.dict(), productType=product_id)
-    #     results += res
+    # Sum results from all query results
+    total_qty = sum([len(res) for sat, res in all_results])
 
-    # # Prompt user before initiating download
-    # if not no_confirmation:
-    #     input(
-    #         f"The search found {len(results)} results. "
-    #         "(use the --no-confirmation flag to bypass this prompt)\n"
-    #         "Press enter to continue:"
-    #     )
+    logger.info(f"Total results qty: {total_qty}")
 
-    # results = results[0:2]
-    # paths = dag.download_all(results)
+    # Prompt user for confirmation before downloading
+    if not no_confirmation:
+        typer.confirm(
+            "Do you want to download the results? (use --no-confirmation to "
+            "skip this prompt)", abort=True
+        )
 
-    # logger.info("The output files are located at:")
-    # for path in paths:
-    #     logger.info(path)
+    # Download the results using the satellite's download provider
+    for sat, res in all_results:
+        if len(res) > 0:
+            logger.info(f"Downloading results for {sat}..."
+                        f"({len(res)} items)")
+            sat.download_many(
+                search_results=res,
+                download_dir=output_dir,
+            )
+
+
+@app.command()
+def credentials(
+    delete: str = typer.Option(
+        None, help="Value to delete"
+    ),
+    set: bool = typer.Option(
+        False, help="Set all credentials"
+    ),
+    show_secrets: bool = typer.Option(
+        False, help="Display values of saved secrets"
+    ),
+) -> None:
+    ''' Management of service credential keys'''
+
+    if set:
+        logger.info("Setting credentials. Press enter to accept default "
+                    "value given in brackets.")
+        core.credentials.set_all_credentials()
+
+    if delete:
+        core.credentials.delete_credential(delete)
+
+    core.credentials.show_credential_list(show_secret=show_secrets)
+
+
+@app.callback()
+def menu():
+    ''' The main menu of Typer
+
+    The @app.command() decorated functions are the subcommands of this menu.
+    '''
+    logger.info('Starting Earth Extractor')
+
+
+def main() -> None:
+    ''' The main function of the application
+
+    Used by the poetry entrypoint.
+    '''
+
+    app()
 
 
 if __name__ == "__main__":
-    app()
+    main()

@@ -1,9 +1,11 @@
 from earth_extractor.satellites.base import Satellite
 from earth_extractor.satellites import enums
-from earth_extractor.providers import copernicus_scihub, asf, sinergise, nasa_cmr
+from earth_extractor.providers import copernicus_scihub, asf
 
 
-sentinel_1 = Satellite(
+''' Define the Sentinel satellites '''
+
+sentinel_1: Satellite = Satellite(
     query_provider=copernicus_scihub,
     download_provider=asf,
     name=enums.Satellite.SENTINEL1,
@@ -12,18 +14,18 @@ sentinel_1 = Satellite(
     sensors=[enums.Sensor.C_SAR]
 )
 
-sentinel_2 = Satellite(
+sentinel_2: Satellite = Satellite(
     query_provider=copernicus_scihub,
-    download_provider=sinergise,
+    download_provider=copernicus_scihub,
     name=enums.Satellite.SENTINEL2,
     description="Sentinel 2",
     processing_levels=[enums.ProcessingLevel.L1C, enums.ProcessingLevel.L2A],
     sensors=[enums.Sensor.MSI]
 )
 
-sentinel_3 = Satellite(
+sentinel_3: Satellite = Satellite(
     query_provider=copernicus_scihub,
-    download_provider=nasa_cmr,
+    download_provider=copernicus_scihub,
     name=enums.Satellite.SENTINEL3,
     description="Sentinel 3",
     processing_levels=[enums.ProcessingLevel.L1, enums.ProcessingLevel.L2],

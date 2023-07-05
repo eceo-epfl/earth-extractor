@@ -1,6 +1,5 @@
 from enum import Enum
 from earth_extractor.satellites import sentinel
-from earth_extractor.satellites.base import Satellite
 
 
 class SatelliteChoices(str, Enum):

@@ -1,12 +1,14 @@
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
-from earth_extractor.models import ROI
+from earth_extractor.core.models import ROI
 import logging
 import datetime
-logger = logging.getLogger(__name__)
+import os
 
 if TYPE_CHECKING:
     from earth_extractor.satellites import enums
     from earth_extractor.satellites.base import Satellite
+
+logger = logging.getLogger(__name__)
 
 
 class Provider:
@@ -14,11 +16,10 @@ class Provider:
         self,
         name: str,
         satellites: Dict["enums.Satellite", str],
-        # processing_levels: Dict["enums.ProcessingLevel", str],
         description: str | None = None,
         uri: str | None = None,
         products: Dict[
-            Tuple["enums.Satellite", "enums.ProcessingLevel"], str
+            Tuple["enums.Satellite", "enums.ProcessingLevel"], Any
         ] = {},
     ):
         self.name = name
@@ -38,18 +39,42 @@ class Provider:
     ) -> List[Any]:
         ''' Query the provider for items matching the given parameters '''
 
-        return []
+        raise NotImplementedError(
+            f"Query method not implemented for Provider: {self.name} "
+            f"({self.description})"
+        )
 
     def download_one(
-            self,
-            items: List[Any],
+        self,
+        search_origin: "Provider",
+        search_results: List[str],
+        download_dir: str,
+        processes: int = 6
     ) -> Any:
 
-        pass
+        raise NotImplementedError(
+            f"Download method not implemented for Provider: {self.name} "
+            f"({self.description})"
+        )
 
     def download_many(
-            self,
-            items: List[Any],
+        self,
+        search_origin: "Provider",
+        search_results: List[str],
+        download_dir: str,
+        processes: int = 6
     ) -> Any:
 
-        pass
+        raise NotImplementedError(
+            f"Download method not implemented for Provider: {self.name} "
+            f"({self.description})"
+        )
+
+    def create_download_folder(
+        self,
+        folder_name: str,
+    ) -> None:
+        ''' Create a download folder if it doesn't exist '''
+
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)

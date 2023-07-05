@@ -28,10 +28,17 @@ class Satellite:
         self.sensors = sensors
 
         # Use the methods from the query and download providers
-        self.query = functools.partial(self._query_provider.query,
-                                       satellite=self)
-        self.download_one = self._download_provider.download_many
-        self.download_many = self._download_provider.download_many
+        self.query = functools.partial(
+            self._query_provider.query, satellite=self
+        )
+        self.download_one = functools.partial(
+            self._download_provider.download_one,
+            search_origin=self._query_provider
+        )
+        self.download_many = functools.partial(
+            self._download_provider.download_many,
+            search_origin=self._query_provider
+        )
 
     def _validate_satellite_provider_compatiblity(
         self,

@@ -3,30 +3,48 @@ from earth_extractor.satellites import enums
 import logging
 from typing import List, Any
 import asf_search
-from earth_extractor.config import credentials
+from earth_extractor.core.credentials import get_credentials
+from earth_extractor import core
+
 
 logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+
+credentials = get_credentials()
 
 
 class AlaskanSatteliteFacility(Provider):
-    def download_from_sentinel(
+    def download_many(
         self,
         search_origin: Provider,
         search_results: List[str],
-        download_dir: str = "data",
+        download_dir: str,
         processes: int = 6
     ) -> None:
+
+        # Extract the file ids from the search results
         search_file_ids = self.process_search_results(
             search_origin, search_results
         )
 
         logger.info("Downloading from Alaskan Satellite Facility")
         logger.debug(f"Search file ids: {search_file_ids}")
-        session = asf_search.ASFSession().auth_with_creds(
-            username=credentials.NASA_USERNAME,
-            password=credentials.NASA_PASSWORD
-        )
 
+        # Add the ASF logger to the root logger
+        logger.addHandler(asf_search.ASF_LOGGER)
+        self.create_download_folder(download_dir)  # Create the download folder
+
+        # Authenticate with ASF
+        try:
+            session = asf_search.ASFSession().auth_with_creds(
+                username=credentials.NASA_USERNAME,
+                password=credentials.NASA_PASSWORD
+            )
+        except asf_search.ASFAuthenticationError as e:
+            logger.error(f"ASF authentication error: {e}")
+            return
+
+        # Search for the granules
         res = asf_search.granule_search(search_file_ids)
         logger.info(f"Found {len(res)} granules to download")
 
@@ -34,6 +52,7 @@ class AlaskanSatteliteFacility(Provider):
             logger.info("No granules to download, skipping")
             return  # nothing to download
 
+        # Download the granules using the ASF API library
         res.download(path=download_dir, session=session, processes=processes)
 
     def process_search_results(
