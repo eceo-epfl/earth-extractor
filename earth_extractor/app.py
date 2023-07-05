@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import datetime
 import typer
-from shapely.geometry.collection import GeometryCollection
+from shapely.geometry import GeometryCollection
 from typing import Annotated, List, Tuple
 from earth_extractor.core.models import BBox
 import logging
@@ -55,9 +55,14 @@ def download(
         typer.Option(  # https://github.com/tiangolo/typer/issues/140
         "--roi",
         help="Region of interest to consider. "
-             "Format: lon_min,lat_min,lon_max,lat_max or path to a GeoJSON "
-             "file (eg. bounds.json).")
+             "Format: <lon_min,lat_min,lon_max,lat_max> or path to a GeoJSON "
+             "file (eg. <bounds.json>). All inputs are assumed to be projected "
+             "in WGS84 (EPSG: 4326).")
     ],
+    buffer: float = typer.Option(
+        0.0, "--buffer",
+        help="Buffer to apply to the ROI in metres."
+    ),
     output_dir: str = typer.Option(
         core.config.constants.DEFAULT_DOWNLOAD_DIR,
         help="Output directory for the downloaded files."
@@ -70,15 +75,26 @@ def download(
         help="Do not ask for confirmation before downloading"
     )
 ) -> None:
+    ''' Handle Typer's download command '''
+
+    # Parse the ROI option
+    if "<" in roi or ">" in roi:
+        # In the case the user explicitly inputs < or > as per the help msg
+        raise ValueError("Do not include the '<' or '>' in the ROI.")
     if (
         (len(roi.split(',')) == 4)
         and all([core.utils.is_float(i) for i in roi.split(',')])
     ):
-        # If str splits into 4 numeric values, consider it a BBox
+        # If str splits into 4 float compatible values, consider it a BBox
         roi_obj: GeometryCollection = BBox.from_string(roi).to_shapely()
     else:
         # Otherwise, consider it a path to a GeoJSON file
         roi_obj: GeometryCollection = core.utils.roi_from_geojson(roi)
+
+    # Apply buffer to ROI if required
+    if buffer > 0:
+        logger.info(f"Applying buffer of {buffer} metres to ROI")
+        roi_obj = core.utils.buffer_in_metres(roi_obj, buffer)
 
     logger.info(f"ROI: {roi_obj}")
     logger.info(f"Time: {start} {end}")

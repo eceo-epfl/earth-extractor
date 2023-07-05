@@ -13,7 +13,7 @@ logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
 credentials = get_credentials()
 
 
-class AlaskanSatteliteFacility(Provider):
+class AlaskanSateliteFacility(Provider):
     def download_many(
         self,
         search_origin: Provider,
@@ -87,7 +87,7 @@ class AlaskanSatteliteFacility(Provider):
         return []
 
 
-asf: AlaskanSatteliteFacility = AlaskanSatteliteFacility(
+asf: AlaskanSateliteFacility = AlaskanSateliteFacility(
     name="Alaskan Satellite Facility",
     description="Alaskan Satellite Facility",
     satellites={enums.Satellite.SENTINEL1: ''},
