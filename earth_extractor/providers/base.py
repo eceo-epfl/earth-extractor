@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
-from earth_extractor.core.models import ROI
+from earth_extractor.core.models import BBox
 import logging
 import datetime
 import os
@@ -32,7 +32,7 @@ class Provider:
         self,
         satellite: "Satellite",
         processing_level: "enums.ProcessingLevel",
-        roi: ROI,
+        roi: BBox,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int = 100,

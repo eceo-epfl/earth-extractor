@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import datetime
 import typer
+from shapely.geometry.collection import GeometryCollection
 from typing import Annotated, List, Tuple
-from earth_extractor.core.models import ROI
+from earth_extractor.core.models import BBox
 import logging
 from earth_extractor import core
 from earth_extractor.cli_options import SatelliteChoices
@@ -33,12 +34,6 @@ app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 @app.command()
 def download(
-    roi: Annotated[
-        Tuple[float, float, float, float],
-        typer.Option("--roi",
-                     help="Region of interest to consider. "
-                     "Format: lon_min,lat_min,lon_max,lat_max")
-    ],
     start: Annotated[
         datetime.datetime,
         typer.Option("--start",
@@ -55,6 +50,14 @@ def download(
                      help="Satellite to consider. To add multiple satellites, "
                      "use the option multiple times.")
     ],
+    roi: Annotated[    # Multichoice types are not possible yet, take a str
+        str,           # then parse option in function
+        typer.Option(  # https://github.com/tiangolo/typer/issues/140
+        "--roi",
+        help="Region of interest to consider. "
+             "Format: lon_min,lat_min,lon_max,lat_max or path to a GeoJSON "
+             "file (eg. bounds.json).")
+    ],
     output_dir: str = typer.Option(
         core.config.constants.DEFAULT_DOWNLOAD_DIR,
         help="Output directory for the downloaded files."
@@ -67,7 +70,16 @@ def download(
         help="Do not ask for confirmation before downloading"
     )
 ) -> None:
-    roi_obj: ROI = ROI.from_tuple(roi)
+    if (
+        (len(roi.split(',')) == 4)
+        and all([core.utils.is_float(i) for i in roi.split(',')])
+    ):
+        # If str splits into 4 numeric values, consider it a BBox
+        roi_obj: GeometryCollection = BBox.from_string(roi).to_shapely()
+    else:
+        # Otherwise, consider it a path to a GeoJSON file
+        roi_obj: GeometryCollection = core.utils.roi_from_geojson(roi)
+
     logger.info(f"ROI: {roi_obj}")
     logger.info(f"Time: {start} {end}")
 

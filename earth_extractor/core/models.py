@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 import shapely
 
 
-class ROI(BaseModel):
+class BBox(BaseModel):
     ''' Defines the region of interest to be used for the search
 
     The region of interest is defined by a list of floats. The first two

@@ -2,6 +2,7 @@ from typing import Tuple
 from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite as SatelliteClass
 from earth_extractor.cli_options import Satellites
+import shapely
 
 
 def pair_satellite_with_level(
@@ -52,3 +53,32 @@ def pair_satellite_with_level(
         )
 
     return (satellite_choice, level_choice)
+
+
+def roi_from_geojson(geojson: str) -> str:
+    ''' Extracts the ROI from a GeoJSON file
+
+    Parameters
+    ----------
+    geojson : str
+        The path to the GeoJSON file
+
+    Returns
+    -------
+    str
+        The boundary as a string
+    '''
+
+    with open(geojson, "r") as in_file:
+        geojson_data = in_file.read()
+
+    return shapely.from_geojson(geojson_data)
+
+
+def is_float(string):
+    ''' Checks if a string is a float '''
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False

@@ -1,7 +1,7 @@
 
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
-from earth_extractor.core.models import ROI
+from earth_extractor.core.models import BBox
 from typing import Any, List, TYPE_CHECKING
 from sentinelhub import DataCollection, SHConfig, SentinelHubCatalog
 import logging
@@ -21,7 +21,7 @@ class SinergiseSentinelHub(Provider):
         self,
         satellite: "Satellite",
         processing_level: enums.ProcessingLevel,
-        roi: ROI,
+        roi: BBox,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int | None = None,

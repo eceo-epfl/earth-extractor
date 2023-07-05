@@ -1,6 +1,6 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
-from earth_extractor.core.models import ROI
+from earth_extractor.core.models import BBox
 from typing import Any, List, TYPE_CHECKING
 import sentinelsat
 import logging
@@ -21,7 +21,7 @@ class CopernicusOpenAccessHub(Provider):
         self,
         satellite: "Satellite",
         processing_level: enums.ProcessingLevel,
-        roi: ROI,
+        roi: BBox,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
@@ -63,7 +63,7 @@ class CopernicusOpenAccessHub(Provider):
 
         try:
             products = api.query(
-                roi.to_wkt(),
+                roi.wkt,
                 producttype=product_type,
                 cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
                 date=(start_date, end_date),
