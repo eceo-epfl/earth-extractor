@@ -78,6 +78,11 @@ class AlaskanSateliteFacility(Provider):
         List[str]
             The search results in a compatible format for ASF
         '''
+
+        # Check if data is of common format first, as provider will not matter
+        if isinstance(results[0], core.models.CommonSearchResult):
+            return [result.identifier for result in results]
+
         if isinstance(origin, CopernicusOpenAccessHub):
             return [prop['identifier'] for id, prop in results.items()]
 

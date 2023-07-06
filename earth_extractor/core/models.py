@@ -97,7 +97,7 @@ class CommonSearchResult:
     provider of the search results.
     '''
 
-    hash: Optional[Any] = None
+    product_id: Optional[Any] = None
     link: Optional[AnyUrl] = None
     identifier: Optional[str] = None
     filename: Optional[str] = None

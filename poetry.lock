@@ -115,6 +115,17 @@ files = [
 python-dateutil = ">=2.7.0"
 
 [[package]]
+name = "ascii-art"
+version = "0.1.0"
+description = "Ascii art for python: chart, bar, histogram."
+optional = false
+python-versions = "*"
+files = [
+    {file = "ascii_art-0.1.0-py2.py3-none-any.whl", hash = "sha256:0c463656e8167afa33dc3e618bffafdbf2fb85b836531c0faf22403f8bf88883"},
+    {file = "ascii_art-0.1.0.tar.gz", hash = "sha256:2ec7c39756831b7d72fbff222baec4cb7c7c9d31df6b633def190226b0fe2f57"},
+]
+
+[[package]]
 name = "asf-search"
 version = "6.5.0"
 description = "Python wrapper for ASF's SearchAPI"
@@ -3269,4 +3280,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4c5480cb64af2515661cfc36718a45d147043a244fe332100f46fbdc9ab9021e"
+content-hash = "6231b36ddc4b094a9892d3bb283a5f0b00724f758948e960f871c3c683c6bf5c"

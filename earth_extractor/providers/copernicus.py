@@ -100,13 +100,16 @@ class CopernicusOpenAccessHub(Provider):
         None
         '''
         logger.addHandler(sentinelsat.SentinelAPI)
+
+        products = self.process_search_results(search_origin, search_results)
         if isinstance(search_origin, CopernicusOpenAccessHub):
             api = sentinelsat.SentinelAPI(
                 credentials.SCIHUB_USERNAME,
                 credentials.SCIHUB_PASSWORD
             )
+            print(search_results)
             api.download_all(
-                search_results,
+                products,
                 directory_path=download_dir,
                 n_concurrent_dl=processes,
                 checksum=True,
@@ -138,6 +141,10 @@ class CopernicusOpenAccessHub(Provider):
             The search results in a compatible format
         '''
 
+        # Check if data is of common format first, as provider will not matter
+        if isinstance(results[0], CommonSearchResult):  # Try first in list
+            return [result.product_id for result in results]
+
         if isinstance(origin, self.__class__):
             return results
 
@@ -154,7 +161,7 @@ class CopernicusOpenAccessHub(Provider):
             common_results.append(
                 CommonSearchResult(
                     geometry=props.get("footprint"),
-                    hash=id,
+                    product_id=id,
                     link=props.get("link_alternative"),
                     identifier=props.get("identifier"),
                     filename=props.get("filename"),

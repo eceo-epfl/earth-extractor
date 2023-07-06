@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
 
 # Setup the file logger
-core.logging.setup_file_logger('.')
+core.logging.setup_file_logger(core.config.constants.DEFAULT_DOWNLOAD_DIR)
 
 # Initialise the Typer class
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -123,10 +123,21 @@ def batch(
         if len(res) > 0:
             logger.info(f"Downloading results for {sat}..."
                         f"({len(res)} items)")
+            # print(res)
+            # print(sat)
+            translated = sat._query_provider.translate_search_results(res)
+            # print(translated)
+            # import sys
+            # sys.exit()
+            # translated = sat.translate_search_results(res)
             sat.download_many(
-                search_results=res,
+                search_results=translated,
                 download_dir=output_dir,
             )
+            # sat.download_many(
+            #     search_results=res,
+            #     download_dir=output_dir,
+            # )
 
 
 @app.command()
@@ -152,9 +163,11 @@ def batch_interval(
         typer.Option(  # https://github.com/tiangolo/typer/issues/140
         "--roi",
         help="Region of interest to consider. "
-             "Format: <lat_min,lon_min,lat_max,lon_max> or path to a GeoJSON "
-             "file (eg. <bounds.json>). All inputs are assumed to be projected "
-             "in WGS84 (EPSG: 4326).")
+             "Format: <lon_min,lat_min,lon_max,lat_max> for boundary, "
+             "<lon,lat> for a point, or path to a "
+             "GeoJSON file (eg. <bounds.json>). All inputs are assumed to be "
+             "projected in WGS84 (EPSG: 4326), and all point geometries must "
+             "also use the buffer option.")
     ],
     frequency: Annotated[
         TemporalFrequency,
@@ -190,14 +203,10 @@ def batch_interval(
     2020-01-31, and the user specifies Sentinel-2 L1C and L2A, the command will
 
     '''
+    ''' Batch download of satellite data with minimal user input '''
 
     logger.info(f"Time: {start} {end}")
-
-    roi_obj = core.utils.parse_roi(roi)
-
-    # Apply buffer to ROI if required
-    if buffer > 0:
-        roi_obj = core.utils.buffer_in_metres(roi_obj, buffer)
+    roi_obj = core.utils.parse_roi(roi, buffer)
 
     # Parse the satellite:level string into a list of workable tuples
     satellite_operations = []
@@ -245,7 +254,6 @@ def batch_interval(
                 search_results=res,
                 download_dir=output_dir,
             )
-
 
 @app.command()
 def credentials(

@@ -1,8 +1,7 @@
 from earth_extractor.core import utils
 import pyproj
-import shapely.ops
+import shapely
 import math
-import pytest
 
 
 def test_buffer_at_equator_in_metres():
