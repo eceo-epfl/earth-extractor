@@ -17,3 +17,12 @@ class Satellites(Enum):
     SENTINEL1 = sentinel.sentinel_1
     SENTINEL2 = sentinel.sentinel_2
     SENTINEL3 = sentinel.sentinel_3
+
+
+class TemporalFrequency(str, Enum):
+    ''' Enum for temporal frequency to be used for '''
+
+    DAILY = "DAILY"
+    WEEKLY = "WEEKLY"
+    MONTHLY = "MONTHLY"
+    YEARLY = "YEARLY"

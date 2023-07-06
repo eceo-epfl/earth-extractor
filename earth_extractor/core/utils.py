@@ -1,11 +1,18 @@
 from typing import Tuple, List, Any
+from earth_extractor import core
+import logging
 from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite as SatelliteClass
-from earth_extractor.cli_options import Satellites
+from earth_extractor.cli_options import Satellites, TemporalFrequency
 import shapely
 from shapely.geometry import GeometryCollection
 import pyproj
 import datetime
+import enum
+
+# Define logger for this module
+logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
 
 
 def pair_satellite_with_level(
@@ -119,6 +126,7 @@ def buffer_in_metres(
         The buffered geometry
     '''
 
+    logger.info(f"Applying buffer of {buffer_metres} metres to ROI")
     # Define pyproj objects for the input, buffer and output CRS
     crs_in = pyproj.CRS.from_epsg(crs_input)
     crs_conv = pyproj.CRS.from_epsg(crs_buffer)
@@ -142,21 +150,27 @@ def buffer_in_metres(
     return projected_geom
 
 
-# def download_by_frequency(
-#     start_date: datetime.datetime,
-#     end_date: datetime.datetime,
-#     frequency: str
-# ):
-#     '''
-#     '''
+def parse_roi(
+    roi: str
+) -> GeometryCollection:
+    ''' Parses the ROI input from the command line '''
 
-class TemporalFrequency(str, enum.Enum):
-    ''' Enum for temporal frequency '''
+    if "<" in roi or ">" in roi:
+        # In the case the user explicitly inputs < or > as per the help msg
+        raise ValueError("Do not include the '<' or '>' in the ROI.")
+    if (
+        (len(roi.split(',')) == 4)
+        and all([core.utils.is_float(i) for i in roi.split(',')])
+    ):
+        # If str splits into 4 float compatible values, consider it a BBox
+        roi_obj = core.models.BBox.from_string(roi).to_shapely()
+    else:
+        # Otherwise, consider it a path to a GeoJSON file
+        roi_obj = roi_from_geojson(roi)
 
-    DAILY = "daily"
-    WEEKLY = "weekly"
-    MONTHLY = "monthly"
-    YEARLY = "yearly"
+    logger.info(f"ROI: {roi_obj}")
+
+    return roi_obj
 
 
 def download_by_frequency(

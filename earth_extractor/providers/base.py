@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
-from earth_extractor.core.models import BBox
+from earth_extractor.core.models import BBox, CommonSearchResult
 import logging
 import datetime
 import os
@@ -78,3 +78,13 @@ class Provider:
 
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
+
+    def translate_search_results(
+        self,
+        provider_search_results: Dict[Any, Any]
+    ) -> List[CommonSearchResult]:
+
+        raise NotImplementedError(
+            "Search translation method not implemented for Provider: "
+            f"{self.name} ({self.description})"
+        )

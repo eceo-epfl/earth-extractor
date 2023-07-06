@@ -1,7 +1,7 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
-from earth_extractor.core.models import BBox
-from typing import Any, List, TYPE_CHECKING
+from earth_extractor.core.models import BBox, CommonSearchResult
+from typing import Any, List, TYPE_CHECKING, Dict
 import sentinelsat
 import logging
 import datetime
@@ -99,7 +99,7 @@ class CopernicusOpenAccessHub(Provider):
         -------
         None
         '''
-
+        logger.addHandler(sentinelsat.SentinelAPI)
         if isinstance(search_origin, CopernicusOpenAccessHub):
             api = sentinelsat.SentinelAPI(
                 credentials.SCIHUB_USERNAME,
@@ -142,6 +142,38 @@ class CopernicusOpenAccessHub(Provider):
             return results
 
         return []
+
+    def translate_search_results(
+        self,
+        provider_search_results: Dict[Any, Any]
+    ) -> List[CommonSearchResult]:
+        ''' Translate search results from a provider to a common format '''
+
+        common_results = []
+        for id, props in provider_search_results.items():
+            common_results.append(
+                CommonSearchResult(
+                    geometry=props.get("footprint"),
+                    hash=id,
+                    link=props.get("link_alternative"),
+                    identifier=props.get("identifier"),
+                    filename=props.get("filename"),
+                    size=props.get("size"),
+                    cloud_cover_percentage=props.get("cloudcoverpercentage"),
+                    processing_level=(
+                        enums.ProcessingLevel(props.get("productlevel"))
+                        if props.get("productlevel") is not None
+                        else None
+                    ),
+                    satellite=(
+                        dict(
+                            map(reversed, self.satellites.items())
+                        )[props['platformname']]
+                    ) if props.get('platformname') is not None else None,
+                )
+            )
+
+        return common_results
 
 
 copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(

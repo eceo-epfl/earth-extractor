@@ -1,10 +1,15 @@
 from pydantic import BaseModel, Field, AnyUrl
 import shapely
-from typing import Any
-from earth_extractor.satellites.enums import ProcessingLevel, Sensor, Satellite
+from typing import Any, TYPE_CHECKING, Optional
+from dataclasses import dataclass
+
+if TYPE_CHECKING:
+    from earth_extractor.satellites.enums import (
+        ProcessingLevel, Sensor, Satellite
+    )
 
 
-class ROI(BaseModel):
+class BBox(BaseModel):
     ''' Defines the region of interest to be used for the search
 
     The region of interest is defined by a list of floats. The first two
@@ -72,25 +77,25 @@ class ROI(BaseModel):
         return self.to_shapely().wkt
 
 
-class CommonSearchResult(BaseModel):
-    ''' A class to encompass the exchange of search results between providers
+@dataclass
+class CommonSearchResult:
+    ''' A class to support the exchange of search results between providers
 
     This class is used to standardise the search results between providers
     such that the the Provider/Satellite classes can be agnostic to the
     provider of the search results.
     '''
 
-    hash: Any | None = None
-    link: AnyUrl | None = None
-    identifier: str | None = None
-    filename: str | None = None
+    hash: Optional[Any] = None
+    link: Optional[AnyUrl] = None
+    identifier: Optional[str] = None
+    filename: Optional[str] = None
 
-    cloud_cover_percentage: float | None = None
-    size_mb: float | None = None
+    cloud_cover_percentage: Optional[float] = None
+    size: Optional[float] = None
 
-    processing_level: ProcessingLevel | None = None
-    sensor: Sensor | None = None
-    satellite: Satellite | None = None
+    processing_level: Optional["ProcessingLevel"] = None
+    sensor: Optional["Sensor"] = None
+    satellite: Optional["Satellite"] = None
 
-    class Config:
-        extra = "allow"  # Allow extra fields to be added to the model
+    geometry: Optional[str] = None
