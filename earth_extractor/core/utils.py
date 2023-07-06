@@ -83,8 +83,16 @@ def roi_from_geojson(
 
     with open(geojson, "r") as in_file:
         geojson_data = in_file.read()
+        geometry = shapely.from_geojson(geojson_data)
 
-    return shapely.from_geojson(geojson_data)
+    if isinstance(geometry, shapely.GeometryCollection):
+        geometry = geometry.geoms[0]
+        logger.warning(
+            "GeoJSON is a collection, only considering first element:"
+            f"{geometry}")
+
+
+    return geometry
 
 
 def is_float(string):
@@ -143,32 +151,56 @@ def buffer_in_metres(
     transformer = pyproj.Transformer.from_crs(
         crs_conv, crs_out, always_xy=True
     )
-    projected_geom = shapely.ops.transform(
+    reprojected_buffered_geom = shapely.ops.transform(
         transformer.transform, buffered_geom
     )
 
-    return projected_geom
+    logger.info(f"Adjusted ROI (post-buffer): {reprojected_buffered_geom}")
+
+    return reprojected_buffered_geom
 
 
 def parse_roi(
-    roi: str
+    roi: str,
+    buffer: float,
 ) -> GeometryCollection:
     ''' Parses the ROI input from the command line '''
 
     if "<" in roi or ">" in roi:
         # In the case the user explicitly inputs < or > as per the help msg
         raise ValueError("Do not include the '<' or '>' in the ROI.")
-    if (
+
+    # Check if the input is a BBox, Point or a path to a GeoJSON file
+    if (  # BBox
         (len(roi.split(',')) == 4)
         and all([core.utils.is_float(i) for i in roi.split(',')])
     ):
         # If str splits into 4 float compatible values, consider it a BBox
         roi_obj = core.models.BBox.from_string(roi).to_shapely()
+    elif (  # Point
+        (len(roi.split(',')) == 2)
+        and all([core.utils.is_float(i) for i in roi.split(',')])
+    ):
+        if buffer == 0:
+            raise ValueError(
+                "Buffer must be greater than 0 for a point ROI."
+            )
+        roi_obj = core.models.Point.from_string(roi).to_shapely()
     else:
         # Otherwise, consider it a path to a GeoJSON file
         roi_obj = roi_from_geojson(roi)
+        print(roi_obj.geom_type)
+        print(type(roi_obj))
+        if roi_obj.geom_type == 'Point' and buffer == 0:
+            raise ValueError(
+                "Buffer must be greater than 0 for a point ROI."
+            )
 
-    logger.info(f"ROI: {roi_obj}")
+    logger.info(f"Input ROI: {roi_obj}")
+
+    # Apply buffer to ROI if required
+    if buffer > 0:
+        roi_obj = buffer_in_metres(roi_obj, buffer)
 
     return roi_obj
 

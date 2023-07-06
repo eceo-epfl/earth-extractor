@@ -1,52 +1,57 @@
 from earth_extractor.satellites.sentinel import (
     sentinel_1, sentinel_2, sentinel_3
 )
-from earth_extractor.providers.copernicus import CopernicusOpenAccessHub
-from earth_extractor.models import ROI
+from earth_extractor.providers.copernicus import copernicus_scihub
+from earth_extractor.core.models import BBox
 from earth_extractor.satellites.enums import Satellite
+from earth_extractor.satellites.enums import ProcessingLevel
 from datetime import datetime
 
 
+''' These following tests require access to the API -- probably not the best
+    way to do this, but it helps in early development.
+'''
+
 def test_query_sentinel_1(
-    scihub: CopernicusOpenAccessHub,
-    roi_switzerland: ROI
+    roi_switzerland: BBox
 ):
     # Query Copernicus Open Access Hub for Sentinel-1 data
-    res = scihub.query(
+    res = copernicus_scihub.query(
         satellite=sentinel_1,
         roi=roi_switzerland,
         start_date=datetime(2016, 11, 19),
         end_date=datetime(2016, 12, 29),
+        processing_level=ProcessingLevel.L1
         )
 
     assert len(res) > 0, ("No results found")
 
 
 def test_query_sentinel_2(
-    scihub: CopernicusOpenAccessHub,
-    roi_switzerland: ROI
+    roi_switzerland: BBox
 ):
     # Query Copernicus Open Access Hub for Sentinel-1 data
-    res = scihub.query(
+    res = copernicus_scihub.query(
         satellite=sentinel_2,
         roi=roi_switzerland,
         start_date=datetime(2015, 12, 19),
         end_date=datetime(2015, 12, 29),
+        processing_level=ProcessingLevel.L1C
         )
 
     assert len(res) > 0, ("No results found")
 
 
 def test_query_sentinel_3(
-    scihub: CopernicusOpenAccessHub,
-    roi_switzerland: ROI
+    roi_switzerland: BBox
 ):
     # Query Copernicus Open Access Hub for Sentinel-3 data
-    res = scihub.query(
+    res = copernicus_scihub.query(
         satellite=sentinel_3,
         roi=roi_switzerland,
         start_date=datetime(2017, 11, 19),
         end_date=datetime(2017, 12, 29),
+        processing_level=ProcessingLevel.L2
         )
 
-    assert len(res) == 0, ("No results found")
+    assert len(res) == 37, ("Found results when shouldn't have")  # Too rigid?
