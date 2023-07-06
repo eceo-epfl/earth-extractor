@@ -55,9 +55,10 @@ def batch(
         "--roi",
         help="Region of interest to consider. "
              "Format: <lon_min,lat_min,lon_max,lat_max> for boundary, "
-             "<lon,lat> for a point (must also use a buffer), or path to a "
+             "<lon,lat> for a point, or path to a "
              "GeoJSON file (eg. <bounds.json>). All inputs are assumed to be "
-             "projected in WGS84 (EPSG: 4326).")
+             "projected in WGS84 (EPSG: 4326), and all point geometries must "
+             "also use the buffer option.")
     ],
     buffer: float = typer.Option(
         0.0, "--buffer",
