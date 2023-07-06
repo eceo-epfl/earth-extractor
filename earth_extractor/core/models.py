@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AnyUrl
 import shapely
+from typing import Any
+from earth_extractor.satellites.enums import ProcessingLevel, Sensor, Satellite
 
 
-class BBox(BaseModel):
+class ROI(BaseModel):
     ''' Defines the region of interest to be used for the search
 
     The region of interest is defined by a list of floats. The first two
@@ -68,3 +70,27 @@ class BBox(BaseModel):
         '''
 
         return self.to_shapely().wkt
+
+
+class CommonSearchResult(BaseModel):
+    ''' A class to encompass the exchange of search results between providers
+
+    This class is used to standardise the search results between providers
+    such that the the Provider/Satellite classes can be agnostic to the
+    provider of the search results.
+    '''
+
+    hash: Any | None = None
+    link: AnyUrl | None = None
+    identifier: str | None = None
+    filename: str | None = None
+
+    cloud_cover_percentage: float | None = None
+    size_mb: float | None = None
+
+    processing_level: ProcessingLevel | None = None
+    sensor: Sensor | None = None
+    satellite: Satellite | None = None
+
+    class Config:
+        extra = "allow"  # Allow extra fields to be added to the model
