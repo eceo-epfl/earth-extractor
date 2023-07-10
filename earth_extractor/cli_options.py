@@ -20,9 +20,12 @@ class Satellites(Enum):
 
 
 class TemporalFrequency(str, Enum):
-    ''' Enum for temporal frequency to be used for '''
+    ''' Enum for temporal frequency to be used for
 
-    DAILY = "DAILY"
-    WEEKLY = "WEEKLY"
-    MONTHLY = "MONTHLY"
-    YEARLY = "YEARLY"
+    In reverse as Typer only uses values and not names for selection in CLI
+    '''
+
+    D = "DAILY"
+    W = "WEEKLY"
+    M = "MONTHLY"
+    Y = "YEARLY"

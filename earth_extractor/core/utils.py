@@ -9,6 +9,8 @@ from shapely.geometry import GeometryCollection
 import pyproj
 import datetime
 import enum
+import pandas as pd
+
 
 # Define logger for this module
 logger = logging.getLogger(__name__)
@@ -88,7 +90,7 @@ def roi_from_geojson(
     if isinstance(geometry, shapely.GeometryCollection):
         geometry = geometry.geoms[0]
         logger.warning(
-            "GeoJSON is a collection, only considering first element:"
+            "GeoJSON is a collection, only considering first element: "
             f"{geometry}")
 
 
@@ -155,7 +157,7 @@ def buffer_in_metres(
         transformer.transform, buffered_geom
     )
 
-    logger.info(f"Adjusted ROI (post-buffer): {reprojected_buffered_geom}")
+    logger.debug(f"Adjusted ROI (post-buffer): {reprojected_buffered_geom}")
 
     return reprojected_buffered_geom
 
@@ -189,14 +191,12 @@ def parse_roi(
     else:
         # Otherwise, consider it a path to a GeoJSON file
         roi_obj = roi_from_geojson(roi)
-        print(roi_obj.geom_type)
-        print(type(roi_obj))
         if roi_obj.geom_type == 'Point' and buffer == 0:
             raise ValueError(
                 "Buffer must be greater than 0 for a point ROI."
             )
 
-    logger.info(f"Input ROI: {roi_obj}")
+    logger.debug(f"Input ROI: {roi_obj}")
 
     # Apply buffer to ROI if required
     if buffer > 0:
@@ -209,43 +209,69 @@ def download_by_frequency(
     start_date: datetime.datetime,
     end_date: datetime.datetime,
     frequency: TemporalFrequency,
-    query_results: List[Any]
+    query_results: List[core.models.CommonSearchResult],
+    filter_field: str = 'cloud_cover_percentage'
 ):
-    ''' With the given start and end dates, using a frequency, choose the
+    ''' With the given start and end dates and a frequency, choose the
         satellite image with the best cloud_cover percentage and download it.
         If there are multiple images with the same cloud_cover percentage,
         choose the one with the least cloud_cover percentage.
 
+        If there are multiple minimum values (for example if there are two or
+        more images with the same cloud_cover percentage of 0), the latest
+        image in the frequency period is chosen (this behaviour is defined by
+        the pandas Grouper function).
     '''
 
-    # Get the frequency as a timedelta
-    if frequency == TemporalFrequency.DAILY:
-        freq = datetime.timedelta(days=1)
-    elif frequency == TemporalFrequency.WEEKLY:
-        freq = datetime.timedelta(days=7)
-    elif frequency == TemporalFrequency.MONTHLY:
-        freq = datetime.timedelta(days=30)
-    elif frequency == TemporalFrequency.YEARLY:
-        freq = datetime.timedelta(days=365)
-    else:
+    # Convert the query results to a list of dicts
+    query_results = [x.as_dict() for x in query_results]
+
+    # If filter_field is not in the query results, raise an error
+    cleaned_query_results = []
+    for result in query_results:
+        if result[filter_field] is None:
+            logger.warning(
+                f"Filter field {filter_field} not in query result "
+                f"for identifier: {result['identifier']}, ignoring."
+            )
+            logger.debug(f"Query result ignored: {result}")
+        else:
+            cleaned_query_results.append(result)
+
+    # Raise exception if there are no results
+    if len(cleaned_query_results) == 0:
         raise ValueError(
-            f"Invalid frequency choice: {frequency}. "
-            f"Valid choices are: {TemporalFrequency.__members__}"
+            f"Filter field {filter_field} not in any query results, "
+            f"cannot filter."
         )
 
-    # Create a list of dates between the start and end dates
-    dates = []
-    while start_date <= end_date:
-        dates.append(start_date)
-        start_date += freq
+    df = pd.DataFrame.from_dict(cleaned_query_results)
+    # Set the 'time' column as the DataFrame index
+    df.set_index('time', inplace=True)
+    df.index = pd.to_datetime(df.index)
 
-    # Create a list of images that match the dates
-    images = []
-    for date in dates:
-        for image in query_results:
-            if date.date() == image.date:
-                images.append(image)
+    date_range = pd.date_range(start_date, end_date)
+    mask = (df.index > date_range[0]) & (df.index <= date_range[-1])
+    df = df.loc[mask]
 
+    # Find the minimum row for each grouping (Using name of the enum
+    # supplied by the enum: D, M, W, Y), and joining back to the original df.
+    # Then ilter df by frequency minimum for the 'cloud_cover_percentage' value
+    filtered = df.merge(
+        df.groupby(
+            pd.Grouper(freq=frequency.name)
+        )['cloud_cover_percentage'].min().reset_index(), how='inner'
+    )
 
-    ## Filter through search results for cloud cover percentage
-    ## (other filters, too?)
+    results = [
+        core.models.CommonSearchResult(**x) for x in filtered.to_dict('records')
+    ]
+
+    for result in results:
+        logger.info(
+            f"Interval filter results: {result.satellite} "
+            f"({result.processing_level}), ID: {result.identifier}, "
+            f"Time: {result.time}, "
+            f"{filter_field}: {getattr(result, filter_field)}")
+
+    return results

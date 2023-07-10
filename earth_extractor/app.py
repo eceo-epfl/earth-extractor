@@ -123,21 +123,15 @@ def batch(
         if len(res) > 0:
             logger.info(f"Downloading results for {sat}..."
                         f"({len(res)} items)")
-            # print(res)
-            # print(sat)
+
+            # Translate the results into an internal workable format
             translated = sat._query_provider.translate_search_results(res)
-            # print(translated)
-            # import sys
-            # sys.exit()
-            # translated = sat.translate_search_results(res)
+
+            # Download the results
             sat.download_many(
                 search_results=translated,
                 download_dir=output_dir,
             )
-            # sat.download_many(
-            #     search_results=res,
-            #     download_dir=output_dir,
-            # )
 
 
 @app.command()
@@ -203,7 +197,6 @@ def batch_interval(
     2020-01-31, and the user specifies Sentinel-2 L1C and L2A, the command will
 
     '''
-    ''' Batch download of satellite data with minimal user input '''
 
     logger.info(f"Time: {start} {end}")
     roi_obj = core.utils.parse_roi(roi, buffer)
@@ -250,8 +243,20 @@ def batch_interval(
         if len(res) > 0:
             logger.info(f"Downloading results for {sat}..."
                         f"({len(res)} items)")
+
+            # Translate the results into an internal workable format
+            translated = sat._query_provider.translate_search_results(res)
+
+            translated = core.utils.download_by_frequency(
+                start_date=start,
+                end_date=end,
+                frequency=frequency,
+                query_results=translated,
+                filter_field='cloud_cover_percentage'
+            )
+            # Download the results
             sat.download_many(
-                search_results=res,
+                search_results=translated,
                 download_dir=output_dir,
             )
 

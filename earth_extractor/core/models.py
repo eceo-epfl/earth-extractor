@@ -1,7 +1,9 @@
 from pydantic import BaseModel, Field, AnyUrl
 import shapely
 from typing import Any, TYPE_CHECKING, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+import datetime
+
 
 if TYPE_CHECKING:
     from earth_extractor.satellites.enums import (
@@ -43,7 +45,7 @@ class BBox(BaseModel):
     def __str__(self):
         return f"{self.latmin},{self.lonmin},{self.latmax},{self.lonmax}"
 
-    def to_shapely(self):
+    def to_shapely(self) -> shapely.geometry.box:
         ''' Convert the ROI into a shapely object
 
         The shapely object is a rectangle defined by the top left and bottom
@@ -102,6 +104,8 @@ class CommonSearchResult:
     identifier: Optional[str] = None
     filename: Optional[str] = None
 
+    time: Optional[datetime.datetime] = None
+
     cloud_cover_percentage: Optional[float] = None
     size: Optional[float] = None
 
@@ -110,3 +114,5 @@ class CommonSearchResult:
     satellite: Optional["Satellite"] = None
 
     geometry: Optional[str] = None
+
+    as_dict = asdict

@@ -46,10 +46,12 @@ class AlaskanSateliteFacility(Provider):
 
         # Search for the granules
         res = asf_search.granule_search(search_file_ids)
-        logger.info(f"Found {len(res)} granules to download")
+        logger.info(
+            f"Found {len(res)} files to download (may include metadata files)"
+        )
 
         if len(res) == 0:
-            logger.info("No granules to download, skipping")
+            logger.info("No files to download, skipping")
             return  # nothing to download
 
         # Download the granules using the ASF API library

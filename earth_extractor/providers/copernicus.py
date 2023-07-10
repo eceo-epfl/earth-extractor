@@ -5,6 +5,7 @@ from typing import Any, List, TYPE_CHECKING, Dict
 import sentinelsat
 import logging
 import datetime
+import shapely
 from earth_extractor.satellites import enums
 from earth_extractor import core
 
@@ -21,10 +22,11 @@ class CopernicusOpenAccessHub(Provider):
         self,
         satellite: "Satellite",
         processing_level: enums.ProcessingLevel,
-        roi: BBox,
+        roi: shapely.geometry.base.BaseGeometry,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
+        full_metadata: bool = False,
     ) -> List[Any]:
         ''' Query the Copernicus Open Access Hub for data '''
 
@@ -72,6 +74,20 @@ class CopernicusOpenAccessHub(Provider):
             logger.error(f"ASF authentication error: {e}")
             return []
 
+        if full_metadata:
+            # By default, the API only returns a subset of the metadata
+            logger.warning(
+                'Extra metadata is being retrieved for each product '
+                'which may take a long time.'
+            )
+            products_full_metadata: Dict[str, Any] = {}
+            for id, props in products.items():
+                logger.debug(f"Retrieving extra metadata for ID: {id}")
+                products_full_metadata[id] = api.get_product_odata(
+                    id, full=True
+                )
+            return products_full_metadata
+
         return products
 
     def download_many(
@@ -107,7 +123,6 @@ class CopernicusOpenAccessHub(Provider):
                 credentials.SCIHUB_USERNAME,
                 credentials.SCIHUB_PASSWORD
             )
-            print(search_results)
             api.download_all(
                 products,
                 directory_path=download_dir,
@@ -158,6 +173,13 @@ class CopernicusOpenAccessHub(Provider):
 
         common_results = []
         for id, props in provider_search_results.items():
+
+            # Get the satellite and processing level from reversed mapping of
+            # the products dictionary
+            satellite, processing_level = dict(
+                map(reversed, self.products.items())
+            )[props['producttype']]
+
             common_results.append(
                 CommonSearchResult(
                     geometry=props.get("footprint"),
@@ -166,17 +188,10 @@ class CopernicusOpenAccessHub(Provider):
                     identifier=props.get("identifier"),
                     filename=props.get("filename"),
                     size=props.get("size"),
+                    time=props.get("beginposition"),
                     cloud_cover_percentage=props.get("cloudcoverpercentage"),
-                    processing_level=(
-                        enums.ProcessingLevel(props.get("productlevel"))
-                        if props.get("productlevel") is not None
-                        else None
-                    ),
-                    satellite=(
-                        dict(
-                            map(reversed, self.satellites.items())
-                        )[props['platformname']]
-                    ) if props.get('platformname') is not None else None,
+                    processing_level=processing_level,
+                    satellite=satellite,
                 )
             )
 
