@@ -31,7 +31,9 @@ class AlaskanSateliteFacility(Provider):
         logger.debug(f"Search file ids: {search_file_ids}")
 
         # Add the ASF logger to the root logger
-        logger.addHandler(asf_search.ASF_LOGGER)
+        asf_logger = logging.getLogger("asf_search")
+        asf_logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
+
         self.create_download_folder(download_dir)  # Create the download folder
 
         # Authenticate with ASF
