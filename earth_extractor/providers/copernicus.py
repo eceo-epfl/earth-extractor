@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
 
 logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 credentials = get_credentials()
 

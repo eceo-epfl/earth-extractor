@@ -9,6 +9,10 @@ from earth_extractor import core
 from earth_extractor.cli_options import SatelliteChoices, TemporalFrequency
 import atexit
 
+
+# Setup the file logger
+core.logging.setup_file_logger(core.config.constants.DEFAULT_DOWNLOAD_DIR)
+
 # Define a console handler
 console_handler = logging.StreamHandler()
 console_handler.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
@@ -22,10 +26,8 @@ atexit.register(error_handler.print_status)  # Print error status on exit
 
 # Define logger for this module
 logger = logging.getLogger(__name__)
-logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
-# Setup the file logger
-core.logging.setup_file_logger(core.config.constants.DEFAULT_DOWNLOAD_DIR)
 
 # Initialise the Typer class
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -222,6 +224,17 @@ def batch_interval(
             f"Satellite: {sat}, Level: {level.value}.\tQty ({len(res)})"
         )
 
+        # Translate the results into an internal workable format
+        res = sat._query_provider.translate_search_results(res)
+
+        res = core.utils.download_by_frequency(
+            start_date=start,
+            end_date=end,
+            frequency=frequency,
+            query_results=res,
+            filter_field='cloud_cover_percentage'
+        )
+
         # Append results to a list with associated satellite in order to use
         # its defined download provider
         all_results.append((sat, res))
@@ -243,20 +256,9 @@ def batch_interval(
         if len(res) > 0:
             logger.info(f"Downloading results for {sat}..."
                         f"({len(res)} items)")
-
-            # Translate the results into an internal workable format
-            translated = sat._query_provider.translate_search_results(res)
-
-            translated = core.utils.download_by_frequency(
-                start_date=start,
-                end_date=end,
-                frequency=frequency,
-                query_results=translated,
-                filter_field='cloud_cover_percentage'
-            )
             # Download the results
             sat.download_many(
-                search_results=translated,
+                search_results=res,
                 download_dir=output_dir,
             )
 

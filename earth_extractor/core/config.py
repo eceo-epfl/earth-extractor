@@ -14,9 +14,10 @@ class Constants(BaseSettings):
     KEYRING_ID: str = "earth-extractor"
 
     # Logging
+    LOGLEVEL_MODULE_DEFAULT: int = logging.DEBUG
     LOGFILE_NAME: str = f"{datetime.datetime.utcnow()}.log"
-    LOGLEVEL_FILE: str = "DEBUG"
-    LOGLEVEL_CONSOLE: str = "INFO"
+    LOGLEVEL_FILE: int = logging.DEBUG
+    LOGLEVEL_CONSOLE: int = logging.INFO
     LOGFORMAT_CONSOLE: logging.Formatter = logging.Formatter(
         "%(asctime)s [%(levelname)-7.7s] %(message)s"
     )

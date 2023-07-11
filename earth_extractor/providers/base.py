@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
-from earth_extractor.core.models import BBox, CommonSearchResult
+from earth_extractor import core
 import logging
 import datetime
 import os
@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
 
 logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
 class Provider:
@@ -32,7 +33,7 @@ class Provider:
         self,
         satellite: "Satellite",
         processing_level: "enums.ProcessingLevel",
-        roi: BBox,
+        roi: core.models.BBox,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int = 100,
@@ -82,7 +83,7 @@ class Provider:
     def translate_search_results(
         self,
         provider_search_results: Dict[Any, Any]
-    ) -> List[CommonSearchResult]:
+    ) -> List[core.models.CommonSearchResult]:
 
         raise NotImplementedError(
             "Search translation method not implemented for Provider: "

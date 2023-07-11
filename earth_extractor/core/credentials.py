@@ -1,10 +1,14 @@
 import keyring
 import typer
+import logging
 from rich.console import Console
 from rich.table import Table
 from pydantic import BaseSettings, root_validator
 from typing import Dict
 from earth_extractor import core
+
+logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
 class Credentials(BaseSettings):

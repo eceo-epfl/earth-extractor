@@ -8,7 +8,7 @@ from earth_extractor import core
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 credentials = get_credentials()
 

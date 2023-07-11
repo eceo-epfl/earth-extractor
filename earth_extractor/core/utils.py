@@ -14,7 +14,7 @@ import pandas as pd
 
 # Define logger for this module
 logger = logging.getLogger(__name__)
-logger.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
 def pair_satellite_with_level(
@@ -210,8 +210,8 @@ def download_by_frequency(
     end_date: datetime.datetime,
     frequency: TemporalFrequency,
     query_results: List[core.models.CommonSearchResult],
-    filter_field: str = 'cloud_cover_percentage'
-):
+    filter_field: str = 'cloud_cover_percentage',
+) -> List[core.models.CommonSearchResult]:
     ''' With the given start and end dates and a frequency, choose the
         satellite image with the best cloud_cover percentage and download it.
         If there are multiple images with the same cloud_cover percentage,
@@ -221,6 +221,24 @@ def download_by_frequency(
         more images with the same cloud_cover percentage of 0), the latest
         image in the frequency period is chosen (this behaviour is defined by
         the pandas Grouper function).
+
+        Parameters
+        ----------
+        start_date : datetime.datetime
+            The start date of the search
+        end_date : datetime.datetime
+            The end date of the search
+        frequency : TemporalFrequency
+            The frequency of the search according to the enum
+        query_results : List[core.models.CommonSearchResult]
+            The query results, in the internal common format
+        filter_field : str, optional
+            The field to filter by, by default 'cloud_cover_percentage'
+
+        Returns
+        -------
+        List[core.models.CommonSearchResult]
+            The filtered query results
     '''
 
     # Convert the query results to a list of dicts
@@ -268,10 +286,14 @@ def download_by_frequency(
     ]
 
     for result in results:
-        logger.info(
+        logger.debug(
             f"Interval filter results: {result.satellite} "
-            f"({result.processing_level}), ID: {result.identifier}, "
+            f"({result.processing_level}), File: {result.filename}, "
             f"Time: {result.time}, "
             f"{filter_field}: {getattr(result, filter_field)}")
+
+    logger.info(f"Interval operation filtered {len(query_results)} to "
+                f"{len(results)} results on {result.satellite} "
+                f"({result.processing_level}).")
 
     return results
