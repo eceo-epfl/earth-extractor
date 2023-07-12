@@ -1,18 +1,108 @@
 #!/usr/bin/env python3
 import datetime
-import typer
-from typing import Annotated, List, Dict, Any, Tuple
+from typing import List, Tuple
 import logging
 from earth_extractor import core, cli_options
-import atexit
 import os
 import sys
 from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite
+import geopandas as gpd
+
 
 # Define logger for this module
 logger = logging.getLogger(__name__)
 logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
+
+
+def export_query_results_to_geojson(
+    gdf: gpd.GeoDataFrame,
+    output_dir: str,
+) -> None:
+    # Convert the results to a GeoDataFrame
+
+    output_file = os.path.join(
+        output_dir,
+        core.config.constants.GEOJSON_EXPORT_FILENAME
+    )
+    logger.info(f"Exporting results to GeoJSON: {output_file}")
+    gdf.to_file(
+        output_file,
+        driver='GeoJSON'
+    )
+
+
+def convert_query_results_to_geodataframe(
+    query_results: List[core.models.CommonSearchResult]
+) -> gpd.GeoDataFrame:
+    ''' Converts the query results to a GeoDataFrame
+
+    Parameters
+    ----------
+    query_results : List[core.models.CommonSearchResult]
+        The query results
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        The query results as a GeoDataFrame
+    '''
+
+    # Convert the query results to a list of dicts
+    query_results = [x.to_geojson() for x in query_results]
+
+    # Convert the query results to a GeoDataFrame
+    gdf = gpd.GeoDataFrame.from_dict(query_results)
+
+    return gdf
+
+
+def convert_geodataframe_to_query_results(
+    gdf: gpd.GeoDataFrame
+) -> List[core.models.CommonSearchResult]:
+    ''' Converts the GeoDataFrame to query results
+
+    A reverse of the `convert_query_results_to_geodataframe` function, used
+    in importing the exported GeoJSON files.
+
+    Parameters
+    ----------
+    gdf : gpd.GeoDataFrame
+        The GeoDataFrame
+
+    Returns
+    -------
+    List[core.models.CommonSearchResult]
+        The query results
+    '''
+
+    # Convert the GeoDataFrame to a list of dicts
+    query_results = [x for x in gdf.to_dict('records')]
+    query_results = []
+    for idx, row in gdf.iterrows():
+        query_results.append(
+            core.models.CommonSearchResult(
+                satellite=row['satellite'],
+                product_id=row['product_id'],
+                link=row['link'],
+                identifier=row['identifier'],
+                filename=row['filename'],
+                time=row['time'],
+                cloud_cover_percentage=row['cloud_cover_percentage'],
+                size=row['size'],
+                processing_level=row['processing_level'],
+                sensor=row['sensor'],
+                geometry=row['geometry']
+            )
+        )
+    # # print(query_results)
+    # query_results.pop('geometry')
+    # # Convert the query results to a list of CommonSearchResult objects
+    # query_results = [
+    #     core.models.CommonSearchResult(**x) for x in query_results
+    # ]
+
+    return query_results
 
 
 def batch_query(
@@ -47,6 +137,7 @@ def batch_query(
     # Parse the satellite:level string into a list of workable tuples
     satellite_operations: List[Tuple[Satellite, enums.ProcessingLevel]] = []
 
+    # Create a list of tuples of satellites and levels
     for sat in satellites:
         satellite_operations.append(
             core.utils.pair_satellite_with_level(sat)
@@ -71,21 +162,13 @@ def batch_query(
         # If the user wants to export the results, do so
         if export != cli_options.ExportMetadataOptions.DISABLED.value:
             # Convert the results to a GeoDataFrame
-            gdf = core.utils.convert_query_results_to_geodataframe(translated)
+            gdf = convert_query_results_to_geodataframe(translated)
 
             if export == cli_options.ExportMetadataOptions.PIPE.value:
                 logger.info("Printing GeoJSON results to console")
                 print(gdf.to_json())
             elif export == cli_options.ExportMetadataOptions.FILE.value:
-                output_file = os.path.join(
-                    output_dir,
-                    core.config.constants.GEOJSON_EXPORT_FILENAME
-                )
-                logger.info(f"Exporting results to GeoJSON: {output_file}")
-                gdf.to_file(
-                    output_file,
-                    driver='GeoJSON'
-                )
+                export_query_results_to_geojson(gdf, output_dir)
 
         if results_only:
             sys.exit()
@@ -104,3 +187,39 @@ def batch_query(
     logger.info(f"Total results qty: {total_qty}")
 
     return all_results
+
+
+def import_query_results(
+    geojson_file: str,
+) -> List[Tuple[Satellite, List[core.models.CommonSearchResult]]]:
+    ''' Import a geojson file, convert it CommonSearchResult objects  '''
+
+    logger.info(f"Importing geojson file: {geojson_file}")
+
+    # Read the geojson file
+    import geopandas
+    gdf = geopandas.read_file(geojson_file)
+
+    # Convert the geojson file to a list of CommonSearchResult objects
+    results = convert_geodataframe_to_query_results(gdf)
+
+    # Create a tuple of satellite and grouping of its results
+    satellite_groups = {}
+    for result in results:
+        satellite_choice = cli_options.Satellites[result.satellite].value
+
+        # Add satellite to dict if not already present
+        if satellite_choice not in satellite_groups:
+            satellite_groups[satellite_choice] = []
+        # Add result to satellite group list
+        satellite_groups[satellite_choice].append(
+            result
+        )
+
+    print(satellite_groups)
+    # import sys
+    # sys.exit()
+
+    query_results = [(key, rows) for key, rows in satellite_groups.items()]
+
+    return query_results

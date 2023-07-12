@@ -299,28 +299,3 @@ def download_by_frequency(
                 f"({result.processing_level}).")
 
     return results
-
-
-def convert_query_results_to_geodataframe(
-    query_results: List[core.models.CommonSearchResult]
-) -> gpd.GeoDataFrame:
-    ''' Converts the query results to a GeoDataFrame
-
-    Parameters
-    ----------
-    query_results : List[core.models.CommonSearchResult]
-        The query results
-
-    Returns
-    -------
-    gpd.GeoDataFrame
-        The query results as a GeoDataFrame
-    '''
-
-    # Convert the query results to a list of dicts
-    query_results = [x.to_geojson() for x in query_results]
-
-    # Convert the query results to a GeoDataFrame
-    gdf = gpd.GeoDataFrame.from_dict(query_results)
-
-    return gdf

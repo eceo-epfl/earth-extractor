@@ -100,6 +100,9 @@ class CommonSearchResult:
     provider of the search results.
     '''
 
+    # Necessary for importing geojson to be able to determine provider
+    satellite: "Satellite"
+
     product_id: Optional[Any] = None
     link: Optional[AnyUrl] = None
     identifier: Optional[str] = None
@@ -112,7 +115,6 @@ class CommonSearchResult:
 
     processing_level: Optional["ProcessingLevel"] = None
     sensor: Optional["Sensor"] = None
-    satellite: Optional["Satellite"] = None
 
     geometry: Optional[str] = None
 

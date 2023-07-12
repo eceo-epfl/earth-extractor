@@ -33,6 +33,43 @@ app = typer.Typer(no_args_is_help=True, add_completion=False,
                   pretty_exceptions_show_locals=False)
 
 
+
+@app.command()
+def import_geojson(
+    filename: str = typer.Option(
+        ...,
+        help="Path to the GeoJSON file to import"
+    ),
+    output_dir: str = typer.Option(
+        core.config.constants.DEFAULT_DOWNLOAD_DIR,
+        help="Output directory for the downloaded files."
+    ),
+) -> None:
+    ''' Import a GeoJSON file with metadata to the database
+
+    The GeoJSON file must be in the same format as the one exported by the
+    export command.
+    '''
+
+    # Check if the file exists
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"File not found: {filename}")
+
+    # Import the GeoJSON file
+    query_results = core.query.import_query_results(geojson_file=filename)
+    print(query_results)
+    # Download the results using the satellite's download provider
+    for sat, res in query_results:
+        if len(res) > 0:
+            logger.info(f"Downloading results for {sat}..."
+                        f"({len(res)} items)")
+
+            # Download the results
+            sat.download_many(
+                search_results=res,
+                download_dir=output_dir,
+            )
+
 @app.command()
 def batch(
     start: Annotated[
