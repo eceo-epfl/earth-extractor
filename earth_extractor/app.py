@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import datetime
 import typer
-from shapely.geometry import GeometryCollection
-from typing import Annotated, List, Tuple
-from earth_extractor.core.models import BBox
+from typing import Annotated, List
 import logging
 from earth_extractor import core, cli_options
 import atexit
+import os
+import sys
 
 
 # Setup the file logger
@@ -29,7 +29,8 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
 # Initialise the Typer class
-app = typer.Typer(no_args_is_help=True, add_completion=False)
+app = typer.Typer(no_args_is_help=True, add_completion=False,
+                  pretty_exceptions_show_locals=False)
 
 
 @app.command()
@@ -83,14 +84,24 @@ def batch(
              "logger will be disabled and the output will be printed to "
              "stdout.",
         case_sensitive=False
+    ),
+    results_only: bool = typer.Option(
+        False,
+        help="Only export the results of the query, do not download"
     )
 ) -> None:
     ''' Batch download of satellite data with minimal user input '''
+
+    # Disable the logger if the user wants to pipe the output
     if export == cli_options.ExportMetadataOptions.PIPE.value:
-        # Disable the logger if the user wants to pipe the output
         logging.getLogger().removeHandler(console_handler)
 
-    logger.info('Starting Earth Extractor batch interval mode')
+    if results_only:
+        if export == cli_options.ExportMetadataOptions.DISABLED.value:
+            raise ValueError("Cannot use --results-only without --export")
+        logger.info("Skipping download, only exporting results")
+
+    logger.info('Starting Earth Extractor batch mode')
     logger.info(f"Time: {start} {end}")
     roi_obj = core.utils.parse_roi(roi, buffer)
 
@@ -114,27 +125,31 @@ def batch(
 
         # Translate the results into an internal workable format
         translated = sat._query_provider.translate_search_results(res)
-        import geopandas as gpd
-        import shapely
-        # Convert the geometry WKT to a shapely object
-        translated = [x.to_geojson() for x in translated]
-        # print(translated)
-            # item.geometry = shapely.wkt.loads(item.geometry)
-        # translated_dict = [x.as_dict() for x in translated]
-        # [print(x['geometry']) for x in translated_dict]
-        # [x.update({'geometry': shapely.wkt.loads(x['geometry'])}) for x in translated_dict]
-        # [print(x['geometry']) for x in translated_dict]
-        # for item in translated:
-            # item.geometry = shapely.wkt.loads(item.geometry)
-        # print(translated_dict)
-        gdf = gpd.GeoDataFrame(translated, crs='EPSG:4326', geometry='geometry')
-        # print(gdf)
-        # save gdf to geojson
-        gdf.to_file('test.geojson', driver='GeoJSON')
 
-        # import json
-        # print(json.dumps(translated, indent=4))
-        # print(translated[0].as_dict())
+
+
+        # If the user wants to export the results, do so
+        if export != cli_options.ExportMetadataOptions.DISABLED.value:
+            # Convert the results to a GeoDataFrame
+            gdf = core.utils.convert_query_results_to_geodataframe(translated)
+
+            if export == cli_options.ExportMetadataOptions.PIPE.value:
+                logger.info("Printing results to stdout")
+                print(gdf.to_json())
+            elif export == cli_options.ExportMetadataOptions.FILE.value:
+                output_file = os.path.join(
+                    output_dir,
+                    core.config.constants.GEOJSON_EXPORT_FILENAME
+                )
+                logger.info(f"Exporting results to GeoJSON: {output_file}")
+                gdf.to_file(
+                    output_file,
+                    driver='GeoJSON'
+                )
+
+        if results_only:
+            sys.exit()
+
         logger.info(
             f"Satellite: {sat}, Level: {level.value}.\tQty ({len(res)})"
         )

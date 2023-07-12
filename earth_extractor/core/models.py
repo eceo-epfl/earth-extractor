@@ -139,9 +139,11 @@ class CommonSearchResult:
         # Convert datetime to string
         if self.time is not None:
             d['time'] = self.time.isoformat()
-        d.pop('geometry')
+
+        d.pop('geometry')  # Don't include geometry in the properties
+
         # Convert the dictionary to a geojson
         return geojson.Feature(
             geometry=geom,
-            properties=d
+            **d
         )
