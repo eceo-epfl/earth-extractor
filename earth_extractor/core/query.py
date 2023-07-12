@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import datetime
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import logging
 from earth_extractor import core, cli_options
 import os
 import sys
 from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite
+from earth_extractor.core.models import CommonSearchResult
 import geopandas as gpd
 
 
@@ -33,13 +34,13 @@ def export_query_results_to_geojson(
 
 
 def convert_query_results_to_geodataframe(
-    query_results: List[core.models.CommonSearchResult]
+    query_results: List[CommonSearchResult]
 ) -> gpd.GeoDataFrame:
     ''' Converts the query results to a GeoDataFrame
 
     Parameters
     ----------
-    query_results : List[core.models.CommonSearchResult]
+    query_results : List[CommonSearchResult]
         The query results
 
     Returns
@@ -59,7 +60,7 @@ def convert_query_results_to_geodataframe(
 
 def convert_geodataframe_to_query_results(
     gdf: gpd.GeoDataFrame
-) -> List[core.models.CommonSearchResult]:
+) -> List[CommonSearchResult]:
     ''' Converts the GeoDataFrame to query results
 
     A reverse of the `convert_query_results_to_geodataframe` function, used
@@ -72,7 +73,7 @@ def convert_geodataframe_to_query_results(
 
     Returns
     -------
-    List[core.models.CommonSearchResult]
+    List[CommonSearchResult]
         The query results
     '''
 
@@ -81,7 +82,7 @@ def convert_geodataframe_to_query_results(
     query_results = []
     for idx, row in gdf.iterrows():
         query_results.append(
-            core.models.CommonSearchResult(
+            CommonSearchResult(
                 satellite=row['satellite'],
                 product_id=row['product_id'],
                 link=row['link'],
@@ -95,12 +96,6 @@ def convert_geodataframe_to_query_results(
                 geometry=row['geometry']
             )
         )
-    # # print(query_results)
-    # query_results.pop('geometry')
-    # # Convert the query results to a list of CommonSearchResult objects
-    # query_results = [
-    #     core.models.CommonSearchResult(**x) for x in query_results
-    # ]
 
     return query_results
 
@@ -116,7 +111,7 @@ def batch_query(
     export: cli_options.ExportMetadataOptions,
     results_only: bool,
     interval_frequency: cli_options.TemporalFrequency | None = None,
-) -> List[Tuple[Satellite, List[core.models.CommonSearchResult]]]:
+) -> List[Tuple[Satellite, List[CommonSearchResult]]]:
 
     if results_only:
         if export == cli_options.ExportMetadataOptions.DISABLED.value:
@@ -149,6 +144,7 @@ def batch_query(
         logger.debug(
             f"Querying satellite Satellite: {sat}, Level: {level.value}"
         )
+
         res = sat.query(
             processing_level=level,
             roi=roi_obj,
@@ -158,6 +154,19 @@ def batch_query(
 
         # Translate the results into an internal workable format
         translated = sat._query_provider.translate_search_results(res)
+
+        if interval_frequency is not None:
+            # If interval frequency is set, then we need to query the results
+            # by the frequency
+            translated = core.utils.download_by_frequency(
+                start_date=start,
+                end_date=end,
+                frequency=interval_frequency,
+                query_results=translated,
+                filter_field='cloud_cover_percentage'
+            )
+
+
 
         # If the user wants to export the results, do so
         if export != cli_options.ExportMetadataOptions.DISABLED.value:
@@ -191,9 +200,9 @@ def batch_query(
 
 def import_query_results(
     geojson_file: str,
-) -> List[Tuple[Satellite, List[core.models.CommonSearchResult]]]:
+) -> List[Tuple[Satellite, List[CommonSearchResult]]]:
     ''' Import a geojson file, convert it CommonSearchResult objects  '''
-
+    logger.info('Starting Earth Extractor import mode')
     logger.info(f"Importing geojson file: {geojson_file}")
 
     # Read the geojson file
@@ -204,7 +213,7 @@ def import_query_results(
     results = convert_geodataframe_to_query_results(gdf)
 
     # Create a tuple of satellite and grouping of its results
-    satellite_groups = {}
+    satellite_groups: Dict[Satellite, List[CommonSearchResult]] = {}
     for result in results:
         satellite_choice = cli_options.Satellites[result.satellite].value
 
@@ -216,10 +225,10 @@ def import_query_results(
             result
         )
 
-    print(satellite_groups)
-    # import sys
-    # sys.exit()
-
+    # Convert the dict to a list of tuples
     query_results = [(key, rows) for key, rows in satellite_groups.items()]
 
+    total_qty = sum([len(res) for sat, res in query_results])
+    logger.info(f"Imported {total_qty} records from {len(query_results)} "
+                f"satellite{'(s)' if len(query_results) > 1 else ''}")
     return query_results

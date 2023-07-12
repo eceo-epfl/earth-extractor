@@ -11,7 +11,7 @@ from shapely.geometry import GeometryCollection
 import pyproj
 import datetime
 import pandas as pd
-import geopandas as gpd
+from dataclasses import asdict
 
 
 # Define logger for this module
@@ -244,7 +244,7 @@ def download_by_frequency(
     '''
 
     # Convert the query results to a list of dicts
-    query_results = [x.as_dict() for x in query_results]
+    query_results = [asdict(x) for x in query_results]
 
     # If filter_field is not in the query results, raise an error
     cleaned_query_results = []

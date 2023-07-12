@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import datetime
 import typer
-from typing import Annotated, List, Dict, Any, Tuple
+from typing import Annotated, List, Tuple
 import logging
 from earth_extractor import core, cli_options
 import atexit
 import os
-import sys
+from earth_extractor.satellites.base import Satellite
+from earth_extractor.satellites import enums
 
 
 # Setup the file logger
@@ -33,7 +34,6 @@ app = typer.Typer(no_args_is_help=True, add_completion=False,
                   pretty_exceptions_show_locals=False)
 
 
-
 @app.command()
 def import_geojson(
     filename: str = typer.Option(
@@ -43,6 +43,10 @@ def import_geojson(
     output_dir: str = typer.Option(
         core.config.constants.DEFAULT_DOWNLOAD_DIR,
         help="Output directory for the downloaded files."
+    ),
+    no_confirmation: bool = typer.Option(
+        False, "--no-confirmation",
+        help="Do not ask for confirmation before downloading"
     ),
 ) -> None:
     ''' Import a GeoJSON file with metadata to the database
@@ -57,7 +61,14 @@ def import_geojson(
 
     # Import the GeoJSON file
     query_results = core.query.import_query_results(geojson_file=filename)
-    print(query_results)
+
+    # Prompt user for confirmation before downloading
+    if not no_confirmation:
+        typer.confirm(
+            "Do you want to download the results? (use --no-confirmation to "
+            "skip this prompt)", abort=True
+        )
+
     # Download the results using the satellite's download provider
     for sat, res in query_results:
         if len(res) > 0:
@@ -69,6 +80,7 @@ def import_geojson(
                 search_results=res,
                 download_dir=output_dir,
             )
+
 
 @app.command()
 def batch(
@@ -216,6 +228,18 @@ def batch_interval(
     no_confirmation: bool = typer.Option(
         False, "--no-confirmation",
         help="Do not ask for confirmation before downloading"
+    ),
+    export: cli_options.ExportMetadataOptions = typer.Option(
+        cli_options.ExportMetadataOptions.DISABLED.value,
+        help="Export query results. Output can be used for editing and "
+             "re-importing with the import command. If PIPE is chosen, the "
+             "logger will be disabled and the output will be printed to "
+             "stdout.",
+        case_sensitive=False
+    ),
+    results_only: bool = typer.Option(
+        False,
+        help="Only export the results of the query, do not download"
     )
 ) -> None:
     ''' Batch download with best cloud cover over a given time period
@@ -228,49 +252,23 @@ def batch_interval(
     2020-01-31, and the user specifies Sentinel-2 L1C and L2A, the command will
 
     '''
-    logger.info('Starting Earth Extractor batch interval mode')
-    logger.info(f"Time: {start} {end}")
-    roi_obj = core.utils.parse_roi(roi, buffer)
 
-    # Parse the satellite:level string into a list of workable tuples
-    satellite_operations = []
-    for sat in satellites:
-        satellite_operations.append(core.utils.pair_satellite_with_level(sat))
+    # Disable the logger if the user wants to pipe the output
+    if export == cli_options.ExportMetadataOptions.PIPE.value:
+        logging.getLogger().removeHandler(console_handler)
 
-    # Perform a query for each satellite and level and append it to a list
-    all_results = []
-    for sat, level in satellite_operations:
-        logger.debug(
-            f"Querying satellite Satellite: {sat}, Level: {level.value}"
-        )
-        res = sat.query(
-            processing_level=level,
-            roi=roi_obj,
-            start_date=start,
-            end_date=end,
-            cloud_cover=cloud_cover)
-        logger.info(
-            f"Satellite: {sat}, Level: {level.value}.\tQty ({len(res)})"
-        )
-
-        # Translate the results into an internal workable format
-        res = sat._query_provider.translate_search_results(res)
-        res = core.utils.download_by_frequency(
-            start_date=start,
-            end_date=end,
-            frequency=frequency,
-            query_results=res,
-            filter_field='cloud_cover_percentage'
-        )
-
-        # Append results to a list with associated satellite in order to use
-        # its defined download provider
-        all_results.append((sat, res))
-
-    # Sum results from all query results
-    total_qty = sum([len(res) for sat, res in all_results])
-
-    logger.info(f"Total results qty: {total_qty}")
+    query_results = core.query.batch_query(
+        start=start,
+        end=end,
+        satellites=satellites,
+        roi=roi,
+        buffer=buffer,
+        output_dir=output_dir,
+        cloud_cover=cloud_cover,
+        export=export,
+        results_only=results_only,
+        interval_frequency=frequency
+    )
 
     # Prompt user for confirmation before downloading
     if not no_confirmation:
@@ -280,7 +278,7 @@ def batch_interval(
         )
 
     # Download the results using the satellite's download provider
-    for sat, res in all_results:
+    for sat, res in query_results:
         if len(res) > 0:
             logger.info(f"Downloading results for {sat}..."
                         f"({len(res)} items)")
