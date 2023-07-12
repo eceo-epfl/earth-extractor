@@ -5,8 +5,7 @@ from shapely.geometry import GeometryCollection
 from typing import Annotated, List, Tuple
 from earth_extractor.core.models import BBox
 import logging
-from earth_extractor import core
-from earth_extractor.cli_options import SatelliteChoices, TemporalFrequency
+from earth_extractor import core, cli_options
 import atexit
 
 
@@ -46,7 +45,7 @@ def batch(
                      help="End datetime of the search.")
     ],
     satellites: Annotated[
-        List[SatelliteChoices],
+        List[cli_options.SatelliteChoices],
         typer.Option("--satellite",
                      help="Satellite to consider. To add multiple satellites, "
                      "use the option multiple times.", case_sensitive=False)
@@ -76,10 +75,22 @@ def batch(
     no_confirmation: bool = typer.Option(
         False, "--no-confirmation",
         help="Do not ask for confirmation before downloading"
+    ),
+    export: cli_options.ExportMetadataOptions = typer.Option(
+        cli_options.ExportMetadataOptions.DISABLED.value,
+        help="Export query results. Output can be used for editing and "
+             "re-importing with the import command. If PIPE is chosen, the "
+             "logger will be disabled and the output will be printed to "
+             "stdout.",
+        case_sensitive=False
     )
 ) -> None:
     ''' Batch download of satellite data with minimal user input '''
+    if export == cli_options.ExportMetadataOptions.PIPE.value:
+        # Disable the logger if the user wants to pipe the output
+        logging.getLogger().removeHandler(console_handler)
 
+    logger.info('Starting Earth Extractor batch interval mode')
     logger.info(f"Time: {start} {end}")
     roi_obj = core.utils.parse_roi(roi, buffer)
 
@@ -100,13 +111,37 @@ def batch(
             start_date=start,
             end_date=end,
             cloud_cover=cloud_cover)
+
+        # Translate the results into an internal workable format
+        translated = sat._query_provider.translate_search_results(res)
+        import geopandas as gpd
+        import shapely
+        # Convert the geometry WKT to a shapely object
+        translated = [x.to_geojson() for x in translated]
+        # print(translated)
+            # item.geometry = shapely.wkt.loads(item.geometry)
+        # translated_dict = [x.as_dict() for x in translated]
+        # [print(x['geometry']) for x in translated_dict]
+        # [x.update({'geometry': shapely.wkt.loads(x['geometry'])}) for x in translated_dict]
+        # [print(x['geometry']) for x in translated_dict]
+        # for item in translated:
+            # item.geometry = shapely.wkt.loads(item.geometry)
+        # print(translated_dict)
+        gdf = gpd.GeoDataFrame(translated, crs='EPSG:4326', geometry='geometry')
+        # print(gdf)
+        # save gdf to geojson
+        gdf.to_file('test.geojson', driver='GeoJSON')
+
+        # import json
+        # print(json.dumps(translated, indent=4))
+        # print(translated[0].as_dict())
         logger.info(
             f"Satellite: {sat}, Level: {level.value}.\tQty ({len(res)})"
         )
 
         # Append results to a list with associated satellite in order to use
         # its defined download provider
-        all_results.append((sat, res))
+        all_results.append((sat, translated))
 
     # Sum results from all query results
     total_qty = sum([len(res) for sat, res in all_results])
@@ -126,12 +161,9 @@ def batch(
             logger.info(f"Downloading results for {sat}..."
                         f"({len(res)} items)")
 
-            # Translate the results into an internal workable format
-            translated = sat._query_provider.translate_search_results(res)
-
             # Download the results
             sat.download_many(
-                search_results=translated,
+                search_results=res,
                 download_dir=output_dir,
             )
 
@@ -149,7 +181,7 @@ def batch_interval(
                      help="End datetime of the search.")
     ],
     satellites: Annotated[
-        List[SatelliteChoices],
+        List[cli_options.SatelliteChoices],
         typer.Option("--satellite",
                      help="Satellite to consider. To add multiple satellites, "
                      "use the option multiple times.", case_sensitive=False)
@@ -166,7 +198,7 @@ def batch_interval(
              "also use the buffer option.")
     ],
     frequency: Annotated[
-        TemporalFrequency,
+        cli_options.TemporalFrequency,
         typer.Option(
             help="Frequency to download data at. "
                  "Options: yearly, monthly, weekly, daily",
@@ -199,7 +231,7 @@ def batch_interval(
     2020-01-31, and the user specifies Sentinel-2 L1C and L2A, the command will
 
     '''
-
+    logger.info('Starting Earth Extractor batch interval mode')
     logger.info(f"Time: {start} {end}")
     roi_obj = core.utils.parse_roi(roi, buffer)
 
@@ -289,11 +321,13 @@ def credentials(
 
 @app.callback()
 def menu():
-    ''' The main menu of Typer
+    ''' EarthExtractor - A tool for downloading satellite data from various
+    providers. It is designed to be simple to use, and to provide a consistent
+    interface for downloading data from different providers.
 
-    The @app.command() decorated functions are the subcommands of this menu.
+    Use the --help option on a subcommand to see more information about it.
     '''
-    logger.info('Starting Earth Extractor')
+    pass
 
 
 def main() -> None:

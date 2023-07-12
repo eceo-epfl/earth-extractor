@@ -3,7 +3,10 @@ from earth_extractor.satellites import enums
 from earth_extractor.providers import copernicus_scihub, asf
 
 
-''' Define the Sentinel satellites '''
+''' Define the Sentinel satellites
+
+    The satellites are defined as instances of the Satellite class.
+'''
 
 sentinel_1: Satellite = Satellite(
     query_provider=copernicus_scihub,

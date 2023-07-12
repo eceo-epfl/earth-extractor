@@ -8,6 +8,8 @@ import datetime
 import shapely
 from earth_extractor.satellites import enums
 from earth_extractor import core
+import tenacity
+
 
 if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
@@ -51,7 +53,7 @@ class CopernicusOpenAccessHub(Provider):
                 f"Open Access Hub. Available satellites: {self.satellites}"
             )
         logger.info(f"Satellite: {satellite.name} "
-                    f"({self.satellites[satellite.name]}"
+                    f"({self.satellites[satellite.name]}) "
                     f"{processing_level.value}")
         product_type = self.products.get(
             (satellite.name, processing_level), None
@@ -120,17 +122,32 @@ class CopernicusOpenAccessHub(Provider):
 
         products = self.process_search_results(search_origin, search_results)
         if isinstance(search_origin, CopernicusOpenAccessHub):
-            api = sentinelsat.SentinelAPI(
-                credentials.SCIHUB_USERNAME,
-                credentials.SCIHUB_PASSWORD
-            )
-            api.download_all(
-                products,
-                directory_path=download_dir,
-                n_concurrent_dl=processes,
-                checksum=True,
-                max_attempts=max_attempts,
-            )
+            try:
+                for attempt in tenacity.Retrying(
+                    stop=tenacity.stop_after_attempt(
+                        core.config.constants.MAX_DOWNLOAD_ATTEMPTS
+                    ),
+                    # 90 seconds between attempts, API rate limit is 90req/60s
+                    wait=tenacity.wait_fixed(90),
+                ):
+                    with attempt:
+                        api = sentinelsat.SentinelAPI(
+                            credentials.SCIHUB_USERNAME,
+                            credentials.SCIHUB_PASSWORD
+                        )
+                        api.download_all(
+                            products,
+                            directory_path=download_dir,
+                            n_concurrent_dl=processes,
+                            checksum=True,
+                            max_attempts=max_attempts,
+                        )
+            except sentinelsat.exceptions.ServerError as e:
+                logger.error(
+                    "Error downloading from Copernicus Open AccessHub"
+                )
+
+
         else:
             raise ValueError(
                 f"Download from {search_origin.name} to "
@@ -210,7 +227,6 @@ copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
     },
     products={
         (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): "GRD",
-        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L2): "SLC",
         (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): "S2MSI1C",
         (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): "S2MSI2A",
         (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L1): "OL_1_EFR___",

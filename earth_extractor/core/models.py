@@ -3,6 +3,7 @@ import shapely
 from typing import Any, TYPE_CHECKING, Optional
 from dataclasses import dataclass, asdict
 import datetime
+from enum import Enum
 
 
 if TYPE_CHECKING:
@@ -115,4 +116,32 @@ class CommonSearchResult:
 
     geometry: Optional[str] = None
 
-    as_dict = asdict
+    # Create function to convert this dataclass to geojson including all fields
+    # and casting enums to their values
+    def to_geojson(self):
+        ''' Convert this dataclass to geojson including all fields and casting
+            enums to their values '''
+
+        # Convert the dataclass to a dictionary
+        d = asdict(self)
+
+        # Convert all enums to their values
+        for k, v in d.items():
+            if isinstance(v, Enum):
+                d[k] = v.value
+        import geojson
+        geom = None
+        # Convert WKT geometry to shapely object
+        if self.geometry is not None:
+            import shapely
+            geom = shapely.wkt.loads(self.geometry)
+
+        # Convert datetime to string
+        if self.time is not None:
+            d['time'] = self.time.isoformat()
+        d.pop('geometry')
+        # Convert the dictionary to a geojson
+        return geojson.Feature(
+            geometry=geom,
+            properties=d
+        )

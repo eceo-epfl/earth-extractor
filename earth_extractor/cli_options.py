@@ -4,7 +4,6 @@ from earth_extractor.satellites import sentinel
 
 class SatelliteChoices(str, Enum):
     SENTINEL1L1 = "SENTINEL1:L1"
-    SENTINEL1L2 = "SENTINEL1:L2"
 
     SENTINEL2L1C = "SENTINEL2:L1C"
     SENTINEL2L2A = "SENTINEL2:L2A"
@@ -29,3 +28,9 @@ class TemporalFrequency(str, Enum):
     W = "WEEKLY"
     M = "MONTHLY"
     Y = "YEARLY"
+
+
+class ExportMetadataOptions(str, Enum):
+    DISABLED = "DISABLED"
+    FILE = "FILE"
+    PIPE = "PIPE"

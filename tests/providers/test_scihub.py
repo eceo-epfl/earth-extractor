@@ -55,3 +55,18 @@ def test_query_sentinel_3(
         )
 
     assert len(res) == 37, ("Found results when shouldn't have")  # Too rigid?
+
+def test_wait_on_download_exception():
+    ''' Test that Tenacity will wait and retry on the download_many() function
+
+        API will fail on > 90 requests per minute, so test retrying on failure
+    '''
+
+    # Query Copernicus Open Access Hub for Sentinel-1 data
+    res = copernicus_scihub.query(
+        satellite=sentinel_1,
+        roi=BBox.from_string("0,0,1,1"),
+        start_date=datetime(2016, 11, 19),
+        end_date=datetime(2016, 12, 29),
+        processing_level=ProcessingLevel.L1
+    )
