@@ -2,8 +2,10 @@ from typing import Tuple, List
 from earth_extractor import core
 import logging
 from earth_extractor.satellites import enums
-from earth_extractor.satellites.base import Satellite as SatelliteClass
-from earth_extractor.cli_options import Satellites, TemporalFrequency
+from earth_extractor.satellites.base import Satellite
+from earth_extractor.cli_options import (
+    Satellites, TemporalFrequency, SatelliteChoices
+)
 import shapely
 from shapely.geometry import GeometryCollection
 import pyproj
@@ -18,8 +20,8 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
 def pair_satellite_with_level(
-    choice: str
-) -> Tuple[SatelliteClass, enums.ProcessingLevel]:
+    choice: SatelliteChoices
+) -> Tuple[Satellite, enums.ProcessingLevel]:
     ''' Splits the input satellite and level choice from the command line
 
         Expects a `<Satellite>:<ProcessingLevel>` string.
@@ -44,7 +46,7 @@ def pair_satellite_with_level(
             f"Valid choices are: {Satellites.__members__}"
         )
     else:
-        satellite_choice: SatelliteClass = Satellites[satellite].value
+        satellite_choice: Satellite = Satellites[satellite].value
 
     # Check if the processing level is valid, if true assign enum to a variable
     if processing_level not in enums.ProcessingLevel.__members__:
