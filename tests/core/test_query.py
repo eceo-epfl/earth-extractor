@@ -2,6 +2,7 @@ from earth_extractor.core import query
 from earth_extractor.core.models import CommonSearchResult
 from earth_extractor.satellites.base import Satellite
 import os
+import geopandas as gpd
 
 
 def test_import_query_results_to_geojson(
@@ -29,6 +30,7 @@ def test_import_query_results_to_geojson(
                 "Result not casted into a CommonSearchResult object"
             )
 
+
 def test_import_query_results_to_geodataframe(
         resource_path_query
 ) -> None:
@@ -48,9 +50,16 @@ def test_import_query_results_to_geodataframe(
     for satellite, search_result in query_results:
         for result in search_result:
             all_results.append(result)
-    print(all_results)
 
     # Convert the results to a GeoDataFrame
     gdf = query.convert_query_results_to_geodataframe(
         all_results
+    )
+
+    assert isinstance(gdf, gpd.GeoDataFrame), (
+        "GeoDataFrame not returned from query results"
+    )
+    assert len(gdf) == len(all_results), (
+        "Number of results in GeoDataFrame does not match number of results "
+        "in query results"
     )

@@ -3,6 +3,7 @@ from earth_extractor import core
 import logging
 import datetime
 import os
+from earth_extractor.core.models import CommonSearchResult
 
 if TYPE_CHECKING:
     from earth_extractor.satellites import enums
@@ -47,8 +48,7 @@ class Provider:
 
     def download_one(
         self,
-        search_origin: "Provider",
-        search_results: List[str],
+        search_results: List[CommonSearchResult],
         download_dir: str,
         processes: int = 6
     ) -> Any:
@@ -60,8 +60,7 @@ class Provider:
 
     def download_many(
         self,
-        search_origin: "Provider",
-        search_results: List[str],
+        search_results: List[CommonSearchResult],
         download_dir: str,
         processes: int = 6
     ) -> Any:

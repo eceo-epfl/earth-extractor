@@ -134,7 +134,7 @@ class CommonSearchResult:
         import geojson
         geom = None
         # Convert WKT geometry to shapely object
-        if self.geometry is not None:
+        if self.geometry is not None and isinstance(self.geometry, str):
             import shapely
             geom = shapely.wkt.loads(self.geometry)
 

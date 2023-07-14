@@ -1,7 +1,7 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import BBox, CommonSearchResult
-from typing import Any, List, TYPE_CHECKING, Dict, Tuple
+from typing import Any, List, TYPE_CHECKING, Dict, Tuple, Callable
 import sentinelsat
 import logging
 import datetime
@@ -81,14 +81,30 @@ class CopernicusOpenAccessHub(Provider):
 
         return products
 
+
+    @tenacity.retry(
+        retry=tenacity.retry_if_exception_type(
+            sentinelsat.exceptions.ServerError
+        ),
+        stop=tenacity.stop_after_attempt(
+            core.config.constants.MAX_DOWNLOAD_ATTEMPTS
+        ),
+        wait=tenacity.wait_fixed(90),  # API rate limit is 90req/60s
+        reraise=True
+    )
     def download_many(
         self,
-        search_results: List[str],
+        search_results: List[CommonSearchResult],
         download_dir: str,
         processes: int = core.config.constants.PARRALLEL_PROCESSES_DEFAULT,
+        *,
         max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
         ''' Using the search results from query(), download the data
+
+        Function will retry if the API returns a 500 error. This can happen
+        when the API is under heavy load or when the API rate limit is exceeded
+        which is defined at time of writing to be 90 requests per minute.
 
         Parameters
         ----------
@@ -105,31 +121,20 @@ class CopernicusOpenAccessHub(Provider):
         '''
         logger.addHandler(sentinelsat.SentinelAPI)
 
-        try:
-            for attempt in tenacity.Retrying(
-                stop=tenacity.stop_after_attempt(
-                    core.config.constants.MAX_DOWNLOAD_ATTEMPTS
-                ),
-                # 90 seconds between attempts, API rate limit is 90req/60s
-                wait=tenacity.wait_fixed(90),
-            ):
-                with attempt:
-                    api = sentinelsat.SentinelAPI(
-                        credentials.SCIHUB_USERNAME,
-                        credentials.SCIHUB_PASSWORD
-                    )
-                    api.download_all(
-                        search_results,
-                        directory_path=download_dir,
-                        n_concurrent_dl=processes,
-                        checksum=True,
-                        max_attempts=max_attempts,
-                    )
-        except sentinelsat.exceptions.ServerError as e:
-            logger.error(
-                "Error downloading from Copernicus Open AccessHub. "
-                f"Message: {e}"
-            )
+        # Convert the search results to a list of product ids
+        search_results = [result.product_id for result in search_results]
+
+        api = sentinelsat.SentinelAPI(
+            credentials.SCIHUB_USERNAME,
+            credentials.SCIHUB_PASSWORD
+        )
+        api.download_all(
+            search_results,
+            directory_path=download_dir,
+            n_concurrent_dl=processes,
+            checksum=True,
+            max_attempts=max_attempts,
+        )
 
     def translate_search_results(
         self,
