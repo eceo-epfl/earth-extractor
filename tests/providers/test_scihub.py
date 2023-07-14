@@ -6,6 +6,7 @@ from earth_extractor.core.models import BBox
 from earth_extractor.satellites.enums import Satellite
 from earth_extractor.satellites.enums import ProcessingLevel
 from datetime import datetime
+import pytest
 
 
 ''' These following tests require access to the API -- probably not the best
@@ -13,7 +14,8 @@ from datetime import datetime
 '''
 
 def test_query_sentinel_1(
-    roi_switzerland: BBox
+    roi_switzerland: BBox,
+    mocker
 ):
     # Query Copernicus Open Access Hub for Sentinel-1 data
     res = copernicus_scihub.query(
@@ -52,7 +54,7 @@ def test_query_sentinel_3(
         start_date=datetime(2017, 11, 19),
         end_date=datetime(2017, 12, 29),
         processing_level=ProcessingLevel.L2
-        )
+    )
 
     assert len(res) == 37, ("Found results when shouldn't have")  # Too rigid?
 
@@ -65,7 +67,7 @@ def test_wait_on_download_exception():
     # Query Copernicus Open Access Hub for Sentinel-1 data
     res = copernicus_scihub.query(
         satellite=sentinel_1,
-        roi=BBox.from_string("0,0,1,1"),
+        roi=BBox.from_string("0,0,1,1").to_shapely(),
         start_date=datetime(2016, 11, 19),
         end_date=datetime(2016, 12, 29),
         processing_level=ProcessingLevel.L1

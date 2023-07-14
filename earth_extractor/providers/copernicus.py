@@ -1,7 +1,7 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import BBox, CommonSearchResult
-from typing import Any, List, TYPE_CHECKING, Dict
+from typing import Any, List, TYPE_CHECKING, Dict, Tuple
 import sentinelsat
 import logging
 import datetime
@@ -29,8 +29,7 @@ class CopernicusOpenAccessHub(Provider):
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
-        full_metadata: bool = False,
-    ) -> List[Any]:
+    ) -> List[CommonSearchResult]:
         ''' Query the Copernicus Open Access Hub for data '''
 
         logger.info("Querying Copernicus Open Access Hub")
@@ -77,25 +76,13 @@ class CopernicusOpenAccessHub(Provider):
             logger.error(f"ASF authentication error: {e}")
             return []
 
-        if full_metadata:
-            # By default, the API only returns a subset of the metadata
-            logger.warning(
-                'Extra metadata is being retrieved for each product '
-                'which may take a long time.'
-            )
-            products_full_metadata: Dict[str, Any] = {}
-            for id, props in products.items():
-                logger.debug(f"Retrieving extra metadata for ID: {id}")
-                products_full_metadata[id] = api.get_product_odata(
-                    id, full=True
-                )
-            return products_full_metadata
+        # Translate the results to a common format
+        products = self.translate_search_results(products)
 
         return products
 
     def download_many(
         self,
-        search_origin: Provider,
         search_results: List[str],
         download_dir: str,
         processes: int = core.config.constants.PARRALLEL_PROCESSES_DEFAULT,
@@ -105,8 +92,6 @@ class CopernicusOpenAccessHub(Provider):
 
         Parameters
         ----------
-        search_origin : Provider
-            The provider of the search results
         search_results : List[str]
             The search results
         download_dir : str
@@ -120,68 +105,31 @@ class CopernicusOpenAccessHub(Provider):
         '''
         logger.addHandler(sentinelsat.SentinelAPI)
 
-        products = self.process_search_results(search_origin, search_results)
-        if isinstance(search_origin, CopernicusOpenAccessHub):
-            try:
-                for attempt in tenacity.Retrying(
-                    stop=tenacity.stop_after_attempt(
-                        core.config.constants.MAX_DOWNLOAD_ATTEMPTS
-                    ),
-                    # 90 seconds between attempts, API rate limit is 90req/60s
-                    wait=tenacity.wait_fixed(90),
-                ):
-                    with attempt:
-                        api = sentinelsat.SentinelAPI(
-                            credentials.SCIHUB_USERNAME,
-                            credentials.SCIHUB_PASSWORD
-                        )
-                        api.download_all(
-                            products,
-                            directory_path=download_dir,
-                            n_concurrent_dl=processes,
-                            checksum=True,
-                            max_attempts=max_attempts,
-                        )
-            except sentinelsat.exceptions.ServerError as e:
-                logger.error(
-                    "Error downloading from Copernicus Open AccessHub"
-                )
-
-
-        else:
-            raise ValueError(
-                f"Download from {search_origin.name} to "
-                f"{self.name} not supported."
+        try:
+            for attempt in tenacity.Retrying(
+                stop=tenacity.stop_after_attempt(
+                    core.config.constants.MAX_DOWNLOAD_ATTEMPTS
+                ),
+                # 90 seconds between attempts, API rate limit is 90req/60s
+                wait=tenacity.wait_fixed(90),
+            ):
+                with attempt:
+                    api = sentinelsat.SentinelAPI(
+                        credentials.SCIHUB_USERNAME,
+                        credentials.SCIHUB_PASSWORD
+                    )
+                    api.download_all(
+                        search_results,
+                        directory_path=download_dir,
+                        n_concurrent_dl=processes,
+                        checksum=True,
+                        max_attempts=max_attempts,
+                    )
+        except sentinelsat.exceptions.ServerError as e:
+            logger.error(
+                "Error downloading from Copernicus Open AccessHub. "
+                f"Message: {e}"
             )
-
-    def process_search_results(
-        self,
-        origin: Provider,
-        results: Any
-    ) -> List[str]:
-        ''' Process search results to a compatible format for SCIHUB
-
-        Parameters
-        ----------
-        origin : Provider
-            The provider of the search results
-        results : Any
-            The search results
-
-        Returns
-        -------
-        List[str]
-            The search results in a compatible format
-        '''
-
-        # Check if data is of common format first, as provider will not matter
-        if isinstance(results[0], CommonSearchResult):  # Try first in list
-            return [result.product_id for result in results]
-
-        if isinstance(origin, self.__class__):
-            return results
-
-        return []
 
     def translate_search_results(
         self,
@@ -191,12 +139,16 @@ class CopernicusOpenAccessHub(Provider):
 
         common_results = []
         for id, props in provider_search_results.items():
-
             # Get the satellite and processing level from reversed mapping of
             # the products dictionary
-            satellite, processing_level = dict(
+            reverse_mapping: Tuple[
+                 enums.Satellite,
+                 enums.ProcessingLevel
+            ] = dict(
                 map(reversed, self.products.items())
             )[props['producttype']]
+
+            satellite, processing_level = reverse_mapping
 
             common_results.append(
                 CommonSearchResult(

@@ -16,16 +16,13 @@ credentials = get_credentials()
 class AlaskanSateliteFacility(Provider):
     def download_many(
         self,
-        search_origin: Provider,
-        search_results: List[str],
+        search_results: List[core.models.CommonSearchResult],
         download_dir: str,
         processes: int = 6
     ) -> None:
 
         # Extract the file ids from the search results
-        search_file_ids = self.process_search_results(
-            search_origin, search_results
-        )
+        search_file_ids = [result.identifier for result in search_results]
 
         logger.info("Downloading from Alaskan Satellite Facility")
         logger.debug(f"Search file ids: {search_file_ids}")
@@ -58,42 +55,6 @@ class AlaskanSateliteFacility(Provider):
 
         # Download the granules using the ASF API library
         res.download(path=download_dir, session=session, processes=processes)
-
-    def process_search_results(
-        self,
-        origin: Provider,
-        results: Any
-    ) -> List[str]:
-        ''' Process search results to a compatible format for ASF
-
-        Define a mapping of search results from a given provider to another
-        provider. This is necessary because the search results from Copernicus
-        Open Access Hub, for example, are not compatible with ASF.
-
-        Parameters
-        ----------
-        origin : Provider
-            The provider of the search results
-        results : Any
-            The search results
-
-        Returns
-        -------
-        List[str]
-            The search results in a compatible format for ASF
-        '''
-
-        # Check if data is of common format first, as provider will not matter
-        if isinstance(results[0], core.models.CommonSearchResult):
-            return [result.identifier for result in results]
-
-        if isinstance(origin, CopernicusOpenAccessHub):
-            return [prop['identifier'] for id, prop in results.items()]
-
-        if isinstance(origin, self.__class__):
-            return results
-
-        return []
 
 
 asf: AlaskanSateliteFacility = AlaskanSateliteFacility(
