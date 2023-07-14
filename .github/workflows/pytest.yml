@@ -22,4 +22,6 @@ jobs:
       run: poetry install
 
     - name: Run pytest with coverage
+      env:
+        PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
       run: poetry run pytest --cov=earth_extractor --cov-report term-missing
