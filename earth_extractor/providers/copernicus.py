@@ -1,7 +1,7 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
-from earth_extractor.core.models import BBox, CommonSearchResult
-from typing import Any, List, TYPE_CHECKING, Dict, Tuple, Callable
+from earth_extractor.core.models import CommonSearchResult
+from typing import Any, List, TYPE_CHECKING, Dict, Tuple
 import sentinelsat
 import logging
 import datetime

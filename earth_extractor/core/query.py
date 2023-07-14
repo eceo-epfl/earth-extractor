@@ -166,8 +166,6 @@ def batch_query(
                 filter_field='cloud_cover_percentage'
             )
 
-
-
         # If the user wants to export the results, do so
         if export != cli_options.ExportMetadataOptions.DISABLED.value:
             # Convert the results to a GeoDataFrame

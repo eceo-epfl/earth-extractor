@@ -11,12 +11,14 @@ def roi_switzerland():
         latmin=45.81, lonmin=5.95, latmax=47.81, lonmax=10.5
     ).to_shapely()
 
+
 @pytest.fixture(scope="session")
 def resource_path_roi():
     ''' Return the path to the test ROI resources '''
 
     return os.path.join(
-        os.path.dirname(__file__),
+        os.getcwd(),
+        "tests",
         "resources",
         "roi"
     )
@@ -26,7 +28,8 @@ def resource_path_query():
     ''' Return the path to the test query resources '''
 
     return os.path.join(
-        os.path.dirname(__file__),
+        os.getcwd(),
+        "tests",
         "resources",
         "query"
     )
