@@ -1,0 +1,466 @@
+{
+    "type": "FeatureCollection",
+    "name": "test",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "f3efa874-ed47-48d6-9ebe-65e91459c603",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('f3efa874-ed47-48d6-9ebe-65e91459c603')/",
+          "identifier": "S2B_MSIL2A_20230524T102609_N0509_R108_T32TLS_20230524T133049",
+          "filename": "S2B_MSIL2A_20230524T102609_N0509_R108_T32TLS_20230524T133049.SAFE",
+          "time": "2023-05-24T10:26:09.024",
+          "cloud_cover_percentage": 85.778576,
+          "size": "957.16 MB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "24b81663-0906-4585-a819-cf12b62eae6a",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('24b81663-0906-4585-a819-cf12b62eae6a')/",
+          "identifier": "S2A_MSIL2A_20230519T102601_N0509_R108_T32TLS_20230519T180953",
+          "filename": "S2A_MSIL2A_20230519T102601_N0509_R108_T32TLS_20230519T180953.SAFE",
+          "time": "2023-05-19T10:26:01.024",
+          "cloud_cover_percentage": 78.835636,
+          "size": "982.59 MB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "f5d0a702-67f6-41d0-baa7-94278c15ae21",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('f5d0a702-67f6-41d0-baa7-94278c15ae21')/",
+          "identifier": "S2B_MSIL2A_20230514T102559_N0509_R108_T32TLS_20230514T133055",
+          "filename": "S2B_MSIL2A_20230514T102559_N0509_R108_T32TLS_20230514T133055.SAFE",
+          "time": "2023-05-14T10:25:59.024",
+          "cloud_cover_percentage": 84.744376,
+          "size": "963.77 MB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "a3d7b999-7467-479c-a4d7-59385c8418ad",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('a3d7b999-7467-479c-a4d7-59385c8418ad')/",
+          "identifier": "S2A_MSIL2A_20230509T102601_N0509_R108_T32TLS_20230509T164202",
+          "filename": "S2A_MSIL2A_20230509T102601_N0509_R108_T32TLS_20230509T164202.SAFE",
+          "time": "2023-05-09T10:26:01.024",
+          "cloud_cover_percentage": 96.775013,
+          "size": "705.74 MB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "4d1833a1-aff8-4c54-95a3-0b4c7b239e3f",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('4d1833a1-aff8-4c54-95a3-0b4c7b239e3f')/",
+          "identifier": "S2B_MSIL2A_20230504T102559_N0509_R108_T32TLS_20230504T133509",
+          "filename": "S2B_MSIL2A_20230504T102559_N0509_R108_T32TLS_20230504T133509.SAFE",
+          "time": "2023-05-04T10:25:59.025",
+          "cloud_cover_percentage": 6.542042,
+          "size": "1.18 GB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "d3d77520-50bc-4907-a29f-be08c0bd9bb2",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('d3d77520-50bc-4907-a29f-be08c0bd9bb2')/",
+          "identifier": "S2A_MSIL2A_20230429T102601_N0509_R108_T32TLS_20230429T163757",
+          "filename": "S2A_MSIL2A_20230429T102601_N0509_R108_T32TLS_20230429T163757.SAFE",
+          "time": "2023-04-29T10:26:01.024",
+          "cloud_cover_percentage": 95.57209,
+          "size": "841.05 MB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "de1d7ffd-325c-4b6a-85ce-636d1809834f",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('de1d7ffd-325c-4b6a-85ce-636d1809834f')/",
+          "identifier": "S2B_MSIL2A_20230424T102559_N0509_R108_T32TLS_20230424T133244",
+          "filename": "S2B_MSIL2A_20230424T102559_N0509_R108_T32TLS_20230424T133244.SAFE",
+          "time": "2023-04-24T10:25:59.024",
+          "cloud_cover_percentage": 73.323876,
+          "size": "1.01 GB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "a4e9dac3-b88a-48cd-ba23-8eec00b5d13a",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('a4e9dac3-b88a-48cd-ba23-8eec00b5d13a')/",
+          "identifier": "S2A_MSIL2A_20230330T102621_N0509_R108_T32TLS_20230330T164809",
+          "filename": "S2A_MSIL2A_20230330T102621_N0509_R108_T32TLS_20230330T164809.SAFE",
+          "time": "2023-03-30T10:26:21.024",
+          "cloud_cover_percentage": 99.973971,
+          "size": "723.34 MB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "ffde87b2-cd04-487e-8d28-0271936acb91",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('ffde87b2-cd04-487e-8d28-0271936acb91')/",
+          "identifier": "S2B_MSIL2A_20230325T102649_N0509_R108_T32TLS_20230325T133051",
+          "filename": "S2B_MSIL2A_20230325T102649_N0509_R108_T32TLS_20230325T133051.SAFE",
+          "time": "2023-03-25T10:26:49.025",
+          "cloud_cover_percentage": 99.453169,
+          "size": "789.56 MB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "type": "Feature",
+          "product_id": "ee185690-4648-4213-909a-6e4d91ea1622",
+          "link": "https://apihub.copernicus.eu/apihub/odata/v1/Products('ee185690-4648-4213-909a-6e4d91ea1622')/",
+          "identifier": "S2A_MSIL2A_20230320T102731_N0509_R108_T32TLS_20230320T165302",
+          "filename": "S2A_MSIL2A_20230320T102731_N0509_R108_T32TLS_20230320T165302.SAFE",
+          "time": "2023-03-20T10:27:31.024",
+          "cloud_cover_percentage": 52.223265,
+          "size": "1.07 GB",
+          "processing_level": "L2A",
+          "sensor": null,
+          "satellite": "SENTINEL2",
+          "properties": {}
+        },
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.420025,
+                  45.936419
+                ],
+                [
+                  7.835956,
+                  45.959623
+                ],
+                [
+                  7.81471,
+                  46.947574
+                ],
+                [
+                  6.37299,
+                  46.923561
+                ],
+                [
+                  6.420025,
+                  45.936419
+                ]
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  }
