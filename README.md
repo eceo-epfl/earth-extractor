@@ -1,4 +1,5 @@
 # Earth Extractor
+
 Earth Extractor simplifies the workflow of data acquisition from multiple
 satellite data providers. The library is designed to be used as a command line
 tool, but can also be used as a library.
@@ -18,6 +19,9 @@ filters than those that are available in the download provider. For example,
 the Copernicus Open Access Hub allows cloud coverage filters, but the data is
 better served by the Alaskan Satellite Facility which does not offer such
 filters.
+
+### Changelog
+Semantic version changes are tracked [here](./CHANGELOG.md).
 
 # Getting started
 ## Installation
@@ -75,6 +79,7 @@ poetry run earth-extractor batch \
     --start 2022-11-19 --end 2022-11-29 \
     --satellite SENTINEL1:L2
 ```
+
 
 
 # Technical specifications
