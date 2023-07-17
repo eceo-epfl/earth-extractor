@@ -34,3 +34,15 @@ class Satellite(Enum):
     SENTINEL1 = "SENTINEL1"
     SENTINEL2 = "SENTINEL2"
     SENTINEL3 = "SENTINEL3"
+    MODIS = "MODIS"
+
+
+class Filters(Enum):
+    ''' The available filters for the satellites
+
+    To understand the filtering capabilities for each sensor, for example
+    radar satellites do not have a cloud cover percentage, so manage those that
+    do have it.
+    '''
+
+    CLOUD_COVER = "CLOUD_COVER"

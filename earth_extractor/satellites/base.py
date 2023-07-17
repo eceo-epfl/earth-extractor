@@ -13,6 +13,7 @@ class Satellite:
         description: str,
         processing_levels: List[enums.ProcessingLevel],
         sensors: List[enums.Sensor],
+        filters: List[enums.Filters],
     ) -> None:
         ''' A satellite's data can be queried from one provider and downloaded
             from another, defining these allows the methods to be interchanged
@@ -26,6 +27,7 @@ class Satellite:
         self.description = description
         self.processing_levels = processing_levels
         self.sensors = sensors
+        self.filters = filters
 
         # Use the methods from the query and download providers
         self.query = functools.partial(
@@ -34,6 +36,16 @@ class Satellite:
         self.download_many = functools.partial(
             self._download_provider.download_many,
         )
+
+
+    @property
+    def has_cloud_cover(
+        self
+    ) -> bool:
+        ''' Whether the satellite has a cloud cover filter '''
+
+        return enums.Filters.CLOUD_COVER in self.filters
+
 
     def _validate_satellite_provider_compatiblity(
         self,

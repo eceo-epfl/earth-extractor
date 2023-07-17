@@ -145,12 +145,19 @@ def batch_query(
             f"Querying satellite Satellite: {sat}, Level: {level.value}"
         )
 
+        if cloud_cover < 100 and not sat.has_cloud_cover:
+            logger.warning(
+                f"Satellite {sat} does not support cloud cover filtering. "
+                "Ignoring the filter and continuing."
+            )
+        # If the satellite does not have a cloud_cover query parameter, set it
+        # to None
         res = sat.query(
             processing_level=level,
             roi=roi_obj,
             start_date=start,
             end_date=end,
-            cloud_cover=cloud_cover)
+            cloud_cover=cloud_cover if sat.has_cloud_cover else None)
 
         if interval_frequency is not None:
             # If interval frequency is set, then we need to query the results
