@@ -46,18 +46,6 @@ class Provider:
             f"({self.description})"
         )
 
-    def download_one(
-        self,
-        search_results: List[CommonSearchResult],
-        download_dir: str,
-        processes: int = 6
-    ) -> Any:
-
-        raise NotImplementedError(
-            f"Download method not implemented for Provider: {self.name} "
-            f"({self.description})"
-        )
-
     def download_many(
         self,
         search_results: List[CommonSearchResult],

@@ -152,24 +152,21 @@ def batch_query(
             end_date=end,
             cloud_cover=cloud_cover)
 
-        # Translate the results into an internal workable format
-        translated = sat._query_provider.translate_search_results(res)
-
         if interval_frequency is not None:
             # If interval frequency is set, then we need to query the results
             # by the frequency
-            translated = core.utils.download_by_frequency(
+            res = core.utils.download_by_frequency(
                 start_date=start,
                 end_date=end,
                 frequency=interval_frequency,
-                query_results=translated,
+                query_results=res,
                 filter_field='cloud_cover_percentage'
             )
 
         # If the user wants to export the results, do so
         if export != cli_options.ExportMetadataOptions.DISABLED.value:
             # Convert the results to a GeoDataFrame
-            gdf = convert_query_results_to_geodataframe(translated)
+            gdf = convert_query_results_to_geodataframe(res)
 
             if export == cli_options.ExportMetadataOptions.PIPE.value:
                 logger.info("Printing GeoJSON results to console")
@@ -186,7 +183,7 @@ def batch_query(
 
         # Append results to a list with associated satellite in order to use
         # its defined download provider
-        all_results.append((sat, translated))
+        all_results.append((sat, res))
 
     # Sum results from all query results
     total_qty = sum([len(res) for sat, res in all_results])

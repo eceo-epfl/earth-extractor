@@ -31,13 +31,8 @@ class Satellite:
         self.query = functools.partial(
             self._query_provider.query, satellite=self
         )
-        self.download_one = functools.partial(
-            self._download_provider.download_one,
-            search_origin=self._query_provider
-        )
         self.download_many = functools.partial(
             self._download_provider.download_many,
-            search_origin=self._query_provider
         )
 
     def _validate_satellite_provider_compatiblity(

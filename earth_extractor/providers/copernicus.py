@@ -81,7 +81,6 @@ class CopernicusOpenAccessHub(Provider):
 
         return products
 
-
     @tenacity.retry(
         retry=tenacity.retry_if_exception_type(
             sentinelsat.exceptions.ServerError

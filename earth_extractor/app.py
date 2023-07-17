@@ -10,9 +10,6 @@ from earth_extractor.satellites.base import Satellite
 from earth_extractor.satellites import enums
 
 
-# Setup the file logger
-core.logging.setup_file_logger(core.config.constants.DEFAULT_DOWNLOAD_DIR)
-
 # Define a console handler
 console_handler = logging.StreamHandler()
 console_handler.setLevel(core.config.constants.LOGLEVEL_CONSOLE)
@@ -141,7 +138,10 @@ def batch(
 ) -> None:
     ''' Batch download of satellite data with minimal user input '''
 
-    # Disable the logger if the user wants to pipe the output
+    # Setup the file logger
+    core.logging.setup_file_logger(output_dir)
+
+    # Disable the console logger if the user wants to pipe the output
     if export == cli_options.ExportMetadataOptions.PIPE.value:
         logging.getLogger().removeHandler(console_handler)
 
@@ -252,8 +252,10 @@ def batch_interval(
     2020-01-31, and the user specifies Sentinel-2 L1C and L2A, the command will
 
     '''
+    # Setup the file logger
+    core.logging.setup_file_logger(output_dir)
 
-    # Disable the logger if the user wants to pipe the output
+    # Disable the console logger if the user wants to pipe the output
     if export == cli_options.ExportMetadataOptions.PIPE.value:
         logging.getLogger().removeHandler(console_handler)
 
