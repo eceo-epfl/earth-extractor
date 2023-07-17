@@ -54,32 +54,41 @@ class CopernicusOpenAccessHub(Provider):
         logger.info(f"Satellite: {satellite.name} "
                     f"({self.satellites[satellite.name]}) "
                     f"{processing_level.value}")
-        product_type = self.products.get(
-            (satellite.name, processing_level), None
-        )
-        if not product_type:
-            raise ValueError(
-                f"Processing level {processing_level.value} not supported "
-                f"by Copernicus Open Access Hub for satellite "
-                f"{satellite.name}. Available processing levels: "
-                f"{self.products}"
-            )
 
-        try:
-            products = api.query(
-                roi.wkt,
-                producttype=product_type,
-                cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
-                date=(start_date, end_date),
-            )
-        except sentinelsat.UnauthorizedError as e:
-            logger.error(f"ASF authentication error: {e}")
-            return []
+        # Variable to combine all CommonSearchResult objects into one
+        all_products = []
 
-        # Translate the results to a common format
-        products = self.translate_search_results(products)
+        for product_type in self.products.get(
+            (satellite.name, processing_level), []
+        ):
+            # We do a list here because in some cases, a satellite may have
+            # multiple product types for a given processing level (sentinel 3
+            # has two product types for L2)
+            logger.info(f"Product type: {product_type}")
+            if not product_type:
+                raise ValueError(
+                    f"Processing level {processing_level.value} not supported "
+                    f"by Copernicus Open Access Hub for satellite "
+                    f"{satellite.name}. Available processing levels: "
+                    f"{self.products}"
+                )
 
-        return products
+            try:
+                products = api.query(
+                    roi.wkt,
+                    producttype=product_type,
+                    cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
+                    date=(start_date, end_date),
+                )
+                # Translate the results to a common format
+                products = self.translate_search_results(products)
+
+                all_products += products
+            except sentinelsat.UnauthorizedError as e:
+                logger.error(f"ASF authentication error: {e}")
+                return []
+
+        return all_products
 
     @tenacity.retry(
         retry=tenacity.retry_if_exception_type(
@@ -144,15 +153,8 @@ class CopernicusOpenAccessHub(Provider):
         common_results = []
         for id, props in provider_search_results.items():
             # Get the satellite and processing level from reversed mapping of
-            # the products dictionary
-            reverse_mapping: Tuple[
-                 enums.Satellite,
-                 enums.ProcessingLevel
-            ] = dict(
-                map(reversed, self.products.items())
-            )[props['producttype']]
-
-            satellite, processing_level = reverse_mapping
+            # the provider's "products" dictionary
+            sat, level = self._products_reversed[props['producttype']]
 
             common_results.append(
                 CommonSearchResult(
@@ -164,8 +166,8 @@ class CopernicusOpenAccessHub(Provider):
                     size=props.get("size"),
                     time=props.get("beginposition"),
                     cloud_cover_percentage=props.get("cloudcoverpercentage"),
-                    processing_level=processing_level,
-                    satellite=satellite,
+                    processing_level=level,
+                    satellite=sat,
                 )
             )
 
@@ -182,10 +184,11 @@ copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
         enums.Satellite.SENTINEL3: "Sentinel-3",
     },
     products={
-        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): "GRD",
-        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): "S2MSI1C",
-        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): "S2MSI2A",
-        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L1): "OL_1_EFR___",
-        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L2): "OL_2_LFR___",
+        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): ["GRD"],
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): ["S2MSI1C"],
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): ["S2MSI2A"],
+        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L1): ["OL_1_EFR___"],
+        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L2): ["OL_2_LFR___",
+                                                                "OL_2_WFR___"],
     }
 )

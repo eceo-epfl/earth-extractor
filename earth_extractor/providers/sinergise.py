@@ -86,8 +86,8 @@ sinergise: SinergiseSentinelHub = SinergiseSentinelHub(
     uri="https://www.sinergise.com",
     products={
         (enums.Satellite.SENTINEL2,
-         enums.ProcessingLevel.L1C): DataCollection.SENTINEL2_L1C,
+         enums.ProcessingLevel.L1C): [DataCollection.SENTINEL2_L1C],
         (enums.Satellite.SENTINEL2,
-         enums.ProcessingLevel.L2A): DataCollection.SENTINEL2_L2A,
+         enums.ProcessingLevel.L2A): [DataCollection.SENTINEL2_L2A],
     }
 )
