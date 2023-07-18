@@ -2344,6 +2344,20 @@ pytest = ">=2.6.4"
 watchdog = ">=0.6.0"
 
 [[package]]
+name = "python-cmr"
+version = "0.8.0"
+description = "Python wrapper to the NASA Common Metadata Repository (CMR) API."
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "python_cmr-0.8.0-py3-none-any.whl", hash = "sha256:2bcd3cf958b1ee9d8f817b76bc024c3e2dfadd51546ecb60dc7162eeb29d6432"},
+    {file = "python_cmr-0.8.0.tar.gz", hash = "sha256:813a3a8e22b14346d9bcfdb596ea54550178bce6d66a288f4b05b3ff71ffab27"},
+]
+
+[package.dependencies]
+requests = ">=2.26.0,<3.0.0"
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -3581,4 +3595,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "663925d5d240ea7883c98987d4a2033a056a45a5ef632a80c2f9ecfc4f430551"
+content-hash = "69b8fb39abab918c4dc43598939c77f9366ef839c8d3d799976f5e3f7532e0cf"

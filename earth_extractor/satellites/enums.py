@@ -26,6 +26,7 @@ class Sensor(str, Enum):
     OLCI = "OLCI"
     SLSTR = "SLSTR"
     SRAL = "SRAL"
+    MODIS = "MODIS"
 
 
 class Satellite(Enum):
@@ -34,7 +35,8 @@ class Satellite(Enum):
     SENTINEL1 = "SENTINEL1"
     SENTINEL2 = "SENTINEL2"
     SENTINEL3 = "SENTINEL3"
-    MODIS = "MODIS"
+    MODIS_TERRA = "MODIS_TERRA"
+    MODIS_AQUA = "MODIS_AQUA"
 
 
 class Filters(Enum):
