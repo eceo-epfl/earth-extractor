@@ -21,7 +21,7 @@ better served by the Alaskan Satellite Facility which does not offer such
 filters.
 
 ### Changelog
-Semantic version changes are tracked [here](./CHANGELOG.md).
+Semantic version changes are tracked in the [CHANGELOG](./CHANGELOG.md).
 
 # Getting started
 ## Installation

@@ -117,7 +117,7 @@ def batch(
         help="Output directory for the downloaded files."
     ),
     cloud_cover: int = typer.Option(
-        100, "--cloud-cover", help=" allowed cloud cover percentage."
+        100, "--cloud-cover", help="Maximum allowed cloud cover percentage."
     ),
     no_confirmation: bool = typer.Option(
         False, "--no-confirmation",
