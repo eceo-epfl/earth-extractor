@@ -77,8 +77,20 @@ def show_credential_list(
     console.print(table)
 
 
-def set_one_credential(key):
-    ''' Set a single credential key in the keyring '''
+def set_one_credential(
+    key,
+    hide_prompt=core.config.constants.HIDE_PASSWORD_PROMPT,
+) -> None:
+    ''' Set a single credential key in the keyring
+
+    Parameters
+    ----------
+    key : str
+        The key to set
+    hide_prompt : bool
+        If True, the prompt is hidden. If False, the prompt is shown.
+
+    '''
 
     if key not in get_credentials().__fields__:
         raise ValueError(f"Key '{key}' does not exist")
@@ -87,6 +99,7 @@ def set_one_credential(key):
     new_secret = typer.prompt(
         key,
         default='' if secret is None else secret,
+        hide_input=hide_prompt
     )
 
     if new_secret == '':
