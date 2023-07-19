@@ -75,9 +75,9 @@ Search for Sentinel-1 L2 data for Switzerland between the dates
 
 ```bash
 poetry run earth-extractor batch \
-    --roi 45.81 5.95 47.81 10.5 \
+    --roi 45.81,5.95,47.81,10.5 \
     --start 2022-11-19 --end 2022-11-29 \
-    --satellite SENTINEL1:L2
+    --satellite SENTINEL1:L1
 ```
 
 
