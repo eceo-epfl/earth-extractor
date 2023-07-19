@@ -175,6 +175,9 @@ def batch(
                 search_results=res,
                 download_dir=output_dir,
             )
+    logger.info(
+        f"Download complete. Your files are in {os.path.abspath(output_dir)}"
+    )
 
 
 @app.command()
@@ -289,6 +292,9 @@ def batch_interval(
                 search_results=res,
                 download_dir=output_dir,
             )
+    logger.info(
+        f"Download complete. Your files are in {os.path.abspath(output_dir)}"
+    )
 
 @app.command()
 def credentials(
