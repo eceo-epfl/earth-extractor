@@ -1,17 +1,21 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
-from earth_extractor.core.models import ROI
-from typing import Any, List, TYPE_CHECKING
+from earth_extractor.core.models import CommonSearchResult
+from typing import Any, List, TYPE_CHECKING, Dict, Tuple
 import sentinelsat
 import logging
 import datetime
+import shapely
 from earth_extractor.satellites import enums
 from earth_extractor import core
+import tenacity
+
 
 if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
 
 logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 credentials = get_credentials()
 
@@ -21,11 +25,11 @@ class CopernicusOpenAccessHub(Provider):
         self,
         satellite: "Satellite",
         processing_level: enums.ProcessingLevel,
-        roi: ROI,
+        roi: shapely.geometry.base.BaseGeometry,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
-    ) -> List[Any]:
+    ) -> List[CommonSearchResult]:
         ''' Query the Copernicus Open Access Hub for data '''
 
         logger.info("Querying Copernicus Open Access Hub")
@@ -48,46 +52,70 @@ class CopernicusOpenAccessHub(Provider):
                 f"Open Access Hub. Available satellites: {self.satellites}"
             )
         logger.info(f"Satellite: {satellite.name} "
-                    f"({self.satellites[satellite.name]}"
+                    f"({self.satellites[satellite.name]}) "
                     f"{processing_level.value}")
-        product_type = self.products.get(
-            (satellite.name, processing_level), None
-        )
-        if not product_type:
-            raise ValueError(
-                f"Processing level {processing_level.value} not supported "
-                f"by Copernicus Open Access Hub for satellite "
-                f"{satellite.name}. Available processing levels: "
-                f"{self.products}"
-            )
 
-        try:
-            products = api.query(
-                roi.to_wkt(),
-                producttype=product_type,
-                cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
-                date=(start_date, end_date),
-            )
-        except sentinelsat.UnauthorizedError as e:
-            logger.error(f"ASF authentication error: {e}")
-            return []
+        # Variable to combine all CommonSearchResult objects into one
+        all_products = []
 
-        return products
+        for product_type in self.products.get(
+            (satellite.name, processing_level), []
+        ):
+            # We do a list here because in some cases, a satellite may have
+            # multiple product types for a given processing level (sentinel 3
+            # has two product types for L2)
+            logger.info(f"Product type: {product_type}")
+            if not product_type:
+                raise ValueError(
+                    f"Processing level {processing_level.value} not supported "
+                    f"by Copernicus Open Access Hub for satellite "
+                    f"{satellite.name}. Available processing levels: "
+                    f"{self.products}"
+                )
 
+            try:
+                products = api.query(
+                    roi.wkt,
+                    producttype=product_type,
+                    cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
+                    date=(start_date, end_date),
+                )
+                # Translate the results to a common format
+                products = self.translate_search_results(products)
+
+                all_products += products
+            except sentinelsat.UnauthorizedError as e:
+                logger.error(f"ASF authentication error: {e}")
+                return []
+
+        return all_products
+
+    @tenacity.retry(
+        retry=tenacity.retry_if_exception_type(
+            sentinelsat.exceptions.ServerError
+        ),
+        stop=tenacity.stop_after_attempt(
+            core.config.constants.MAX_DOWNLOAD_ATTEMPTS
+        ),
+        wait=tenacity.wait_fixed(90),  # API rate limit is 90req/60s
+        reraise=True
+    )
     def download_many(
         self,
-        search_origin: Provider,
-        search_results: List[str],
+        search_results: List[CommonSearchResult],
         download_dir: str,
         processes: int = core.config.constants.PARRALLEL_PROCESSES_DEFAULT,
+        *,
         max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
         ''' Using the search results from query(), download the data
 
+        Function will retry if the API returns a 500 error. This can happen
+        when the API is under heavy load or when the API rate limit is exceeded
+        which is defined at time of writing to be 90 requests per minute.
+
         Parameters
         ----------
-        search_origin : Provider
-            The provider of the search results
         search_results : List[str]
             The search results
         download_dir : str
@@ -99,49 +127,51 @@ class CopernicusOpenAccessHub(Provider):
         -------
         None
         '''
+        logger.addHandler(sentinelsat.SentinelAPI)
 
-        if isinstance(search_origin, CopernicusOpenAccessHub):
-            api = sentinelsat.SentinelAPI(
-                credentials.SCIHUB_USERNAME,
-                credentials.SCIHUB_PASSWORD
-            )
-            api.download_all(
-                search_results,
-                directory_path=download_dir,
-                n_concurrent_dl=processes,
-                checksum=True,
-                max_attempts=max_attempts,
-            )
-        else:
-            raise ValueError(
-                f"Download from {search_origin.name} to "
-                f"{self.name} not supported."
-            )
+        # Convert the search results to a list of product ids
+        search_results = [result.product_id for result in search_results]
 
-    def process_search_results(
+        api = sentinelsat.SentinelAPI(
+            credentials.SCIHUB_USERNAME,
+            credentials.SCIHUB_PASSWORD
+        )
+        api.download_all(
+            search_results,
+            directory_path=download_dir,
+            n_concurrent_dl=processes,
+            checksum=True,
+            max_attempts=max_attempts,
+        )
+
+    def translate_search_results(
         self,
-        origin: Provider,
-        results: Any
-    ) -> List[str]:
-        ''' Process search results to a compatible format for SCIHUB
+        provider_search_results: Dict[Any, Any]
+    ) -> List[CommonSearchResult]:
+        ''' Translate search results from a provider to a common format '''
 
-        Parameters
-        ----------
-        origin : Provider
-            The provider of the search results
-        results : Any
-            The search results
+        common_results = []
+        for id, props in provider_search_results.items():
+            # Get the satellite and processing level from reversed mapping of
+            # the provider's "products" dictionary
+            sat, level = self._products_reversed[props['producttype']]
 
-        Returns
-        -------
-        List[str]
-            The search results in a compatible format
-        '''
+            common_results.append(
+                CommonSearchResult(
+                    geometry=props.get("footprint"),
+                    product_id=id,
+                    link=props.get("link_alternative"),
+                    identifier=props.get("identifier"),
+                    filename=props.get("filename"),
+                    size=props.get("size"),
+                    time=props.get("beginposition"),
+                    cloud_cover_percentage=props.get("cloudcoverpercentage"),
+                    processing_level=level,
+                    satellite=sat,
+                )
+            )
 
-        if isinstance(origin, self.__class__):
-            return results
-
-        return []
+        return common_results
 
 
 copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
@@ -154,11 +184,11 @@ copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
         enums.Satellite.SENTINEL3: "Sentinel-3",
     },
     products={
-        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): "GRD",
-        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L2): "SLC",
-        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): "S2MSI1C",
-        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): "S2MSI2A",
-        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L1): "OL_1_EFR___",
-        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L2): "OL_2_LFR___",
+        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): ["GRD"],
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): ["S2MSI1C"],
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): ["S2MSI2A"],
+        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L1): ["OL_1_EFR___"],
+        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L2): ["OL_2_LFR___",
+                                                                "OL_2_WFR___"],
     }
 )

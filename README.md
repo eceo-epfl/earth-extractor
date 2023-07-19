@@ -1,4 +1,5 @@
 # Earth Extractor
+
 Earth Extractor simplifies the workflow of data acquisition from multiple
 satellite data providers. The library is designed to be used as a command line
 tool, but can also be used as a library.
@@ -18,6 +19,9 @@ filters than those that are available in the download provider. For example,
 the Copernicus Open Access Hub allows cloud coverage filters, but the data is
 better served by the Alaskan Satellite Facility which does not offer such
 filters.
+
+### Changelog
+Semantic version changes are tracked in the [CHANGELOG](./CHANGELOG.md).
 
 # Getting started
 ## Installation
@@ -56,6 +60,8 @@ Credentials can be obtained from the respective providers:
 
 * [Alaskan Satellite Facility](https://urs.earthdata.nasa.gov/users/new)
     * `NASA_USERNAME` and `NASA_PASSWORD`
+    * Make sure to accept the Alaskan Satellite Facility EULA after registering
+    in [NASA Earth Data: Accept New EULAs](https://urs.earthdata.nasa.gov/users/ejayt/unaccepted_eulas)
 
 * [Sinergise](https://www.sentinel-hub.com)
     * `SINERGISE_CLIENT_ID` and `SINERGISE_CLIENT_SECRET`
@@ -70,11 +76,12 @@ Search for Sentinel-1 L2 data for Switzerland between the dates
 2022-11-19 and 2022-11-29.
 
 ```bash
-poetry run earth-extractor download \
-    --roi 45.81 5.95 47.81 10.5 \
+poetry run earth-extractor batch \
+    --roi 45.81,5.95,47.81,10.5 \
     --start 2022-11-19 --end 2022-11-29 \
-    --satellite SENTINEL1:L2
+    --satellite SENTINEL1:L1
 ```
+
 
 
 # Technical specifications

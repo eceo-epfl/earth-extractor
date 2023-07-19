@@ -5,6 +5,11 @@ import os
 
 def setup_file_logger(output_folder):
     # Add a file logger
+
+    # Create folder if it doesn't exist
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
     logfile_handler = logging.FileHandler(
         os.path.join(output_folder, core.constants.LOGFILE_NAME)
     )

@@ -3,7 +3,10 @@ from earth_extractor.satellites import enums
 from earth_extractor.providers import copernicus_scihub, asf
 
 
-''' Define the Sentinel satellites '''
+''' Define the Sentinel satellites
+
+    The satellites are defined as instances of the Satellite class.
+'''
 
 sentinel_1: Satellite = Satellite(
     query_provider=copernicus_scihub,
@@ -11,7 +14,8 @@ sentinel_1: Satellite = Satellite(
     name=enums.Satellite.SENTINEL1,
     description="Sentinel 1",
     processing_levels=[enums.ProcessingLevel.L1, enums.ProcessingLevel.L2],
-    sensors=[enums.Sensor.C_SAR]
+    sensors=[enums.Sensor.C_SAR],
+    filters=[]
 )
 
 sentinel_2: Satellite = Satellite(
@@ -20,7 +24,8 @@ sentinel_2: Satellite = Satellite(
     name=enums.Satellite.SENTINEL2,
     description="Sentinel 2",
     processing_levels=[enums.ProcessingLevel.L1C, enums.ProcessingLevel.L2A],
-    sensors=[enums.Sensor.MSI]
+    sensors=[enums.Sensor.MSI],
+    filters=[enums.Filters.CLOUD_COVER]
 )
 
 sentinel_3: Satellite = Satellite(
@@ -29,5 +34,6 @@ sentinel_3: Satellite = Satellite(
     name=enums.Satellite.SENTINEL3,
     description="Sentinel 3",
     processing_levels=[enums.ProcessingLevel.L1, enums.ProcessingLevel.L2],
-    sensors=[enums.Sensor.OLCI, enums.Sensor.SLSTR, enums.Sensor.SRAL]
+    sensors=[enums.Sensor.OLCI, enums.Sensor.SLSTR, enums.Sensor.SRAL],
+    filters=[enums.Filters.CLOUD_COVER]
 )

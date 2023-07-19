@@ -161,3 +161,8 @@ cython_debug/
 .vscode/
 *.code-workspace
 *.ipynb
+
+data/
+*.geojson
+
+coverage.lcov

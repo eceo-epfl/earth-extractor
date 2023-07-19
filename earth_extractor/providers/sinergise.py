@@ -1,7 +1,6 @@
 
 from earth_extractor.providers import Provider
-from earth_extractor.core.credentials import get_credentials
-from earth_extractor.core.models import ROI
+from earth_extractor import core
 from typing import Any, List, TYPE_CHECKING
 from sentinelhub import DataCollection, SHConfig, SentinelHubCatalog
 import logging
@@ -12,8 +11,9 @@ if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
 
 logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
-credentials = get_credentials()
+credentials = core.credentials.get_credentials()
 
 
 class SinergiseSentinelHub(Provider):
@@ -21,7 +21,7 @@ class SinergiseSentinelHub(Provider):
         self,
         satellite: "Satellite",
         processing_level: enums.ProcessingLevel,
-        roi: ROI,
+        roi: core.models.BBox,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
@@ -86,8 +86,8 @@ sinergise: SinergiseSentinelHub = SinergiseSentinelHub(
     uri="https://www.sinergise.com",
     products={
         (enums.Satellite.SENTINEL2,
-         enums.ProcessingLevel.L1C): DataCollection.SENTINEL2_L1C,
+         enums.ProcessingLevel.L1C): [DataCollection.SENTINEL2_L1C],
         (enums.Satellite.SENTINEL2,
-         enums.ProcessingLevel.L2A): DataCollection.SENTINEL2_L2A,
+         enums.ProcessingLevel.L2A): [DataCollection.SENTINEL2_L2A],
     }
 )
