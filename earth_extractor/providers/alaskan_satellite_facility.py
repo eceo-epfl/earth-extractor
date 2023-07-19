@@ -39,22 +39,33 @@ class AlaskanSateliteFacility(Provider):
                 username=credentials.NASA_USERNAME,
                 password=credentials.NASA_PASSWORD
             )
+
+            # Search for the granules
+            res = asf_search.granule_search(search_file_ids)
+            logger.info(
+                f"Found {len(res)} files to download (may include "
+                "metadata files)"
+            )
+
+            if len(res) == 0:
+                logger.info("No files to download, skipping")
+                return  # nothing to download
+
+            # Download the granules using the ASF API library
+            res.download(
+                path=download_dir,
+                session=session,
+                processes=processes
+            )
         except asf_search.ASFAuthenticationError as e:
-            logger.error(f"ASF authentication error: {e}")
+            logger.error(
+                "ASF authentication error. Check your credentials and make "
+                "sure that you have accepted the ASF EULA in your NASA "
+                "profile at "
+                "https://urs.earthdata.nasa.gov/users/ejayt/unaccepted_eulas"
+            )
+            logger.debug(f"ASF Authentication error: {e}")
             return
-
-        # Search for the granules
-        res = asf_search.granule_search(search_file_ids)
-        logger.info(
-            f"Found {len(res)} files to download (may include metadata files)"
-        )
-
-        if len(res) == 0:
-            logger.info("No files to download, skipping")
-            return  # nothing to download
-
-        # Download the granules using the ASF API library
-        res.download(path=download_dir, session=session, processes=processes)
 
 
 asf: AlaskanSateliteFacility = AlaskanSateliteFacility(

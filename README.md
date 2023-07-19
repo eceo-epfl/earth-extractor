@@ -60,6 +60,8 @@ Credentials can be obtained from the respective providers:
 
 * [Alaskan Satellite Facility](https://urs.earthdata.nasa.gov/users/new)
     * `NASA_USERNAME` and `NASA_PASSWORD`
+    * Make sure to accept the Alaskan Satellite Facility EULA after registering
+    in [NASA Earth Data: Accept New EULAs](https://urs.earthdata.nasa.gov/users/ejayt/unaccepted_eulas)
 
 * [Sinergise](https://www.sentinel-hub.com)
     * `SINERGISE_CLIENT_ID` and `SINERGISE_CLIENT_SECRET`
