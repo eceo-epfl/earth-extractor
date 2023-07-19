@@ -1,7 +1,7 @@
-from earth_extractor.providers import Provider, CopernicusOpenAccessHub
+from earth_extractor.providers import Provider
 from earth_extractor.satellites import enums
 import logging
-from typing import List, Any
+from typing import List
 import asf_search
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor import core

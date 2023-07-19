@@ -1,6 +1,4 @@
 from earth_extractor.providers.copernicus import copernicus_scihub
-from earth_extractor.core.models import BBox
-from datetime import datetime
 import pytest
 import pytest_mock
 import sentinelsat
@@ -29,9 +27,9 @@ def test_wait_on_download_exception(
     # Overwrite tenacity's retry function to only retry once and not wait
     copernicus_scihub.download_many.retry.wait = tenacity.wait_none()
 
-    # Make sure
+    # Make sure the exception is raised
     with pytest.raises(sentinelsat.exceptions.ServerError):
-        res = copernicus_scihub.download_many(
+        copernicus_scihub.download_many(
             search_results=results_common_format,
             download_dir='testdata',
         )
