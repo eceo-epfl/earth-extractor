@@ -2,7 +2,6 @@ from earth_extractor.providers import Provider
 import logging
 from earth_extractor.satellites import enums
 from earth_extractor import core
-from cmr import CollectionQuery, GranuleQuery, ToolQuery, ServiceQuery, VariableQuery
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
@@ -13,6 +12,7 @@ import logging
 import os
 import datetime
 import tqdm
+
 # import shapely
 import shapely.geometry
 from shapely.geometry import Polygon
@@ -44,7 +44,7 @@ class NASACommonMetadataRepository(Provider):
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
     ) -> List[CommonSearchResult]:
-        ''' Query the Copernicus Open Access Hub for data '''
+        """Query the Copernicus Open Access Hub for data"""
 
         catalog = Client.open(f"{self.uri}/stac/LAADS")
 
@@ -54,29 +54,28 @@ class NASACommonMetadataRepository(Provider):
             intersects=roi,
             datetime=[start_date.isoformat(), end_date.isoformat()],
         )
-        records = search.item_collection_as_dict()['features']
+        records = search.item_collection_as_dict()["features"]
         logger.info(f"NASA CMR: Found {len(records)} files to download")
 
         return self.translate_search_results(records)
 
     def translate_search_results(
-        self,
-        provider_search_results: Any
+        self, provider_search_results: Any
     ) -> List[CommonSearchResult]:
-        ''' Translate search results from a provider to a common format '''
+        """Translate search results from a provider to a common format"""
 
         common_results = []
         for record in provider_search_results:
             # Get the satellite and processing level from reversed mapping of
             # the provider's "products" dictionary
-            sat, level = self._products_reversed[record['collection']]
+            sat, level = self._products_reversed[record["collection"]]
 
             common_results.append(
                 CommonSearchResult(
-                    product_id=record['id'],
-                    time=record['properties']['datetime'],
-                    geometry=Polygon(record['geometry']['coordinates'][0]),
-                    url=record['assets']['data']['href'],
+                    product_id=record["id"],
+                    time=record["properties"]["datetime"],
+                    geometry=Polygon(record["geometry"]["coordinates"][0]),
+                    url=record["assets"]["data"]["href"],
                     processing_level=level,
                     satellite=sat,
                 )
@@ -102,7 +101,7 @@ class NASACommonMetadataRepository(Provider):
         *,
         max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
-        ''' Using the search results from query(), download the data
+        """Using the search results from query(), download the data
 
         Parameters
         ----------
@@ -116,13 +115,15 @@ class NASACommonMetadataRepository(Provider):
         Returns
         -------
         None
-        '''
+        """
 
         # Convert the search results to a list of URIs
         urls: list[AnyUrl] = [x.url for x in search_results if x.url]
 
         # auth_header = {"Authorization": f"Bearer {credentials.NASA_TOKEN}"}
-        auth_header = {"Authorization": f"Basic {credentials.NASA_USERNAME}:{credentials.NASA_PASSWORD}"}
+        auth_header = {
+            "Authorization": f"Basic {credentials.NASA_USERNAME}:{credentials.NASA_PASSWORD}"
+        }
         print(auth_header)
         # Get total size
         # total = 0
@@ -138,12 +139,15 @@ class NASACommonMetadataRepository(Provider):
             if resp.status == 200:
                 try:
                     output_path = os.path.join(
-                        download_dir, url.split('/')[-1],
+                        download_dir,
+                        url.split("/")[-1],
                     )
-                    with open(output_path, 'wb') as dest:
+                    with open(output_path, "wb") as dest:
                         with tqdm.tqdm(
-                            desc=url, unit='iB',
-                            unit_scale=True, unit_divisor=1024
+                            desc=url,
+                            unit="iB",
+                            unit_scale=True,
+                            unit_divisor=1024,
                         ) as bar:
                             while True:
                                 data = resp.read(4096)
@@ -196,19 +200,26 @@ class NASACommonMetadataRepository(Provider):
     #     return url
 
 
-
 nasa_cmr: NASACommonMetadataRepository = NASACommonMetadataRepository(
     name="CMR",
     description="NASA Common Metadata Repository",
-    satellites={enums.Satellite.MODIS_TERRA: "",
-                enums.Satellite.MODIS_AQUA: ""},  # Redundant?
+    satellites={
+        enums.Satellite.MODIS_TERRA: "",
+        enums.Satellite.MODIS_AQUA: "",
+    },  # Redundant?
     products={
         (enums.Satellite.MODIS_TERRA, enums.ProcessingLevel.L1B): [
-            "MOD02QKM.v6.1", "MOD02HKM.v6.1", "MOD021KM.v6.1",  "MOD03.v6.1",
+            "MOD02QKM.v6.1",
+            "MOD02HKM.v6.1",
+            "MOD021KM.v6.1",
+            "MOD03.v6.1",
         ],
         (enums.Satellite.MODIS_AQUA, enums.ProcessingLevel.L1B): [
-            "MYD02QKM.v6.1", "MYD02HKM.v6.1", "MYD021KM.v6.1", "MYD03.v6.1",
-        ]
+            "MYD02QKM.v6.1",
+            "MYD02HKM.v6.1",
+            "MYD021KM.v6.1",
+            "MYD03.v6.1",
+        ],
     },
     uri="https://cmr.earthdata.nasa.gov",
 )
