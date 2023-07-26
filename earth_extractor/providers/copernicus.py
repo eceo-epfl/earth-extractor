@@ -30,13 +30,12 @@ class CopernicusOpenAccessHub(Provider):
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
     ) -> List[Dict[Any, Any]]:
-        ''' Query the Copernicus Open Access Hub for data '''
+        """Query the Copernicus Open Access Hub for data"""
 
-        logger.info("Querying Copernicus Open Access Hub")
+        # logger.info("Querying Copernicus Open Access Hub")
         try:
             api = sentinelsat.SentinelAPI(
-                credentials.SCIHUB_USERNAME,
-                credentials.SCIHUB_PASSWORD
+                credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
             )
         except sentinelsat.UnauthorizedError as e:
             logger.error(f"ASF authentication error: {e}")
@@ -51,9 +50,9 @@ class CopernicusOpenAccessHub(Provider):
                 f"Satellite {satellite.name} not supported by Copernicus "
                 f"Open Access Hub. Available satellites: {self.satellites}"
             )
-        logger.info(f"Satellite: {satellite.name} "
-                    f"({self.satellites[satellite.name]}) "
-                    f"{processing_level.value}")
+        # logger.info(f"Satellite: {satellite.name} "
+        #             f"({self.satellites[satellite.name]}) "
+        #             f"{processing_level.value}")
 
         # Variable to combine all CommonSearchResult objects into one
         all_products = []
@@ -77,7 +76,9 @@ class CopernicusOpenAccessHub(Provider):
                 products = api.query(
                     roi.wkt,
                     producttype=product_type,
-                    cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
+                    cloudcoverpercentage=(0, cloud_cover)
+                    if cloud_cover
+                    else None,
                     date=(start_date, end_date),
                 )
                 # Translate the results to a common format
@@ -98,7 +99,7 @@ class CopernicusOpenAccessHub(Provider):
             core.config.constants.MAX_DOWNLOAD_ATTEMPTS
         ),
         wait=tenacity.wait_fixed(90),  # API rate limit is 90req/60s
-        reraise=True
+        reraise=True,
     )
     def download_many(
         self,
@@ -108,7 +109,7 @@ class CopernicusOpenAccessHub(Provider):
         *,
         max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
-        ''' Using the search results from query(), download the data
+        """Using the search results from query(), download the data
 
         Function will retry if the API returns a 500 error. This can happen
         when the API is under heavy load or when the API rate limit is exceeded
@@ -126,15 +127,14 @@ class CopernicusOpenAccessHub(Provider):
         Returns
         -------
         None
-        '''
-        logger.addHandler(sentinelsat.SentinelAPI)
+        """
+        logger.addHandler(sentinelsat.SentinelAPI.logger)
 
         # Convert the search results to a list of product ids
         search_results = [result.product_id for result in search_results]
 
         api = sentinelsat.SentinelAPI(
-            credentials.SCIHUB_USERNAME,
-            credentials.SCIHUB_PASSWORD
+            credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
         )
         api.download_all(
             search_results,
@@ -145,16 +145,15 @@ class CopernicusOpenAccessHub(Provider):
         )
 
     def translate_search_results(
-        self,
-        provider_search_results: Dict[Any, Any]
+        self, provider_search_results: Dict[Any, Any]
     ) -> List[CommonSearchResult]:
-        ''' Translate search results from a provider to a common format '''
+        """Translate search results from a provider to a common format"""
 
         common_results = []
         for id, props in provider_search_results.items():
             # Get the satellite and processing level from reversed mapping of
             # the provider's "products" dictionary
-            sat, level = self._products_reversed[props['producttype']]
+            sat, level = self._products_reversed[props["producttype"]]
 
             common_results.append(
                 CommonSearchResult(
@@ -188,7 +187,9 @@ copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
         (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): ["S2MSI1C"],
         (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): ["S2MSI2A"],
         (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L1): ["OL_1_EFR___"],
-        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L2): ["OL_2_LFR___",
-                                                                "OL_2_WFR___"],
-    }
+        (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L2): [
+            "OL_2_LFR___",
+            "OL_2_WFR___",
+        ],
+    },
 )

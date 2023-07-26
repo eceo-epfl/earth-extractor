@@ -1,10 +1,12 @@
-from typing import Tuple, List
+from typing import Tuple, List, Dict, Any
 from earth_extractor import core
 import logging
 from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite
 from earth_extractor.cli_options import (
-    Satellites, TemporalFrequency, SatelliteChoices
+    Satellites,
+    TemporalFrequency,
+    SatelliteChoices,
 )
 import shapely
 from shapely.geometry import GeometryCollection
@@ -20,9 +22,9 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
 def pair_satellite_with_level(
-    choice: SatelliteChoices
+    choice: SatelliteChoices,
 ) -> Tuple[Satellite, enums.ProcessingLevel]:
-    ''' Splits the input satellite and level choice from the command line
+    """Splits the input satellite and level choice from the command line
 
         Expects a `<Satellite>:<ProcessingLevel>` string.
 
@@ -35,7 +37,7 @@ def pair_satellite_with_level(
     -------
     Tuple[Satellite, ProcessingLevel]
         A tuple containing the satellite and level choice
-    '''
+    """
 
     satellite, processing_level = choice.split(":")
 
@@ -69,10 +71,8 @@ def pair_satellite_with_level(
     return (satellite_choice, level_choice)
 
 
-def roi_from_geojson(
-    geojson: str
-) -> GeometryCollection:
-    ''' Extracts the ROI from a GeoJSON file
+def roi_from_geojson(geojson: str) -> GeometryCollection:
+    """Extracts the ROI from a GeoJSON file
 
     Parameters
     ----------
@@ -83,7 +83,7 @@ def roi_from_geojson(
     -------
     str
         The boundary as a string
-    '''
+    """
 
     with open(geojson, "r") as in_file:
         geojson_data = in_file.read()
@@ -93,14 +93,14 @@ def roi_from_geojson(
         geometry = geometry.geoms[0]
         logger.warning(
             "GeoJSON is a collection, only considering first element: "
-            f"{geometry}")
-
+            f"{geometry}"
+        )
 
     return geometry
 
 
 def is_float(string):
-    ''' Checks if a string is a float '''
+    """Checks if a string is a float"""
     try:
         float(string)
         return True
@@ -115,7 +115,7 @@ def buffer_in_metres(
     crs_output: int = 4326,
     crs_buffer: int = 3857,
 ) -> GeometryCollection:
-    ''' Adds a buffer to geometry in metres
+    """Adds a buffer to geometry in metres
 
     Parameters
     ----------
@@ -136,7 +136,7 @@ def buffer_in_metres(
     -------
     GeometryCollection
         The buffered geometry
-    '''
+    """
 
     logger.info(f"Applying buffer of {buffer_metres} metres to ROI")
     # Define pyproj objects for the input, buffer and output CRS
@@ -168,35 +168,29 @@ def parse_roi(
     roi: str,
     buffer: float,
 ) -> GeometryCollection:
-    ''' Parses the ROI input from the command line '''
+    """Parses the ROI input from the command line"""
 
     if "<" in roi or ">" in roi:
         # In the case the user explicitly inputs < or > as per the help msg
         raise ValueError("Do not include the '<' or '>' in the ROI.")
 
     # Check if the input is a BBox, Point or a path to a GeoJSON file
-    if (  # BBox
-        (len(roi.split(',')) == 4)
-        and all([core.utils.is_float(i) for i in roi.split(',')])
+    if (len(roi.split(",")) == 4) and all(  # BBox
+        [core.utils.is_float(i) for i in roi.split(",")]
     ):
         # If str splits into 4 float compatible values, consider it a BBox
         roi_obj = core.models.BBox.from_string(roi).to_shapely()
-    elif (  # Point
-        (len(roi.split(',')) == 2)
-        and all([core.utils.is_float(i) for i in roi.split(',')])
+    elif (len(roi.split(",")) == 2) and all(  # Point
+        [core.utils.is_float(i) for i in roi.split(",")]
     ):
         if buffer == 0:
-            raise ValueError(
-                "Buffer must be greater than 0 for a point ROI."
-            )
+            raise ValueError("Buffer must be greater than 0 for a point ROI.")
         roi_obj = core.models.Point.from_string(roi).to_shapely()
     else:
         # Otherwise, consider it a path to a GeoJSON file
         roi_obj = roi_from_geojson(roi)
-        if roi_obj.geom_type == 'Point' and buffer == 0:
-            raise ValueError(
-                "Buffer must be greater than 0 for a point ROI."
-            )
+        if roi_obj.geom_type == "Point" and buffer == 0:
+            raise ValueError("Buffer must be greater than 0 for a point ROI.")
 
     logger.debug(f"Input ROI: {roi_obj}")
 
@@ -211,44 +205,44 @@ def download_by_frequency(
     start_date: datetime.datetime,
     end_date: datetime.datetime,
     frequency: TemporalFrequency,
-    query_results: List[core.models.CommonSearchResult],
-    filter_field: str = 'cloud_cover_percentage',
+    query_results_dict: List[core.models.CommonSearchResult],
+    filter_field: str = "cloud_cover_percentage",
 ) -> List[core.models.CommonSearchResult]:
-    ''' With the given start and end dates and a frequency, choose the
-        satellite image with the best cloud_cover percentage and download it.
-        If there are multiple images with the same cloud_cover percentage,
-        choose the one with the least cloud_cover percentage.
+    """With the given start and end dates and a frequency, choose the
+    satellite image with the best cloud_cover percentage and download it.
+    If there are multiple images with the same cloud_cover percentage,
+    choose the one with the least cloud_cover percentage.
 
-        If there are multiple minimum values (for example if there are two or
-        more images with the same cloud_cover percentage of 0), the latest
-        image in the frequency period is chosen (this behaviour is defined by
-        the pandas Grouper function).
+    If there are multiple minimum values (for example if there are two or
+    more images with the same cloud_cover percentage of 0), the latest
+    image in the frequency period is chosen (this behaviour is defined by
+    the pandas Grouper function).
 
-        Parameters
-        ----------
-        start_date : datetime.datetime
-            The start date of the search
-        end_date : datetime.datetime
-            The end date of the search
-        frequency : TemporalFrequency
-            The frequency of the search according to the enum
-        query_results : List[core.models.CommonSearchResult]
-            The query results, in the internal common format
-        filter_field : str, optional
-            The field to filter by, by default 'cloud_cover_percentage'
+    Parameters
+    ----------
+    start_date : datetime.datetime
+        The start date of the search
+    end_date : datetime.datetime
+        The end date of the search
+    frequency : TemporalFrequency
+        The frequency of the search according to the enum
+    query_results : List[core.models.CommonSearchResult]
+        The query results, in the internal common format
+    filter_field : str, optional
+        The field to filter by, by default 'cloud_cover_percentage'
 
-        Returns
-        -------
-        List[core.models.CommonSearchResult]
-            The filtered query results
-    '''
+    Returns
+    -------
+    List[core.models.CommonSearchResult]
+        The filtered query results
+    """
 
     # Convert the query results to a list of dicts
-    query_results = [asdict(x) for x in query_results]
+    query_results_dict = [asdict(x) for x in query_results_dict]
 
     # If filter_field is not in the query results, raise an error
-    cleaned_query_results = []
-    for result in query_results:
+    cleaned_query_results: Dict[Any, Any] = []
+    for result in query_results_dict:
         if result[filter_field] is None:
             logger.warning(
                 f"Filter field {filter_field} not in query result "
@@ -267,7 +261,7 @@ def download_by_frequency(
 
     df = pd.DataFrame.from_dict(cleaned_query_results)
     # Set the 'time' column as the DataFrame index
-    df.set_index('time', inplace=True)
+    df.set_index("time", inplace=True)
     df.index = pd.to_datetime(df.index)
 
     date_range = pd.date_range(start_date, end_date)
@@ -278,13 +272,15 @@ def download_by_frequency(
     # supplied by the enum: D, M, W, Y), and joining back to the original df.
     # Then ilter df by frequency minimum for the 'cloud_cover_percentage' value
     filtered = df.merge(
-        df.groupby(
-            pd.Grouper(freq=frequency.name)
-        )['cloud_cover_percentage'].min().reset_index(), how='inner'
+        df.groupby(pd.Grouper(freq=frequency.name))["cloud_cover_percentage"]
+        .min()
+        .reset_index(),
+        how="inner",
     )
 
     results = [
-        core.models.CommonSearchResult(**x) for x in filtered.to_dict('records')
+        core.models.CommonSearchResult(**x)
+        for x in filtered.to_dict("records")
     ]
 
     for result in results:
@@ -292,10 +288,13 @@ def download_by_frequency(
             f"Interval filter results: {result.satellite} "
             f"({result.processing_level}), File: {result.filename}, "
             f"Time: {result.time}, "
-            f"{filter_field}: {getattr(result, filter_field)}")
+            f"{filter_field}: {getattr(result, filter_field)}"
+        )
 
-    logger.info(f"Interval operation filtered {len(query_results)} to "
-                f"{len(results)} results on {result.satellite} "
-                f"({result.processing_level}).")
+    logger.info(
+        f"Interval operation filtered {len(query_results_dict)} to "
+        f"{len(results)} results on {result.satellite} "
+        f"({result.processing_level})."
+    )
 
     return results

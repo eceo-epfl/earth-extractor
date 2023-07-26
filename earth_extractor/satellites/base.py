@@ -15,9 +15,9 @@ class Satellite:
         sensors: List[enums.Sensor],
         filters: List[enums.Filters],
     ) -> None:
-        ''' A satellite's data can be queried from one provider and downloaded
-            from another, defining these allows the methods to be interchanged
-        '''
+        """A satellite's data can be queried from one provider and downloaded
+        from another, defining these allows the methods to be interchanged
+        """
 
         self._query_provider = query_provider
         self._download_provider = download_provider
@@ -38,18 +38,15 @@ class Satellite:
         )
 
     @property
-    def has_cloud_cover(
-        self
-    ) -> bool:
-        ''' Whether the satellite has a cloud cover filter '''
+    def has_cloud_cover(self) -> bool:
+        """Whether the satellite has a cloud cover filter"""
 
         return enums.Filters.CLOUD_COVER in self.filters
-
 
     def _validate_satellite_provider_compatiblity(
         self,
     ) -> None:
-        ''' Check that the given provider is compatible with the satellite '''
+        """Check that the given provider is compatible with the satellite"""
 
         if self not in self._download_provider.satellites:
             raise ValueError(
@@ -63,14 +60,14 @@ class Satellite:
             )
 
     def __str__(self):
-        ''' Return the name of the satellite as a string.
+        """Return the name of the satellite as a string.
 
-            Allows for the satellite to be used as a dictionary key
-        '''
+        Allows for the satellite to be used as a dictionary key
+        """
 
         return str(self.name)
 
     def __repr__(self):
-        ''' Return the representable name of the satellite as a string. '''
+        """Return the representable name of the satellite as a string."""
 
         return str(self.name)

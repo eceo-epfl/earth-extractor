@@ -23,20 +23,16 @@ def export_query_results_to_geojson(
     # Convert the results to a GeoDataFrame
 
     output_file = os.path.join(
-        output_dir,
-        core.config.constants.GEOJSON_EXPORT_FILENAME
+        output_dir, core.config.constants.GEOJSON_EXPORT_FILENAME
     )
     logger.info(f"Exporting results to GeoJSON: {output_file}")
-    gdf.to_file(
-        output_file,
-        driver='GeoJSON'
-    )
+    gdf.to_file(output_file, driver="GeoJSON")
 
 
 def convert_query_results_to_geodataframe(
-    query_results: List[CommonSearchResult]
+    query_results: List[CommonSearchResult],
 ) -> gpd.GeoDataFrame:
-    ''' Converts the query results to a GeoDataFrame
+    """Converts the query results to a GeoDataFrame
 
     Parameters
     ----------
@@ -47,21 +43,21 @@ def convert_query_results_to_geodataframe(
     -------
     gpd.GeoDataFrame
         The query results as a GeoDataFrame
-    '''
+    """
 
     # Convert the query results to a list of dicts
-    query_results = [x.to_geojson() for x in query_results]
+    query_results_geojson = [x.to_geojson() for x in query_results]
 
     # Convert the query results to a GeoDataFrame
-    gdf = gpd.GeoDataFrame.from_dict(query_results)
+    gdf = gpd.GeoDataFrame.from_dict(query_results_geojson)
 
     return gdf
 
 
 def convert_geodataframe_to_query_results(
-    gdf: gpd.GeoDataFrame
+    gdf: gpd.GeoDataFrame,
 ) -> List[CommonSearchResult]:
-    ''' Converts the GeoDataFrame to query results
+    """Converts the GeoDataFrame to query results
 
     A reverse of the `convert_query_results_to_geodataframe` function, used
     in importing the exported GeoJSON files.
@@ -75,25 +71,25 @@ def convert_geodataframe_to_query_results(
     -------
     List[CommonSearchResult]
         The query results
-    '''
+    """
 
     # Convert the GeoDataFrame to a list of dicts
-    query_results = [x for x in gdf.to_dict('records')]
+    query_results = [x for x in gdf.to_dict("records")]
     query_results = []
     for idx, row in gdf.iterrows():
         query_results.append(
             CommonSearchResult(
-                satellite=row['satellite'],
-                product_id=row['product_id'],
-                link=row['link'],
-                identifier=row['identifier'],
-                filename=row['filename'],
-                time=row['time'],
-                cloud_cover_percentage=row['cloud_cover_percentage'],
-                size=row['size'],
-                processing_level=row['processing_level'],
-                sensor=row['sensor'],
-                geometry=row['geometry']
+                satellite=row["satellite"],
+                product_id=row["product_id"],
+                link=row["link"],
+                identifier=row["identifier"],
+                filename=row["filename"],
+                time=row["time"],
+                cloud_cover_percentage=row["cloud_cover_percentage"],
+                size=row["size"],
+                processing_level=row["processing_level"],
+                sensor=row["sensor"],
+                geometry=row["geometry"],
             )
         )
 
@@ -112,18 +108,17 @@ def batch_query(
     results_only: bool,
     interval_frequency: cli_options.TemporalFrequency | None = None,
 ) -> List[Tuple[Satellite, List[CommonSearchResult]]]:
-
     if results_only:
         if export == cli_options.ExportMetadataOptions.DISABLED.value:
             raise ValueError("Cannot use --results-only without --export")
         logger.info("Skipping download, only exporting results")
 
     if interval_frequency is None:
-        logger.info('Starting Earth Extractor batch mode')
+        logger.info("Starting Earth Extractor batch mode")
     else:
         logger.info(
-            'Starting Earth Extractor interval-batch mode with '
-            f'interval frequency {interval_frequency.value}'
+            "Starting Earth Extractor interval-batch mode with "
+            f"interval frequency {interval_frequency.value}"
         )
 
     logger.info(f"Time: {start} {end}")
@@ -134,9 +129,7 @@ def batch_query(
 
     # Create a list of tuples of satellites and levels
     for sat in satellites:
-        satellite_operations.append(
-            core.utils.pair_satellite_with_level(sat)
-        )
+        satellite_operations.append(core.utils.pair_satellite_with_level(sat))
 
     # Perform a query for each satellite and level and append it to a list
     all_results = []
@@ -157,7 +150,8 @@ def batch_query(
             roi=roi_obj,
             start_date=start,
             end_date=end,
-            cloud_cover=cloud_cover if sat.has_cloud_cover else None)
+            cloud_cover=cloud_cover if sat.has_cloud_cover else None,
+        )
 
         if interval_frequency is not None:
             # If interval frequency is set, then we need to query the results
@@ -166,8 +160,8 @@ def batch_query(
                 start_date=start,
                 end_date=end,
                 frequency=interval_frequency,
-                query_results=res,
-                filter_field='cloud_cover_percentage'
+                query_results_dict=res,
+                filter_field="cloud_cover_percentage",
             )
 
         # If the user wants to export the results, do so
@@ -203,12 +197,13 @@ def batch_query(
 def import_query_results(
     geojson_file: str,
 ) -> List[Tuple[Satellite, List[CommonSearchResult]]]:
-    ''' Import a geojson file, convert it CommonSearchResult objects  '''
-    logger.info('Starting Earth Extractor import mode')
+    """Import a geojson file, convert it CommonSearchResult objects"""
+    logger.info("Starting Earth Extractor import mode")
     logger.info(f"Importing geojson file: {geojson_file}")
 
     # Read the geojson file
     import geopandas
+
     gdf = geopandas.read_file(geojson_file)
 
     # Convert the geojson file to a list of CommonSearchResult objects
@@ -223,14 +218,14 @@ def import_query_results(
         if satellite_choice not in satellite_groups:
             satellite_groups[satellite_choice] = []
         # Add result to satellite group list
-        satellite_groups[satellite_choice].append(
-            result
-        )
+        satellite_groups[satellite_choice].append(result)
 
     # Convert the dict to a list of tuples
     query_results = [(key, rows) for key, rows in satellite_groups.items()]
 
     total_qty = sum([len(res) for sat, res in query_results])
-    logger.info(f"Imported {total_qty} records from {len(query_results)} "
-                f"satellite{'(s)' if len(query_results) > 1 else ''}")
+    logger.info(
+        f"Imported {total_qty} records from {len(query_results)} "
+        f"satellite{'(s)' if len(query_results) > 1 else ''}"
+    )
     return query_results

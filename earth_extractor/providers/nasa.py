@@ -2,26 +2,16 @@ from earth_extractor.providers import Provider
 import logging
 from earth_extractor.satellites import enums
 from earth_extractor import core
-from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
-from typing import Any, List, TYPE_CHECKING, Dict, Tuple
+from typing import Any, List, TYPE_CHECKING
 from pydantic import AnyUrl
-import sentinelsat
-import logging
 import os
 import datetime
 import tqdm
-
-# import shapely
 import shapely.geometry
 from shapely.geometry import Polygon
-from earth_extractor.satellites import enums
-from earth_extractor import core
-import tenacity
-from pystac_client import Client, CollectionClient
-import netrc
-import aiohttp
+from pystac_client import Client
 import requests
 
 
@@ -120,11 +110,7 @@ class NASACommonMetadataRepository(Provider):
         # Convert the search results to a list of URIs
         urls: list[AnyUrl] = [x.url for x in search_results if x.url]
 
-        # auth_header = {"Authorization": f"Bearer {credentials.NASA_TOKEN}"}
-        auth_header = {
-            "Authorization": f"Basic {credentials.NASA_USERNAME}:{credentials.NASA_PASSWORD}"
-        }
-        print(auth_header)
+        auth_header = {"Authorization": f"Bearer {credentials.NASA_TOKEN}"}
         # Get total size
         # total = 0
         # for url in urls:

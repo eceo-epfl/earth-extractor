@@ -6,7 +6,7 @@ import datetime
 
 class Constants(BaseSettings):
     COMMON_TIMESTAMP: str = f"{datetime.datetime.utcnow().isoformat()}"
-    DEFAULT_DOWNLOAD_DIR: str = os.path.join(os.getcwd(), 'data')
+    DEFAULT_DOWNLOAD_DIR: str = os.path.join(os.getcwd(), "data")
     GEOJSON_EXPORT_FILENAME: str = f"{COMMON_TIMESTAMP}.geojson"
     MAX_DOWNLOAD_ATTEMPTS: int = 50
 

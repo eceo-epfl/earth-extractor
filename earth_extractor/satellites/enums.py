@@ -2,10 +2,10 @@ from enum import Enum
 
 
 class ProcessingLevel(str, Enum):
-    ''' Satellite processing levels
+    """Satellite processing levels
     As defined by:
     https://www.earthdata.nasa.gov/engage/open-data-services-and-software/data-information-policy/data-levels
-    '''
+    """
 
     L0 = "L0"
     L1 = "L1"
@@ -30,7 +30,7 @@ class Sensor(str, Enum):
 
 
 class Satellite(Enum):
-    ''' Contains the supported satellites supported by the library '''
+    """Contains the supported satellites supported by the library"""
 
     SENTINEL1 = "SENTINEL1"
     SENTINEL2 = "SENTINEL2"
@@ -40,11 +40,11 @@ class Satellite(Enum):
 
 
 class Filters(Enum):
-    ''' The available filters for the satellites
+    """The available filters for the satellites
 
     To understand the filtering capabilities for each sensor, for example
     radar satellites do not have a cloud cover percentage, so manage those that
     do have it.
-    '''
+    """
 
     CLOUD_COVER = "CLOUD_COVER"
