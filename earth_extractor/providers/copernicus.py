@@ -29,7 +29,7 @@ class CopernicusOpenAccessHub(Provider):
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
-    ) -> List[CommonSearchResult]:
+    ) -> List[Dict[Any, Any]]:
         ''' Query the Copernicus Open Access Hub for data '''
 
         logger.info("Querying Copernicus Open Access Hub")

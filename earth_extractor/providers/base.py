@@ -77,7 +77,7 @@ class Provider:
         start_date: datetime.datetime,
         end_date: datetime.datetime,
         cloud_cover: int = 100,
-    ) -> List[Any]:
+    ) -> List[CommonSearchResult]:
         ''' Query the provider for items matching the given parameters '''
 
         raise NotImplementedError(

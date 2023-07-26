@@ -19,6 +19,7 @@ class Credentials(BaseSettings):
     # NASA API (For Alaska Satellite Facility)
     NASA_USERNAME: str | None = None
     NASA_PASSWORD: str | None = None
+    NASA_TOKEN: str | None = None
 
     # Sinergise Sentinel Hub
     SINERGISE_CLIENT_ID: str | None = None

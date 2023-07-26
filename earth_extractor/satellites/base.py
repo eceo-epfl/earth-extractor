@@ -37,7 +37,6 @@ class Satellite:
             self._download_provider.download_many,
         )
 
-
     @property
     def has_cloud_cover(
         self

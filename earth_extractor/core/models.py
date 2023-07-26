@@ -116,7 +116,8 @@ class CommonSearchResult:
     processing_level: Optional["ProcessingLevel"] = None
     sensor: Optional["Sensor"] = None
 
-    geometry: Optional[str] = None
+    geometry: Optional[str] = None  # Should be as WKT
+    url: Optional[AnyUrl] = None
 
     # Create function to convert this dataclass to geojson including all fields
     # and casting enums to their values
