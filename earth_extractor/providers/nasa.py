@@ -111,19 +111,41 @@ class NASACommonMetadataRepository(Provider):
         urls: list[AnyUrl] = [x.url for x in search_results if x.url]
 
         auth_header = {"Authorization": f"Bearer {credentials.NASA_TOKEN}"}
-        # Get total size
-        # total = 0
-        # for url in urls:
 
         for url in urls:
-            # url_header = requests.head(url, headers=auth_header).raw.headers
-            # total_size = int(url_header.get('content-length', -1))
-            # logger.info(f"Total size: {total_size}")
+            try:
+                with requests.get(
+                    url, stream=True, headers=auth_header
+                ) as resp:
+                    if resp.status_code == 200:
+                        if "text/html" in resp.headers["Content-Type"]:
+                            # We definitely don't want to download HTML when
+                            # expecting a binary file. This is likely due to
+                            # an expired token, auth error or NASA issue.
 
-            resp = requests.get(url, stream=True, headers=auth_header).raw
-
-            if resp.status == 200:
-                try:
+                            if (  # Try to determine the error
+                                "We are currently having issues verifying "
+                                "your request. Please try again later"
+                                in resp.content.decode("utf-8")
+                            ):
+                                error_msg = (
+                                    "NASA CMR: Server error in verifying "
+                                    f"request with URL '{url}'. This is most "
+                                    "likely a server error. "
+                                )
+                            else:
+                                error_msg = (
+                                    "NASA CMR: Received an unknown HTML "
+                                    f"response downloading '{url}', this "
+                                    "could be an issue with your credentials "
+                                    "or a NASA server error."
+                                )
+                            error_msg += (
+                                "Check the NASA Alerts & Issues page at "
+                                "https://ladsweb.modaps.eosdis.nasa.gov/alerts-and-issues/"  # noqa: E501
+                            )
+                            raise RuntimeError(error_msg)
+                    # resp.raw
                     output_path = os.path.join(
                         download_dir,
                         url.split("/")[-1],
@@ -135,55 +157,13 @@ class NASACommonMetadataRepository(Provider):
                             unit_scale=True,
                             unit_divisor=1024,
                         ) as bar:
-                            while True:
-                                data = resp.read(4096)
-                                if not data:
-                                    break
-                                size = dest.write(data)
-                                bar.update(size)
-                finally:
-                    resp.release_conn()
-            else:
-                total_size = 0
-        # requests.get()
-        # api = sentinelsat.SentinelAPI(
-        #     credentials.SCIHUB_USERNAME,
-        #     credentials.SCIHUB_PASSWORD
-        # )
-
-        # api.download_all(
-        #     search_results,
-        #     directory_path=download_dir,
-        #     n_concurrent_dl=processes,
-        #     checksum=True,
-        #     max_attempts=max_attempts,
-        # )
-
-    # def sign_urls(
-    #     self,
-    #     urls: List[str],
-    #     authentication_uri: str = "urs.earthdata.nasa.gov",
-    # ) -> str:
-    #     ''' Sign the URLs for download with NASA Earthdata authentication '''
-
-    #     for url in urls:
-
-    #     username, account, password = netrc.netrc().authenticators(
-    #         authentication_uri
-    #     )
-    #     # fsspec.config.conf['https'] = dict(
-    #     creds = dict(
-    #         client_kwargs={'auth':
-    #             aiohttp.BasicAuth(
-    #                 credentials.NASA_USERNAME,
-    #                 credentials.NASA_PASSWORD
-    #             )
-    #         }
-    #     )
-    #     print(creds)
-    #     # return username, password
-
-    #     return url
+                            for chunk in resp.iter_content(chunk_size=4096):
+                                if chunk:  # filter out keep-alive new chunks
+                                    dest.write(chunk)
+            except RuntimeError as e:
+                # Log the exception and continue to the next file
+                logger.error(e)
+                continue
 
 
 nasa_cmr: NASACommonMetadataRepository = NASACommonMetadataRepository(
