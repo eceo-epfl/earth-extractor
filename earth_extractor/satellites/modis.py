@@ -1,7 +1,5 @@
 from earth_extractor.satellites.base import Satellite
 from earth_extractor.satellites import enums
-
-# from earth_extractor.providers import copernicus_scihub, asf
 from earth_extractor.providers import nasa_cmr
 
 
@@ -14,7 +12,7 @@ modis_terra: Satellite = Satellite(
     description="Sentinel 1",
     processing_levels=[enums.ProcessingLevel.L1B],
     sensors=[enums.Sensor.MODIS],
-    filters=[enums.Filters.CLOUD_COVER],
+    filters=[],
 )
 
 modis_aqua: Satellite = Satellite(
@@ -24,5 +22,5 @@ modis_aqua: Satellite = Satellite(
     description="Sentinel 1",
     processing_levels=[enums.ProcessingLevel.L1B],
     sensors=[enums.Sensor.MODIS],
-    filters=[enums.Filters.CLOUD_COVER],
+    filters=[],
 )

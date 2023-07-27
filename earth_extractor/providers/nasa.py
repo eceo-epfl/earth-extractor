@@ -186,6 +186,12 @@ nasa_cmr: NASACommonMetadataRepository = NASACommonMetadataRepository(
             "MYD021KM.v6.1",
             "MYD03.v6.1",
         ],
+        (enums.Satellite.VIIRS, enums.ProcessingLevel.L1): [
+            "VNP03IMG.v2",
+            "VJ103IMG.v2.1",
+            "VNP03MOD.v2",
+            "VJ103MOD.v2.1",
+        ],
     },
     uri="https://cmr.earthdata.nasa.gov",
 )

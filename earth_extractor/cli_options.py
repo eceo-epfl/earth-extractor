@@ -1,5 +1,5 @@
 from enum import Enum
-from earth_extractor.satellites import sentinel, modis
+from earth_extractor.satellites import sentinel, modis, viirs
 
 
 class SatelliteChoices(str, Enum):
@@ -14,6 +14,9 @@ class SatelliteChoices(str, Enum):
     MODISTERRA = "MODIS_TERRA:L1B"
     MODISAQUA = "MODIS_AQUA:L1B"
 
+    # VIIRS
+    VIIRS = "VIIRS:L1"
+
 
 class Satellites(Enum):
     SENTINEL1 = sentinel.sentinel_1
@@ -21,13 +24,14 @@ class Satellites(Enum):
     SENTINEL3 = sentinel.sentinel_3
     MODIS_TERRA = modis.modis_terra
     MODIS_AQUA = modis.modis_aqua
+    VIIRS = viirs.viirs
 
 
 class TemporalFrequency(str, Enum):
-    ''' Enum for temporal frequency to be used for
+    """Enum for temporal frequency to be used for
 
     In reverse as Typer only uses values and not names for selection in CLI
-    '''
+    """
 
     D = "DAILY"
     W = "WEEKLY"
