@@ -1,4 +1,4 @@
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List, Dict, Any, Union
 from earth_extractor import core
 from earth_extractor.core.models import CommonSearchResult
 import logging
@@ -117,7 +117,7 @@ def is_float(string):
 
 def buffer_in_metres(
     input_geom: GeometryCollection,
-    buffer_metres: float | int,
+    buffer_metres: Union[float, int],
     crs_input: int = 4326,
     crs_output: int = 4326,
     crs_buffer: int = 3857,
@@ -128,7 +128,7 @@ def buffer_in_metres(
     ----------
     input_geom : GeometryCollection
         The geometry to buffer
-    buffer_metres : float | int
+    buffer_metres : Union[float, int}
         The buffer distance in metres
     crs_input : int, optional
         The CRS of the input geometry, by default 4326 (EPSG: WGS84)

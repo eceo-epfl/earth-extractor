@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING, Optional
 from earth_extractor import core
 import logging
 import datetime
@@ -19,8 +19,8 @@ class Provider:
     def __init__(
         self,
         name: str,
-        description: str | None = None,
-        uri: str | None = None,
+        description: Optional[str] = None,
+        uri: Optional[str] = None,
         products: Dict[
             Tuple["enums.Satellite", "enums.ProcessingLevel"], List[Any]
         ] = {},

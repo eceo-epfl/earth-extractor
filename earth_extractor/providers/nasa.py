@@ -4,7 +4,7 @@ from earth_extractor.satellites import enums
 from earth_extractor import core
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
-from typing import Any, List, TYPE_CHECKING
+from typing import Any, List, TYPE_CHECKING, Optional
 from pydantic import AnyUrl
 import os
 import datetime
@@ -32,7 +32,7 @@ class NASACommonMetadataRepository(Provider):
         roi: shapely.geometry.base.BaseGeometry,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
-        cloud_cover: int | None = None,
+        cloud_cover: Optional[int] = None,
     ) -> List[CommonSearchResult]:
         """Query the NASA Common Metadata Repository with STAC"""
 
@@ -109,7 +109,7 @@ class NASACommonMetadataRepository(Provider):
         """
 
         # Convert the search results to a list of URIs
-        urls: list[AnyUrl] = [x.url for x in search_results if x.url]
+        urls: List[AnyUrl] = [x.url for x in search_results if x.url]
 
         auth_header = {"Authorization": f"Bearer {credentials.NASA_TOKEN}"}
 

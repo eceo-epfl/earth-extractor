@@ -1,6 +1,6 @@
 from earth_extractor.providers import Provider
 from earth_extractor import core
-from typing import Any, List, TYPE_CHECKING
+from typing import Any, List, TYPE_CHECKING, Optional
 from sentinelhub import DataCollection, SHConfig, SentinelHubCatalog
 import logging
 import datetime
@@ -23,7 +23,7 @@ class SinergiseSentinelHub(Provider):
         roi: core.models.BBox,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
-        cloud_cover: int | None = None,
+        cloud_cover: Optional[int] = None,
     ) -> List[Any]:
         logger.info("Querying Sinergise Sentinel Hub")
         if (

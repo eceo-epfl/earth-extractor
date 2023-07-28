@@ -5,7 +5,7 @@ from earth_extractor.satellites import enums
 from earth_extractor import core
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
-from typing import Any, List, TYPE_CHECKING
+from typing import Any, List, TYPE_CHECKING, Optional
 import pyproj
 from shapely.geometry import box
 from shapely.ops import transform
@@ -36,7 +36,7 @@ class SwissTopo(Provider):
         roi: shapely.geometry.base.BaseGeometry,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
-        cloud_cover: int | None = None,
+        cloud_cover: Optional[int] = None,
     ) -> List[CommonSearchResult]:
         """Perform a search query as if done via SwissTopo web interface
 
@@ -60,12 +60,21 @@ class SwissTopo(Provider):
         start_date_unix = int(
             (start_date + datetime.timedelta(hours=2)).timestamp() * 1000
         )
+
+        # I have a suspicion that start time is offset by +2 hours, to
+        # Europe/Zurich but the end_time is still UTC +0 hours. There is no
+        # adjustment here for this, but it may be worth investigating in the
+        # future.
         end_date_unix = int(
             (end_date + datetime.timedelta(hours=2)).timestamp() * 1000
         )
         request_epsg = 2056
 
         # Get the resolution from the products dictionary based on CLI choice
+        # Normally this would be a satellite processing level, but in this case
+        # it's a resolution. Rather than redesigning the code for this one use
+        # case (SwissTopo), we can just use the resolution as the processing
+        # level. May be worth changing in the future
         resolution = self.products[(satellite.name, processing_level)][0]
         product = "ch.swisstopo.swissimage-dop10"
 

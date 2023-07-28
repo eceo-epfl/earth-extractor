@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import datetime
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 import logging
 from earth_extractor import core, cli_options
 import os
@@ -106,7 +106,7 @@ def batch_query(
     cloud_cover: int,
     export: cli_options.ExportMetadataOptions,
     results_only: bool,
-    interval_frequency: cli_options.TemporalFrequency | None = None,
+    interval_frequency: Optional[cli_options.TemporalFrequency] = None,
 ) -> List[Tuple[Satellite, List[CommonSearchResult]]]:
     if results_only:
         if export == cli_options.ExportMetadataOptions.DISABLED.value:

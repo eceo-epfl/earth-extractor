@@ -12,7 +12,7 @@ swissimage: Satellite = Satellite(
     query_provider=swiss_topo,
     download_provider=swiss_topo,
     name=enums.Satellite.SWISSIMAGE,
-    description="Sentinel 1",
+    description="SwissImage 10cm",
     processing_levels=[
         enums.ProcessingLevel.CM10,
         enums.ProcessingLevel.CM200,

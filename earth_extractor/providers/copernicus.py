@@ -1,7 +1,7 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
-from typing import Any, List, TYPE_CHECKING, Dict, Tuple
+from typing import Any, List, TYPE_CHECKING, Dict, Tuple, Optional
 import sentinelsat
 import logging
 import datetime
@@ -29,7 +29,7 @@ class CopernicusOpenAccessHub(Provider):
         roi: shapely.geometry.base.BaseGeometry,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
-        cloud_cover: int | None = None,
+        cloud_cover: Optional[int] = None,
     ) -> List[Dict[Any, Any]]:
         """Query the Copernicus Open Access Hub for data"""
 

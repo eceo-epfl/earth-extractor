@@ -4,7 +4,7 @@ import logging
 from rich.console import Console
 from rich.table import Table
 from pydantic import BaseSettings, root_validator
-from typing import Dict
+from typing import Dict, Optional
 from earth_extractor import core
 
 logger = logging.getLogger(__name__)
@@ -13,22 +13,22 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 class Credentials(BaseSettings):
     # User tokens
-    SCIHUB_USERNAME: str | None = None
-    SCIHUB_PASSWORD: str | None = None
+    SCIHUB_USERNAME: Optional[str] = None
+    SCIHUB_PASSWORD: Optional[str] = None
 
     # NASA API (For Alaska Satellite Facility)
-    NASA_USERNAME: str | None = None
-    NASA_PASSWORD: str | None = None
-    NASA_TOKEN: str | None = None
+    NASA_USERNAME: Optional[str] = None
+    NASA_PASSWORD: Optional[str] = None
+    NASA_TOKEN: Optional[str] = None
 
     # Sinergise Sentinel Hub
-    SINERGISE_CLIENT_ID: str | None = None
-    SINERGISE_CLIENT_SECRET: str | None = None
+    SINERGISE_CLIENT_ID: Optional[str] = None
+    SINERGISE_CLIENT_SECRET: Optional[str] = None
 
     @root_validator
     def populate_credentials_from_keyring(
-        cls, values: Dict[str, str | None]
-    ) -> Dict[str, str | None]:
+        cls, values: Dict[str, Optional[str]]
+    ) -> Dict[str, Optional[str]]:
         """Populate the credentials from the keyring"""
         for key in values.keys():
             values[key] = keyring.get_password(
@@ -75,7 +75,7 @@ def show_credential_list(show_secret=False) -> None:
     console.print(table)
 
 
-def set_one_credential(key):
+def set_one_credential(key) -> None:
     """Set a single credential key in the keyring"""
 
     if key not in get_credentials().__fields__:
@@ -95,19 +95,19 @@ def set_one_credential(key):
         keyring.set_password(core.config.constants.KEYRING_ID, key, new_secret)
 
 
-def set_all_credentials():
+def set_all_credentials() -> None:
     """Set all credential keys in the keyring"""
 
     for cred_key in get_credentials().__fields__:
         set_one_credential(cred_key)
 
 
-def delete_credential(key):
+def delete_credential(key) -> None:
     if key not in get_credentials().__fields__:
         raise ValueError(f"Key '{key}' does not exist")
 
     keyring.delete_password(core.config.constants.KEYRING_ID, key)
 
 
-def get_credentials():
+def get_credentials() -> None:
     return Credentials()
