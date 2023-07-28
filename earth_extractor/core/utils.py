@@ -9,11 +9,18 @@ from earth_extractor.cli_options import (
     SatelliteChoices,
 )
 import shapely
+import shapely.ops
 from shapely.geometry import GeometryCollection
 import pyproj
 import datetime
 import pandas as pd
 from dataclasses import asdict
+import requests
+import os
+import tqdm
+import tenacity
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 # Define logger for this module
@@ -298,3 +305,100 @@ def download_by_frequency(
     )
 
     return results
+
+
+# @tenacity.retry(
+#     stop=tenacity.stop_after_attempt(
+#         core.config.constants.MAX_DOWNLOAD_ATTEMPTS
+#     ),
+#     wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
+#     reraise=True,
+# )
+def download_with_progress(
+    url: str,
+    output_folder: str,
+) -> Dict[str, Any]:
+    """Downloads a file with a progress bar
+
+    The output file is the same filename as the original, and is saved to
+    the output_folder.
+
+    Parameters
+    ----------
+    url : str
+        The URL to download
+    output_folder : str
+        The output file base directory
+    """
+
+    with requests.get(url, stream=True) as resp:
+        resp.raise_for_status()
+        total_size = int(resp.headers.get("content-length", -1))
+
+        output_file = os.path.join(output_folder, url.split("/")[-1])
+
+        with open(output_file, "wb") as dest:
+            with tqdm.tqdm(
+                total=total_size,
+                desc=url,
+                unit="iB",
+                unit_scale=True,
+                unit_divisor=1024,
+            ) as bar:
+                for chunk in resp.iter_content(chunk_size=4096):
+                    if chunk:  # filter out keep-alive new chunks
+                        size = dest.write(chunk)
+                        bar.update(size)
+
+    # Check size of downloaded file
+    output_size = os.path.getsize(output_file)
+    if output_size == 0:
+        raise ValueError(
+            f"Downloaded file {output_file} is empty, retrying download "
+            f"(max {core.config.constants.MAX_DOWNLOAD_ATTEMPTS} attempts)."
+        )
+
+    if total_size != -1 and total_size != os.path.getsize(output_file):
+        raise ValueError(
+            f"Downloaded file {output_file} is not the expected size, "
+            f"retrying download"
+        )
+
+    return {"path": output_file, "url": url, "size": output_size}
+
+
+def download_parallel(
+    urls: List[str],
+    output_folder: str,
+) -> None:
+    """Downloads the given URLs in parallel
+
+    Giving a total progress bar for all downloads, and overall if possible.
+
+    Parameters
+    ----------
+    urls : List[str]
+        A list of URLs to download
+    output_folder : str
+        The output file base directory
+    """
+
+    failed = []
+    downloaded = []
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        # Map download_item function to the URLs in the specified column
+        futures = {
+            executor.submit(download_with_progress, url, output_folder): url
+            for url in urls
+        }
+
+        # Retrieve the results as they become available
+        for future in as_completed(futures):
+            url = futures[future]
+            try:
+                result = future.result()
+                downloaded.append(result)
+            except Exception as e:
+                print(f"{url} generated an exception: {e}")
+                failed.append({"url": url, "error": e})

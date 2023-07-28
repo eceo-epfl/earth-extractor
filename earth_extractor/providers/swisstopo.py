@@ -176,14 +176,6 @@ class SwissTopo(Provider):
 
         return common_results
 
-    @tenacity.retry(
-        # retry=tenacity.retry_if_exception_type(ConnectionError),
-        stop=tenacity.stop_after_attempt(
-            core.config.constants.MAX_DOWNLOAD_ATTEMPTS
-        ),
-        wait=tenacity.wait_fixed(90),  # API rate limit is 90req/60s
-        reraise=True,
-    )
     def download_many(
         self,
         search_results: List[CommonSearchResult],
@@ -192,28 +184,13 @@ class SwissTopo(Provider):
         *,
         max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
-        for result in search_results:
-            file_path = str(result.url)
+        """Download many files from the SwissTopo API
 
-            with requests.get(file_path, stream=True) as resp:
-                resp.raise_for_status()
-                total_size = int(resp.headers.get("content-length", -1))
+        Uses the common download utility with progress bar
+        """
 
-                output_file_path = os.path.join(
-                    download_dir, file_path.split("/")[-1]
-                )
-                with open(output_file_path, "wb") as dest:
-                    with tqdm.tqdm(
-                        total=total_size,
-                        desc=file_path,
-                        unit="iB",
-                        unit_scale=True,
-                        unit_divisor=1024,
-                    ) as bar:
-                        for chunk in resp.iter_content(chunk_size=4096):
-                            if chunk:  # filter out keep-alive new chunks
-                                size = dest.write(chunk)
-                                bar.update(size)
+        search_results = [str(x.url) for x in search_results]
+        core.utils.download_parallel(search_results, download_dir)
 
 
 swiss_topo: SwissTopo = SwissTopo(
