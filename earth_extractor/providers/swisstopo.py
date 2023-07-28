@@ -102,13 +102,23 @@ class SwissTopo(Provider):
 
         x_min, y_min, x_max, y_max = utm_bounds_int
 
+        # Options seem to be 2017, 2018, 2019, 2020, 2021, 2022 and current
+        # If set to None, it will return all years which is confusing because
+        # we can also query for time period. Therefore we should write a
+        # function that determines the years in the time period given by the
+        # user and then query for those years... Or we can do a string filter
+        # on the results to only return the years we want (easier and faster).
+        year_collection = None
+
         # form_data="{'{\n++++++++"type":+"Polygon",\n++++++++"crs":+{"type":+"name",+"properties":+{"name":+"EPSG:2056"}},\n++++++++"coordinates":+[[[2618237.3216779926,1205413.977215467],[2650961.126517095,1206868.3685416495],[2656051.4961587335,1179962.1290072764],[2626236.4739719955,1175598.9550287293],[2618237.3216779926,1205413.977215467]]]\n++++++}'}"
         url = (
             "https://ogd.swisstopo.admin.ch/services/swiseld/services/assets/"
             f"{product}/search"
             "?format=image/tiff; application=geotiff; "
             f"profile=cloud-optimized&{resolution}&srid={request_epsg}"
-            f"&state=current&from={start_date_unix}&to={end_date_unix}"
+            f"&state={year_collection if year_collection is not None else ''}"
+            # f"&state={year_collection}"
+            f"&from={start_date_unix}&to={end_date_unix}"
             # "&xMin=2588462&yMin=1117167&xMax=2596188&yMax=1123802&csv=true"
             f"&xMin={x_min}&yMin={y_min}&xMax={x_max}&yMax={y_max}&csv=true"
         )
@@ -141,6 +151,7 @@ class SwissTopo(Provider):
         # print(csv_file)
         # The "csv" is a headerless, single-column CSV that can be parsed into one line per file by splitting by newline char
         file_list = csv_file.decode("utf-8").split("\n")
+        [print(x) for x in file_list]
         logger.info(f"{self.name}: Found {len(file_list)} files to download")
         # logger.info(f"NASA CMR: Found {len(features)} files to download")
 
