@@ -179,7 +179,8 @@ def batch_query(
             sys.exit()
 
         logger.info(
-            f"Satellite: {sat}, Level: {level.value}.\tQty ({len(res)})"
+            f"Satellite: {sat}, Level: {level.value}. "
+            f"Results qty: ({len(res)})"
         )
 
         # Append results to a list with associated satellite in order to use
@@ -189,7 +190,7 @@ def batch_query(
     # Sum results from all query results
     total_qty = sum([len(res) for sat, res in all_results])
 
-    logger.info(f"Total results qty: {total_qty}")
+    logger.info(f"Total (all satellites) results qty: {total_qty}")
 
     return all_results
 

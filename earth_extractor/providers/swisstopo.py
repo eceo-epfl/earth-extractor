@@ -1,3 +1,4 @@
+import tenacity
 from earth_extractor.providers import Provider
 import logging
 from earth_extractor.satellites import enums
@@ -47,25 +48,9 @@ class SwissTopo(Provider):
         coordinates. We must cast the ROI to CH1903+ EPSG: 2056 before querying
         the API even though there appears to be a CRS parameter in the
         API -- as API is undocumented, it's best to play it safe.
-
         """
 
         logger.info(f"{self.name}: Querying API")
-
-        year = 2020
-        headers = {
-            "type": "Polygon",
-            "crs": {"type": "name", "properties": {"name": "EPSG:2056"}},
-            "coordinates": [
-                [
-                    [2618237.3216779926, 1205413.977215467],
-                    [2650961.126517095, 1206868.3685416495],
-                    [2656051.4961587335, 1179962.1290072764],
-                    [2626236.4739719955, 1175598.9550287293],
-                    [2618237.3216779926, 1205413.977215467],
-                ]
-            ],
-        }
 
         # Convert datetime to unix time 1601942400000 represents 2020-10-06
         # two hours after midnight (Zurich time) representing an offset of 7200
@@ -79,17 +64,12 @@ class SwissTopo(Provider):
             (end_date + datetime.timedelta(hours=2)).timestamp() * 1000
         )
         request_epsg = 2056
+
         # Get the resolution from the products dictionary based on CLI choice
-        resolution = self.products.get((satellite.name, processing_level))[0]
+        resolution = self.products[(satellite.name, processing_level)][0]
         product = "ch.swisstopo.swissimage-dop10"
 
-        # wgs84_box = box(
-        #     7.234485381825444,
-        #     46.16001032919722,
-        #     7.450015649232836,
-        #     46.28278844442293,
-        # )
-
+        # Reproject coordinates from WGS84 to CH1903+ (EPSG:2056)
         wgs84 = pyproj.CRS("EPSG:4326")
         utm = pyproj.CRS("EPSG:2056")
 
@@ -97,66 +77,80 @@ class SwissTopo(Provider):
             wgs84, utm, always_xy=True
         ).transform
         roi_utm = transform(project, roi)
+        x_min, y_min, x_max, y_max = roi_utm.bounds
 
-        utm_bounds_int = [int(x) for x in roi_utm.bounds]
-
-        x_min, y_min, x_max, y_max = utm_bounds_int
-
-        # Options seem to be 2017, 2018, 2019, 2020, 2021, 2022 and current
+        # Options seem to be 2017, 2018, 2019, 2020, 2021, 2022 and "current".
         # If set to None, it will return all years which is confusing because
-        # we can also query for time period. Therefore we should write a
-        # function that determines the years in the time period given by the
-        # user and then query for those years... Or we can do a string filter
-        # on the results to only return the years we want (easier and faster).
+        # we can also query for time period. We can do a string filter
+        # on the results to only return the years we want (faster queries but
+        # a bit hacky). Ensure the assumptions are tested at runtime.
         year_collection = None
 
-        # form_data="{'{\n++++++++"type":+"Polygon",\n++++++++"crs":+{"type":+"name",+"properties":+{"name":+"EPSG:2056"}},\n++++++++"coordinates":+[[[2618237.3216779926,1205413.977215467],[2650961.126517095,1206868.3685416495],[2656051.4961587335,1179962.1290072764],[2626236.4739719955,1175598.9550287293],[2618237.3216779926,1205413.977215467]]]\n++++++}'}"
         url = (
             "https://ogd.swisstopo.admin.ch/services/swiseld/services/assets/"
             f"{product}/search"
             "?format=image/tiff; application=geotiff; "
             f"profile=cloud-optimized&{resolution}&srid={request_epsg}"
             f"&state={year_collection if year_collection is not None else ''}"
-            # f"&state={year_collection}"
             f"&from={start_date_unix}&to={end_date_unix}"
-            # "&xMin=2588462&yMin=1117167&xMax=2596188&yMax=1123802&csv=true"
             f"&xMin={x_min}&yMin={y_min}&xMax={x_max}&yMax={y_max}&csv=true"
         )
-        print(url)
+
         res = requests.get(url)
-        # res = requests.get(
-        #     # f"https://ogd.swisstopo.admin.ch/services/swiseld/services/assets/ch.swisstopo.swissimage-dop10/search?format=image/tiff; application=geotiff; profile=cloud-optimized&resolution=0.1&srid=2056&state={year}",
-        #     "https://ogd.swisstopo.admin.ch/services/swiseld/services/assets/"
-        #     f"{product}/search"
-        #     "?format=image/tiff; application=geotiff; "
-        #     f"profile=cloud-optimized&{resolution}&srid={request_epsg}"
-        #     f"&state=current&from={start_date_unix}&to={end_date_unix}"
-        #     f"&xMin={x_min}&yMin={y_min}&xMax={x_max}&yMax={y_max}&csv=true",
-        #     # f"&xMin=2588462&yMin=1117167&xMax=2596188&yMax=1123802&csv=true",
-        #     # data={"geometry": json.dumps(headers)}
-        # )
-        print(product)
-        print(resolution)
-        print(request_epsg)
-        print(start_date_unix, end_date_unix)
-        print(x_min, y_min, x_max, y_max)
-        print(f"First response: {res.status_code}")
+        res.raise_for_status()
+
+        logger.debug(f"Unix time: {start_date_unix}, {end_date_unix}")
+        logger.debug(f"Bounds {x_min}, {y_min}, {x_max}, {y_max}")
+
+        # Get the CSV path from JSON response
         csv_path = res.json()["href"]
-        print(csv_path)
+        logger.debug(f"CSV Path: {csv_path}")
 
         # import csv
         res = requests.get(csv_path)
-        print(res.status_code)
-        csv_file = res.content
-        # print(csv_file)
-        # The "csv" is a headerless, single-column CSV that can be parsed into one line per file by splitting by newline char
-        file_list = csv_file.decode("utf-8").split("\n")
-        [print(x) for x in file_list]
-        logger.info(f"{self.name}: Found {len(file_list)} files to download")
-        # logger.info(f"NASA CMR: Found {len(features)} files to download")
+        res.raise_for_status()
 
-        # return self.translate_search_results(features)
-        records = self.translate_search_results(file_list, resolution)
+        # The "csv" is a headerless, single-column CSV that can be parsed into
+        # one line per file by splitting by newline char
+        file_list = res.content.decode("utf-8").split("\n")
+
+        # We can try and make an assumption that the returned addresses stated:
+        # https://<url>/swissimage-dop10_<i>_<j>-<k>/filename.tif can relate to
+        # the following:
+        # i = year
+        # j = unknown (flight #?)
+        # k = unknown (tile #?)
+        # We can then filter the results based on the year we want to download
+        # and then download the files.
+
+        filtered_file_list = []
+        for url_path in file_list:
+            subpath, _filename = url_path.split("/")[-2:]
+
+            # Split the subpath into its components (as listed above)
+            subpath_split = subpath.split("_")
+            if (
+                subpath_split[0] == "swissimage-dop10"
+                and len(str(subpath_split[1])) == 4
+            ):
+                # Get the range of years given by the user in a sequential list
+                # and then filter the results based on that list
+                year_range = list(range(start_date.year, end_date.year + 1))
+                if int(subpath_split[1]) in year_range:
+                    filtered_file_list.append(url_path)
+            else:
+                raise ValueError(
+                    f"Unexpected file path provided by SwissTopo: '{url_path}'"
+                    " This breaks the assumption of yearly filtering. Please "
+                    "report this issue to the developers."
+                )
+        [logger.debug(f"{self.name}: {x}") for x in filtered_file_list]
+
+        logger.info(
+            f"{self.name}: Found {len(filtered_file_list)} files to download"
+        )
+
+        records = self.translate_search_results(filtered_file_list, resolution)
 
         return records
 
@@ -182,16 +176,14 @@ class SwissTopo(Provider):
 
         return common_results
 
-    # @tenacity.retry(
-    #     retry=tenacity.retry_if_exception_type(
-    #         sentinelsat.exceptions.ServerError
-    #     ),
-    #     stop=tenacity.stop_after_attempt(
-    #         core.config.constants.MAX_DOWNLOAD_ATTEMPTS
-    #     ),
-    #     wait=tenacity.wait_fixed(90),  # API rate limit is 90req/60s
-    #     reraise=True
-    # )
+    @tenacity.retry(
+        # retry=tenacity.retry_if_exception_type(ConnectionError),
+        stop=tenacity.stop_after_attempt(
+            core.config.constants.MAX_DOWNLOAD_ATTEMPTS
+        ),
+        wait=tenacity.wait_fixed(90),  # API rate limit is 90req/60s
+        reraise=True,
+    )
     def download_many(
         self,
         search_results: List[CommonSearchResult],
@@ -201,19 +193,27 @@ class SwissTopo(Provider):
         max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
         for result in search_results:
-            file_path = result.url
-            print(file_path)
+            file_path = str(result.url)
 
-            response = requests.get(file_path, stream=True)
-            response.raise_for_status()
-            # import os
+            with requests.get(file_path, stream=True) as resp:
+                resp.raise_for_status()
+                total_size = int(resp.headers.get("content-length", -1))
 
-            output_file_path = os.path.join(
-                download_dir, file_path.split("/")[-1]
-            )
-            with open(output_file_path, "wb") as output_file:
-                for chunk in response.iter_content(chunk_size=8192):
-                    output_file.write(chunk)
+                output_file_path = os.path.join(
+                    download_dir, file_path.split("/")[-1]
+                )
+                with open(output_file_path, "wb") as dest:
+                    with tqdm.tqdm(
+                        total=total_size,
+                        desc=file_path,
+                        unit="iB",
+                        unit_scale=True,
+                        unit_divisor=1024,
+                    ) as bar:
+                        for chunk in resp.iter_content(chunk_size=4096):
+                            if chunk:  # filter out keep-alive new chunks
+                                size = dest.write(chunk)
+                                bar.update(size)
 
 
 swiss_topo: SwissTopo = SwissTopo(
