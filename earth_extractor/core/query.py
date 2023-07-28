@@ -187,11 +187,6 @@ def batch_query(
         # its defined download provider
         all_results.append((sat, res))
 
-    # Sum results from all query results
-    total_qty = sum([len(res) for sat, res in all_results])
-
-    logger.info(f"Total (all satellites) results qty: {total_qty}")
-
     return all_results
 
 

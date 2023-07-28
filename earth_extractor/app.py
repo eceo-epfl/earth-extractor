@@ -6,6 +6,7 @@ import logging
 from earth_extractor import core, cli_options
 import atexit
 import os
+import sys
 
 
 # Define a console handler
@@ -139,6 +140,9 @@ def batch(
     results_only: bool = typer.Option(
         False, help="Only export the results of the query, do not download"
     ),
+    parallel: bool = typer.Option(
+        True, help="Download all results in parallel"
+    ),
 ) -> None:
     """Batch download of satellite data with minimal user input"""
 
@@ -160,6 +164,13 @@ def batch(
         export=export,
         results_only=results_only,
     )
+    # Sum results from all query results
+    total_qty = sum([len(res) for sat, res in query_results])
+
+    logger.info(f"Total (all satellites) results qty: {total_qty}")
+
+    if total_qty == 0:
+        sys.exit("Nothing to download")
 
     # Prompt user for confirmation before downloading
     if not no_confirmation:
@@ -169,18 +180,24 @@ def batch(
             abort=True,
         )
 
-    # Download the results using the satellite's download provider
-    for sat, res in query_results:
-        if len(res) > 0:
-            logger.info(
-                f"Downloading results for {sat}..." f"({len(res)} items)"
-            )
+    if parallel is True:
+        # Download all of the satellites in parallel at the same time
+        core.utils.download_all_satellites_in_parallel(
+            query_results, output_dir
+        )
+    else:
+        # Download the results using the satellite's download provider
+        for sat, res in query_results:
+            if len(res) > 0:
+                logger.info(
+                    f"Downloading results for {sat}..." f"({len(res)} items)"
+                )
 
-            # Download the results
-            sat.download_many(
-                search_results=res,
-                download_dir=output_dir,
-            )
+                # Download the results
+                sat.download_many(
+                    search_results=res,
+                    download_dir=output_dir,
+                )
 
 
 @app.command()
@@ -248,6 +265,9 @@ def batch_interval(
     results_only: bool = typer.Option(
         False, help="Only export the results of the query, do not download"
     ),
+    parallel: bool = typer.Option(
+        True, help="Download all results in parallel"
+    ),
 ) -> None:
     """Batch download with best cloud cover over a given time period
 
@@ -278,6 +298,13 @@ def batch_interval(
         results_only=results_only,
         interval_frequency=frequency,
     )
+    # Sum results from all query results
+    total_qty = sum([len(res) for sat, res in query_results])
+
+    logger.info(f"Total (all satellites) results qty: {total_qty}")
+
+    if total_qty == 0:
+        sys.exit("Nothing to download")
 
     # Prompt user for confirmation before downloading
     if not no_confirmation:
@@ -287,9 +314,14 @@ def batch_interval(
             abort=True,
         )
 
-    # Download the results using the satellite's download provider
-    for sat, res in query_results:
-        if len(res) > 0:
+    if parallel is True:
+        # Download all of the satellites in parallel at the same time
+        core.utils.download_all_satellites_in_parallel(
+            query_results, output_dir
+        )
+    else:
+        # Download the results using the satellite's download provider
+        for sat, res in query_results:
             logger.info(
                 f"Downloading results for {sat}..." f"({len(res)} items)"
             )

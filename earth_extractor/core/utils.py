@@ -1,5 +1,6 @@
 from typing import Tuple, List, Dict, Any
 from earth_extractor import core
+from earth_extractor.core.models import CommonSearchResult
 import logging
 from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite
@@ -19,7 +20,6 @@ import requests
 import os
 import tqdm
 import tenacity
-import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
@@ -307,17 +307,17 @@ def download_by_frequency(
     return results
 
 
-# @tenacity.retry(
-#     stop=tenacity.stop_after_attempt(
-#         core.config.constants.MAX_DOWNLOAD_ATTEMPTS
-#     ),
-#     wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
-#     reraise=True,
-# )
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(
+        core.config.constants.MAX_DOWNLOAD_ATTEMPTS
+    ),
+    wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
+    reraise=True,
+)
 def download_with_progress(
     url: str,
     output_folder: str,
-) -> Dict[str, Any]:
+) -> None:
     """Downloads a file with a progress bar
 
     The output file is the same filename as the original, and is saved to
@@ -363,8 +363,9 @@ def download_with_progress(
             f"Downloaded file {output_file} is not the expected size, "
             f"retrying download"
         )
+    logger.debug(f"Downloaded file: {output_file}, size: {output_size}")
 
-    return {"path": output_file, "url": url, "size": output_size}
+    return
 
 
 def download_parallel(
@@ -383,10 +384,9 @@ def download_parallel(
         The output file base directory
     """
 
-    failed = []
-    downloaded = []
-
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(
+        max_workers=core.constants.DEFAULT_DOWNLOAD_THREADS
+    ) as executor:
         # Map download_item function to the URLs in the specified column
         futures = {
             executor.submit(download_with_progress, url, output_folder): url
@@ -398,7 +398,57 @@ def download_parallel(
             url = futures[future]
             try:
                 result = future.result()
-                downloaded.append(result)
+                logger.debug(
+                    f"Downloaded file successfully (threading): {url} "
+                    f"({result})"
+                )
             except Exception as e:
-                print(f"{url} generated an exception: {e}")
-                failed.append({"url": url, "error": e})
+                logger.error(f"{url} generated an exception: {e}")
+
+
+def download_all_satellites_in_parallel(
+    query_results: List[Tuple[Satellite, List[CommonSearchResult]]],
+    output_folder: str,
+) -> None:
+    """Executes each provider download function in parallel
+
+    As each provider has a different method, this function does not attempt
+    to consolidate one big list, but issue the `download_many()` into
+    many threads so they can all run at the same time.
+
+    It is up to this `download_many()` function to provide parallel downloads
+    for that individual provider.
+
+    Parameters
+    ----------
+    query_results : List[Tuple[Satellite, List[CommonSearchResult]]]
+        The query results, in the internal common format
+    output_folder : str
+        The output file base directory
+    """
+
+    with ThreadPoolExecutor(
+        max_workers=core.constants.DEFAULT_DOWNLOAD_THREADS
+    ) as executor:
+        # Map download_item function to the URLs in the specified column
+        # satellite, results = query_results
+        futures = {
+            executor.submit(
+                satgroup[0].download_many,
+                search_results=satgroup[1],
+                download_dir=output_folder,
+            ): satgroup
+            for satgroup in query_results
+        }
+
+        # Retrieve the results as they become available
+        for future in as_completed(futures):
+            url = futures[future]
+            try:
+                result = future.result()
+                logger.debug(
+                    f"Downloaded file successfully (threading): {url} "
+                    f"({result})"
+                )
+            except Exception as e:
+                logger.error(f"{url} generated an exception: {e}")
