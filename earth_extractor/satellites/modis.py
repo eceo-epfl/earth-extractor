@@ -1,7 +1,11 @@
 from earth_extractor.satellites.base import Satellite
 from earth_extractor.satellites import enums
 from earth_extractor.providers import nasa_cmr
+from earth_extractor import core
+import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 """ Define the MODIS constellation """
 

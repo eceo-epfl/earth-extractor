@@ -2,6 +2,11 @@ from typing import List
 from earth_extractor.satellites import enums
 from earth_extractor.providers.base import Provider
 import functools
+from earth_extractor import core
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
 class Satellite:

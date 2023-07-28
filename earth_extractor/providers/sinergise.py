@@ -1,4 +1,3 @@
-
 from earth_extractor.providers import Provider
 from earth_extractor import core
 from typing import Any, List, TYPE_CHECKING
@@ -26,7 +25,6 @@ class SinergiseSentinelHub(Provider):
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
     ) -> List[Any]:
-
         logger.info("Querying Sinergise Sentinel Hub")
         if (
             credentials.SINERGISE_CLIENT_SECRET
@@ -40,19 +38,14 @@ class SinergiseSentinelHub(Provider):
 
         config = SHConfig(
             credentials.SINERGISE_CLIENT_ID,
-            credentials.SINERGISE_CLIENT_SECRET
+            credentials.SINERGISE_CLIENT_SECRET,
         )
         catalog = SentinelHubCatalog(config=config)
 
-        if satellite.name not in self.satellites:
-            raise ValueError(
-                f"Satellite {satellite.name} not supported by Copernicus "
-                f"Open Access Hub. Available satellites: {self.satellites}"
-            )
-
-        logger.info(f"Satellite: {satellite.name} "
-                    f"({self.satellites[satellite.name]}"
-                    f"{processing_level.value}")
+        logger.info(
+            f"Satellite: {satellite.name} ({satellite.name}) "
+            f"{processing_level.value}"
+        )
 
         product_type = self.products.get(
             (satellite.name, processing_level), None
@@ -66,28 +59,18 @@ class SinergiseSentinelHub(Provider):
             )
 
         raise NotImplementedError("Sinergise Sentinel Hub not implemented")
-        # catalog.get_feature(product_type, )
-        # products = api.query(
-        #     roi.to_wkt(),
-        #     platformname=self.satellites[satellite.name],
-        #     # producttype=product_type,
-        #     # processinglevel=processing_level.value,
-        #     cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
-        #     date=(start_date, end_date),
-        # )
-
-        # return products
 
 
 sinergise: SinergiseSentinelHub = SinergiseSentinelHub(
     name="Sinergise",
     description="Sinergise Sentinel Hub",
-    satellites={enums.Satellite.SENTINEL2: ''},
     uri="https://www.sinergise.com",
     products={
-        (enums.Satellite.SENTINEL2,
-         enums.ProcessingLevel.L1C): [DataCollection.SENTINEL2_L1C],
-        (enums.Satellite.SENTINEL2,
-         enums.ProcessingLevel.L2A): [DataCollection.SENTINEL2_L2A],
-    }
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): [
+            DataCollection.SENTINEL2_L1C
+        ],
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): [
+            DataCollection.SENTINEL2_L2A
+        ],
+    },
 )

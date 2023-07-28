@@ -18,9 +18,8 @@ class AlaskanSateliteFacility(Provider):
         self,
         search_results: List[core.models.CommonSearchResult],
         download_dir: str,
-        processes: int = 6
+        processes: int = 6,
     ) -> None:
-
         # Extract the file ids from the search results
         search_file_ids = [result.identifier for result in search_results]
 
@@ -37,7 +36,7 @@ class AlaskanSateliteFacility(Provider):
         try:
             session = asf_search.ASFSession().auth_with_creds(
                 username=credentials.NASA_USERNAME,
-                password=credentials.NASA_PASSWORD
+                password=credentials.NASA_PASSWORD,
             )
         except asf_search.ASFAuthenticationError as e:
             logger.error(f"ASF authentication error: {e}")
@@ -60,6 +59,5 @@ class AlaskanSateliteFacility(Provider):
 asf: AlaskanSateliteFacility = AlaskanSateliteFacility(
     name="Alaskan Satellite Facility",
     description="Alaskan Satellite Facility",
-    satellites={enums.Satellite.SENTINEL1: ''},
-    uri="https://asf.alaska.edu"
+    uri="https://asf.alaska.edu",
 )

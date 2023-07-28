@@ -34,20 +34,21 @@ class NASACommonMetadataRepository(Provider):
         end_date: datetime.datetime,
         cloud_cover: int | None = None,
     ) -> List[CommonSearchResult]:
-        """Query the Copernicus Open Access Hub for data"""
-
-        catalog = Client.open(f"{self.uri}/stac/LAADS")
+        """Query the NASA Common Metadata Repository with STAC"""
 
         logger.info("Querying NASA Common Metadata Repository")
-        search = catalog.search(
+        features = self.query_stac(
+            # Make URI more generic? MODIS/VIIRS both use LAADS for now
+            provider_uri=f"{self.uri}/stac/LAADS",
             collections=self.products[(satellite.name, processing_level)],
-            intersects=roi,
-            datetime=[start_date.isoformat(), end_date.isoformat()],
-        )
-        records = search.item_collection_as_dict()["features"]
-        logger.info(f"NASA CMR: Found {len(records)} files to download")
+            roi=roi,
+            start_date=start_date,
+            end_date=end_date,
+        )["features"]
 
-        return self.translate_search_results(records)
+        logger.info(f"NASA CMR: Found {len(features)} files to download")
+
+        return self.translate_search_results(features)
 
     def translate_search_results(
         self, provider_search_results: Any
@@ -169,10 +170,6 @@ class NASACommonMetadataRepository(Provider):
 nasa_cmr: NASACommonMetadataRepository = NASACommonMetadataRepository(
     name="CMR",
     description="NASA Common Metadata Repository",
-    satellites={
-        enums.Satellite.MODIS_TERRA: "",
-        enums.Satellite.MODIS_AQUA: "",
-    },  # Redundant?
     products={
         (enums.Satellite.MODIS_TERRA, enums.ProcessingLevel.L1B): [
             "MOD02QKM.v6.1",

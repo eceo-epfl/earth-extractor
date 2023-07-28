@@ -19,6 +19,13 @@ class ProcessingLevel(str, Enum):
     L3A = "L3A"
     L4 = "L4"
 
+    # Spatial Resolutions (breaks the naming convention unfortunately ...)
+    # SWISSIMAGE is provided in two products, 0.1m and 2m
+    # Perhaps reassess naming of "ProcessingLevel" to something else later if
+    # resolutions in Satellite clases are to be added
+    CM10 = "CM10"
+    CM200 = "CM200"
+
 
 class Sensor(str, Enum):
     MSI = "MSI"
@@ -28,6 +35,7 @@ class Sensor(str, Enum):
     SRAL = "SRAL"
     MODIS = "MODIS"
     VIIRS = "VIIRS"
+    SWISSIMAGE = "SWISSIMAGE"
 
 
 class Satellite(Enum):
@@ -39,6 +47,7 @@ class Satellite(Enum):
     MODIS_TERRA = "MODIS_TERRA"
     MODIS_AQUA = "MODIS_AQUA"
     VIIRS = "VIIRS"
+    SWISSIMAGE = "SWISSIMAGE_10CM"
 
 
 class Filters(Enum):

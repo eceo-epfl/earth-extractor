@@ -1,5 +1,5 @@
 from enum import Enum
-from earth_extractor.satellites import sentinel, modis, viirs
+from earth_extractor.satellites import sentinel, modis, viirs, swissimage
 
 
 class SatelliteChoices(str, Enum):
@@ -17,6 +17,10 @@ class SatelliteChoices(str, Enum):
     # VIIRS
     VIIRS = "VIIRS:L1"
 
+    # SwissImage
+    SWISSIMAGE10CM = "SWISSIMAGE:CM10"
+    SWISSIMAGE200CM = "SWISSIMAGE:CM200"
+
 
 class Satellites(Enum):
     SENTINEL1 = sentinel.sentinel_1
@@ -25,6 +29,7 @@ class Satellites(Enum):
     MODIS_TERRA = modis.modis_terra
     MODIS_AQUA = modis.modis_aqua
     VIIRS = viirs.viirs
+    SWISSIMAGE = swissimage.swissimage
 
 
 class TemporalFrequency(str, Enum):

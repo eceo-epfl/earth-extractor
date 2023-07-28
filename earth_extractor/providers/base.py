@@ -3,7 +3,9 @@ from earth_extractor import core
 import logging
 import datetime
 import os
+import shapely.geometry
 from earth_extractor.core.models import CommonSearchResult
+from pystac_client import Client
 
 if TYPE_CHECKING:
     from earth_extractor.satellites import enums
@@ -17,31 +19,23 @@ class Provider:
     def __init__(
         self,
         name: str,
-        satellites: Dict["enums.Satellite", str],
         description: str | None = None,
         uri: str | None = None,
         products: Dict[
             Tuple["enums.Satellite", "enums.ProcessingLevel"], List[Any]
         ] = {},
     ):
-        ''' A provider of satellite data
+        """A provider of satellite data
 
         Parameters
         ----------
         name : str
             The name of the provider
-        satellites : Dict[enums.Satellite, str]
-            A dictionary of the satellites supported by the provider. The key
-            is the satellite enum and the value is the name of the satellite
-            as it is known by the provider
         description : str, optional
             A description of the provider, by default None
         uri : str, optional
             A URI for the provider, by default None
-        products : Dict[
-                    Tuple[
-                        enums.Satellite, enums.ProcessingLevel
-                    ], List[Any]], optional
+        products : Dict[Tuple[Satellite, ProcessingLevel], List[Any]], optional
             A dictionary of the products supported by the provider. The key
             is a tuple of the satellite enum and the processing level enum.
             The value is a list of the products supported by the provider and
@@ -62,11 +56,10 @@ class Provider:
         ------
         NotImplementedError
             If the query method is not implemented
-        '''
+        """
         self.name = name
         self.description = description
         self.uri = uri
-        self.satellites = satellites
         self.products = products
 
     def query(
@@ -78,7 +71,7 @@ class Provider:
         end_date: datetime.datetime,
         cloud_cover: int = 100,
     ) -> List[CommonSearchResult]:
-        ''' Query the provider for items matching the given parameters '''
+        """Query the provider for items matching the given parameters"""
 
         raise NotImplementedError(
             f"Query method not implemented for Provider: {self.name} "
@@ -89,9 +82,8 @@ class Provider:
         self,
         search_results: List[CommonSearchResult],
         download_dir: str,
-        processes: int = 6
+        processes: int = 6,
     ) -> Any:
-
         raise NotImplementedError(
             f"Download method not implemented for Provider: {self.name} "
             f"({self.description})"
@@ -101,16 +93,16 @@ class Provider:
         self,
         folder_name: str,
     ) -> None:
-        ''' Create a download folder if it doesn't exist '''
+        """Create a download folder if it doesn't exist"""
 
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
     def translate_search_results(
         self,
-        provider_search_results: Dict[Any, Any]
+        *,
+        provider_search_results: Dict[Any, Any],
     ) -> List[core.models.CommonSearchResult]:
-
         raise NotImplementedError(
             "Search translation method not implemented for Provider: "
             f"{self.name} ({self.description})"
@@ -118,9 +110,9 @@ class Provider:
 
     @property
     def _products_reversed(
-        self
+        self,
     ) -> Dict[Any, Tuple["enums.Satellite", "enums.ProcessingLevel"]]:
-        ''' A reverse of the property dictionary
+        """A reverse of the property dictionary
 
         Makes sure that each item in the list each value is now its own key
         and the original key is now a value in the list
@@ -134,7 +126,7 @@ class Provider:
             "IW": ("Sentinel-1", "GRD"),
             "EW": ("Sentinel-1", "GRD")
         }
-        '''
+        """
 
         products_reversed = {}
         for key, value in self.products.items():
@@ -142,3 +134,43 @@ class Provider:
                 products_reversed[item] = key
 
         return products_reversed
+
+    def query_stac(
+        self,
+        provider_uri: str,
+        collections: List[str],
+        roi: shapely.geometry.base.BaseGeometry,
+        start_date: datetime.datetime,
+        end_date: datetime.datetime,
+    ) -> Dict[str, str]:
+        """A generic STAC query method for providers that support STAC
+
+        Parameters
+        ----------
+        provider_uri : str
+            The URI of the provider
+        collections : List[str]
+            A list of collections to query
+        roi : shapely.geometry.base.BaseGeometry
+            The region of interest
+        start_time : datetime.datetime
+            The start time of the query
+        end_time : datetime.datetime
+            The end time of the query
+
+        Returns
+        -------
+        Dict[str, str]
+            A dictionary of the results
+        """
+
+        catalog = Client.open(provider_uri)
+
+        logger.info(f"Querying STAC URI: {provider_uri}")
+        search = catalog.search(
+            collections=collections,
+            intersects=roi,
+            datetime=[start_date.isoformat(), end_date.isoformat()],
+        )
+
+        return search.item_collection_as_dict()

@@ -6,6 +6,7 @@ import sentinelsat
 import logging
 import datetime
 import shapely
+import shapely.geometry
 from earth_extractor.satellites import enums
 from earth_extractor import core
 import tenacity
@@ -44,15 +45,6 @@ class CopernicusOpenAccessHub(Provider):
         # If cloud cover percentage is 100, set to None for API
         if cloud_cover == 100:
             cloud_cover = None
-
-        if satellite.name not in self.satellites:
-            raise ValueError(
-                f"Satellite {satellite.name} not supported by Copernicus "
-                f"Open Access Hub. Available satellites: {self.satellites}"
-            )
-        # logger.info(f"Satellite: {satellite.name} "
-        #             f"({self.satellites[satellite.name]}) "
-        #             f"{processing_level.value}")
 
         # Variable to combine all CommonSearchResult objects into one
         all_products = []
@@ -177,11 +169,6 @@ copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
     name="scihub",
     description="Copernicus Open Access Hub",
     uri="https://scihub.copernicus.eu",
-    satellites={
-        enums.Satellite.SENTINEL1: "Sentinel-1",
-        enums.Satellite.SENTINEL2: "Sentinel-2",
-        enums.Satellite.SENTINEL3: "Sentinel-3",
-    },
     products={
         (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): ["GRD"],
         (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): ["S2MSI1C"],

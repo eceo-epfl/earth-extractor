@@ -89,25 +89,31 @@ poetry run earth-extractor batch \
 The following satellites and respective processing levels are
 included in the design:
 
-* Sentinel-1
-    * Level 1 (GRD)
-    * Level 2 (GRD_SIGMA0)
-* Sentinel-2
-    * Level 1C
-    * Level 2A
-* Sentinel-3
-    * Level 1B
-    * Level 2
-        * LFR Atmos (Land)
-        * WFR Atmos (Water)
+
+| **Satellite** | **Levels**            | **Search provider**               | **Download provider**             |
+|---------------|-----------------------|-----------------------------------|-----------------------------------|
+| **Sentinel-1**| 1 (GRD)               | SCIHUB                            | Alaskan Satellite Facility        |
+|               | 2 (GRD_SIGMA0)        | SCIHUB                            | SCIHUB                            |
+| **Sentinel-2**| 1C                    | SCIHUB                            | SCIHUB                            |
+|               | 2A                    | SCIHUB                            | SCIHUB                            |
+| **Sentinel-3**| 1B                    | SCIHUB                            | SCIHUB                            |
+|               | 2                     | SCIHUB                            | SCIHUB                            |
+|               | 3 LFR Atmos (Land)    | SCIHUB                            | SCIHUB                            |
+|               | 3 WFR Atmos (Water)   | SCIHUB                            | SCIHUB                            |
+| **MODIS Terra**| 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
+| **MODIS Aqua** | 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
+| **VIIRS**      | 1                    | NASA Common Metadata Repository   | NASA LAADS                        |
+
+
+
 
 ### Providers
 
 * Copernicus Open Access Hub (SCIHUB)
     * For searching capabilities
 * Alaskan Satellite Facility
-    * Sentinel 1
+    * Sentinel 1 (Used for Sentinel-1 data), generally faster than SCIHUB
 * Sinergise
-    * Sentinel 2
+    * Sentinel 2 (Not yet implemented)
 * NASA Common Metadata Repository
     * Sentinel 3
