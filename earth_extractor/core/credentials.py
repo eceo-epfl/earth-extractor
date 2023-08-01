@@ -16,9 +16,7 @@ class Credentials(BaseSettings):
     SCIHUB_USERNAME: Optional[str] = None
     SCIHUB_PASSWORD: Optional[str] = None
 
-    # NASA API (For Alaska Satellite Facility)
-    NASA_USERNAME: Optional[str] = None
-    NASA_PASSWORD: Optional[str] = None
+    # NASA (For Alaska Satellite Facility and NASA Common Metadata Repository)
     NASA_TOKEN: Optional[str] = None
 
     # Sinergise Sentinel Hub
@@ -109,5 +107,5 @@ def delete_credential(key) -> None:
     keyring.delete_password(core.config.constants.KEYRING_ID, key)
 
 
-def get_credentials() -> None:
+def get_credentials() -> Credentials:
     return Credentials()

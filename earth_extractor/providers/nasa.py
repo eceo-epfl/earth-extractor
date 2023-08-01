@@ -74,16 +74,6 @@ class NASACommonMetadataRepository(Provider):
 
         return common_results
 
-    # @tenacity.retry(
-    #     retry=tenacity.retry_if_exception_type(
-    #         sentinelsat.exceptions.ServerError
-    #     ),
-    #     stop=tenacity.stop_after_attempt(
-    #         core.config.constants.MAX_DOWNLOAD_ATTEMPTS
-    #     ),
-    #     wait=tenacity.wait_fixed(90),  # API rate limit is 90req/60s
-    #     reraise=True
-    # )
     def download_many(
         self,
         search_results: List[CommonSearchResult],
@@ -109,58 +99,13 @@ class NASACommonMetadataRepository(Provider):
         """
 
         # Convert the search results to a list of URIs
-        urls: List[AnyUrl] = [x.url for x in search_results if x.url]
+        urls: List[str] = [str(x.url) for x in search_results if x.url]
 
         auth_header = {"Authorization": f"Bearer {credentials.NASA_TOKEN}"}
 
         for url in urls:
             try:
-                with requests.get(
-                    url, stream=True, headers=auth_header
-                ) as resp:
-                    if resp.status_code == 200:
-                        if "text/html" in resp.headers["Content-Type"]:
-                            # We definitely don't want to download HTML when
-                            # expecting a binary file. This is likely due to
-                            # an expired token, auth error or NASA issue.
-
-                            if (  # Try to determine the error
-                                "We are currently having issues verifying "
-                                "your request. Please try again later"
-                                in resp.content.decode("utf-8")
-                            ):
-                                error_msg = (
-                                    "NASA CMR: Server error in verifying "
-                                    f"request with URL '{url}'. This is most "
-                                    "likely a server error. "
-                                )
-                            else:
-                                error_msg = (
-                                    "NASA CMR: Received an unknown HTML "
-                                    f"response downloading '{url}', this "
-                                    "could be an issue with your credentials "
-                                    "or a NASA server error."
-                                )
-                            error_msg += (
-                                "Check the NASA Alerts & Issues page at "
-                                "https://ladsweb.modaps.eosdis.nasa.gov/alerts-and-issues/"  # noqa: E501
-                            )
-                            raise RuntimeError(error_msg)
-                    # resp.raw
-                    output_path = os.path.join(
-                        download_dir,
-                        url.split("/")[-1],
-                    )
-                    with open(output_path, "wb") as dest:
-                        with tqdm.tqdm(
-                            desc=url,
-                            unit="iB",
-                            unit_scale=True,
-                            unit_divisor=1024,
-                        ) as bar:
-                            for chunk in resp.iter_content(chunk_size=4096):
-                                if chunk:  # filter out keep-alive new chunks
-                                    dest.write(chunk)
+                core.utils.download_parallel(urls, download_dir, auth_header)
             except RuntimeError as e:
                 # Log the exception and continue to the next file
                 logger.error(e)

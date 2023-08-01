@@ -34,9 +34,8 @@ class AlaskanSateliteFacility(Provider):
 
         # Authenticate with ASF
         try:
-            session = asf_search.ASFSession().auth_with_creds(
-                username=credentials.NASA_USERNAME,
-                password=credentials.NASA_PASSWORD,
+            session = asf_search.ASFSession().auth_with_token(
+                token=credentials.NASA_TOKEN,
             )
         except asf_search.ASFAuthenticationError as e:
             logger.error(f"ASF authentication error: {e}")

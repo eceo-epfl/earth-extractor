@@ -317,6 +317,7 @@ def download_by_frequency(
 def download_with_progress(
     url: str,
     output_folder: str,
+    headers: Dict[str, str] = {},
 ) -> None:
     """Downloads a file with a progress bar
 
@@ -329,12 +330,37 @@ def download_with_progress(
         The URL to download
     output_folder : str
         The output file base directory
+    headers : Dict[str, str], optional
+        The headers to use for the download, by default {}. This is necessary
+        for some providers that require authentication.
     """
 
-    with requests.get(url, stream=True) as resp:
+    with requests.get(url, stream=True, headers=headers) as resp:
         resp.raise_for_status()
         total_size = int(resp.headers.get("content-length", -1))
 
+        if "text/html" in resp.headers["Content-Type"]:
+            # We definitely don't want to download HTML when
+            # expecting a binary file. This is likely due to
+            # an expired token, auth error or NASA issue.
+
+            if (  # NASA Error
+                "We are currently having issues verifying "
+                "your request. Please try again later"
+                in resp.content.decode("utf-8")
+            ):
+                error_msg = (
+                    "NASA CMR: Server error in verifying "
+                    f"request with URL '{url}'. This is most likely a server "
+                    "error. Check the NASA Alerts & Issues page at "
+                    "https://ladsweb.modaps.eosdis.nasa.gov/alerts-and-issues/"
+                )
+            else:
+                error_msg = (
+                    f"Server error in verifying request with URL '{url}'. "
+                    f"This is most likely a server error. "
+                )
+            raise RuntimeError(error_msg)
         output_file = os.path.join(output_folder, url.split("/")[-1])
 
         with open(output_file, "wb") as dest:
@@ -371,6 +397,7 @@ def download_with_progress(
 def download_parallel(
     urls: List[str],
     output_folder: str,
+    headers: Dict[str, str] = {},
 ) -> None:
     """Downloads the given URLs in parallel
 
@@ -382,6 +409,9 @@ def download_parallel(
         A list of URLs to download
     output_folder : str
         The output file base directory
+    headers : Dict[str, str], optional
+        The headers to use for the download, by default {}. This is necessary
+        for some providers that require authentication.
     """
 
     with ThreadPoolExecutor(
@@ -389,7 +419,9 @@ def download_parallel(
     ) as executor:
         # Map download_item function to the URLs in the specified column
         futures = {
-            executor.submit(download_with_progress, url, output_folder): url
+            executor.submit(
+                download_with_progress, url, output_folder, headers
+            ): url
             for url in urls
         }
 
