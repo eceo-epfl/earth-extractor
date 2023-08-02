@@ -2,11 +2,12 @@ from earth_extractor.core import query
 from earth_extractor.core.models import CommonSearchResult
 from earth_extractor.satellites.base import Satellite
 from earth_extractor.cli_options import SatelliteChoices, ExportMetadataOptions
+from earth_extractor.core.credentials import Credentials
 from collections import OrderedDict
 import os
 import geopandas as gpd
 import datetime
-import shapely
+import shapely.geometry
 import pytest
 import pytest_mock
 

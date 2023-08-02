@@ -1,11 +1,14 @@
 import keyring
 import typer
 import logging
+import sys
 from rich.console import Console
 from rich.table import Table
 from pydantic import BaseSettings, root_validator
 from typing import Dict, Optional
 from earth_extractor import core
+import jwt
+import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
@@ -32,6 +35,23 @@ class Credentials(BaseSettings):
             values[key] = keyring.get_password(
                 core.config.constants.KEYRING_ID, key
             )
+        if "pytest" in sys.modules:  # Populate fake credentials for unit tests
+            return {
+                "SCIHUB_USERNAME": "test",
+                "SCIHUB_PASSWORD": "test",
+                "NASA_TOKEN": jwt.encode(  # JSON Web token
+                    {
+                        "some": "test",
+                        "iat": datetime.datetime.utcnow(),
+                        "exp": datetime.datetime.utcnow()
+                        + datetime.timedelta(days=1),
+                    },
+                    "secret",
+                    algorithm="HS256",
+                ),
+                "SINERGISE_CLIENT_ID": "test",
+                "SINERGISE_CLIENT_SECRET": "test",
+            }
 
         return values
 

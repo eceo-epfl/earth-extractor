@@ -1,6 +1,7 @@
 # flake8: noqa
 import pytest
 from earth_extractor.core.models import BBox
+from earth_extractor.core.credentials import Credentials
 import os
 import shapely.geometry
 from collections import OrderedDict
