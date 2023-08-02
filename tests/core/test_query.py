@@ -95,7 +95,7 @@ def test_batch_query_export_only_pipe(
 
 
 def test_batch_query_export_only_without_export(
-    roi_switzerland: shapely.geometry.box,
+    roi_switzerland: shapely.geometry.base.BaseGeometry,
 ):
     """Test the export only option without an export option
 

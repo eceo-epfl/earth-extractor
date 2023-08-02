@@ -3,13 +3,14 @@ import pytest
 from earth_extractor.core.models import BBox
 from earth_extractor.core.credentials import Credentials
 import os
+import json
 import shapely.geometry
 from collections import OrderedDict
 import datetime
 
 
 @pytest.fixture(scope="session")
-def roi_switzerland() -> shapely.geometry.box:
+def roi_switzerland() -> shapely.geometry.base.BaseGeometry:
     """Return a ROI object for the bounds of Switzerland"""
 
     return BBox(
@@ -29,6 +30,27 @@ def resource_path_query() -> str:
     """Return the path to the test query resources"""
 
     return os.path.join(os.getcwd(), "tests", "resources", "query")
+
+
+@pytest.fixture
+def nasa_stac_query_response(resource_path_query) -> OrderedDict:
+    """Return a real response from NASA's STAC
+
+    Query on:
+        `earth-extractor batch --roi 45.81,5.95,47.81,10.5 --start 2022-11-19
+          --end 2022-11-20 --satellite VIIRS:L1`
+    """
+
+    with open(
+        os.path.join(
+            resource_path_query,
+            "nasa-stac-query-response.json",
+        ),
+        "r",
+    ) as f:
+        nasa_stac = f.read()
+
+    return json.loads(nasa_stac)
 
 
 @pytest.fixture(scope="session")

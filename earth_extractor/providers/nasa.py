@@ -35,14 +35,15 @@ class NASACommonMetadataRepository(Provider):
         self._check_credentials_exist()
 
         logger.info("Querying NASA Common Metadata Repository")
-        features = self.query_stac(
+        res = self.query_stac(
             # Make URI more generic? MODIS/VIIRS both use LAADS for now
             provider_uri=f"{self.uri}/stac/LAADS",
             collections=self.products[(satellite.name, processing_level)],
             roi=roi,
             start_date=start_date,
             end_date=end_date,
-        )["features"]
+        )
+        features = res["features"]
 
         logger.info(f"NASA CMR: Found {len(features)} files to download")
 
