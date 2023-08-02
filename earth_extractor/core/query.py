@@ -160,7 +160,7 @@ def batch_query(
                 start_date=start,
                 end_date=end,
                 frequency=interval_frequency,
-                query_results_dict=res,
+                query_results=res,
                 filter_field="cloud_cover_percentage",
             )
 

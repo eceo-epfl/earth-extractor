@@ -5,6 +5,7 @@ import datetime
 import os
 import shapely.geometry
 from earth_extractor.core.models import CommonSearchResult
+from earth_extractor.core.credentials import get_credentials
 from pystac_client import Client
 
 if TYPE_CHECKING:
@@ -13,6 +14,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
+
+credentials = get_credentials()
 
 
 class Provider:
@@ -24,6 +27,7 @@ class Provider:
         products: Dict[
             Tuple["enums.Satellite", "enums.ProcessingLevel"], List[Any]
         ] = {},
+        credentials_required: List[Optional[str]] = [],
     ):
         """A provider of satellite data
 
@@ -51,7 +55,16 @@ class Provider:
                     ["IW", "EW"]
             }
             by default {}
-
+        credentials_required : List[Optional[str]], optional
+            A list of credentials required by the provider, by default []. The
+            value should be a string representation of the field in the
+            earth_extractor.core.credentials.Credentials class. For example,
+            the Copernicus Open Access Hub requires the credentials
+            SCIHUB_USERNAME and SCIHUB_PASSWORD, so the value would be
+            ["SCIHUB_USERNAME", "SCIHUB_PASSWORD"]. A check can be done on the
+            existance of these vars using the _check_credentials_exist() method
+            to determine whether these credentials are set, and if not, an
+            error is raised.
         Raises
         ------
         NotImplementedError
@@ -61,6 +74,7 @@ class Provider:
         self.description = description
         self.uri = uri
         self.products = products
+        self.credentials_required = credentials_required
 
     def query(
         self,
@@ -174,3 +188,13 @@ class Provider:
         )
 
         return search.item_collection_as_dict()
+
+    def _check_credentials_exist(self) -> None:
+        for credential in self.credentials_required:
+            if getattr(credentials, credential) is None:
+                raise ValueError(
+                    f"Credential '{credential}' for {self.name} is required "
+                    "but its value has not been set, please set the "
+                    "credential with the command "
+                    "`earth-extractor credentials --set`"
+                )

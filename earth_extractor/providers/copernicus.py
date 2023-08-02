@@ -33,7 +33,9 @@ class CopernicusOpenAccessHub(Provider):
     ) -> List[Dict[Any, Any]]:
         """Query the Copernicus Open Access Hub for data"""
 
-        # logger.info("Querying Copernicus Open Access Hub")
+        # Check that the provider's credentials that are needed are set
+        self._check_credentials_exist()
+
         try:
             api = sentinelsat.SentinelAPI(
                 credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
@@ -120,16 +122,19 @@ class CopernicusOpenAccessHub(Provider):
         -------
         None
         """
+        # Check that the provider's credentials that are needed are set
+        self._check_credentials_exist()
+
         logger.addHandler(sentinelsat.SentinelAPI.logger)
 
         # Convert the search results to a list of product ids
-        search_results = [result.product_id for result in search_results]
+        product_ids = [result.product_id for result in search_results]
 
         api = sentinelsat.SentinelAPI(
             credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
         )
         api.download_all(
-            search_results,
+            product_ids,
             directory_path=download_dir,
             n_concurrent_dl=processes,
             checksum=True,
@@ -139,7 +144,18 @@ class CopernicusOpenAccessHub(Provider):
     def translate_search_results(
         self, provider_search_results: Dict[Any, Any]
     ) -> List[CommonSearchResult]:
-        """Translate search results from a provider to a common format"""
+        """Translate search results from a provider to a common format
+
+        Parameters
+        ----------
+        provider_search_results : Dict[Any, Any]
+            The search results from the provider
+
+            Returns
+            -------
+            List[CommonSearchResult]
+                The search results in a common format
+        """
 
         common_results = []
         for id, props in provider_search_results.items():
@@ -179,4 +195,5 @@ copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
             "OL_2_WFR___",
         ],
     },
+    credentials_required=["SCIHUB_USERNAME", "SCIHUB_PASSWORD"],
 )

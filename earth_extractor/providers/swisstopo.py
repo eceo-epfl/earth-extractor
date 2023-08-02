@@ -1,4 +1,3 @@
-import tenacity
 from earth_extractor.providers import Provider
 import logging
 from earth_extractor.satellites import enums
@@ -7,15 +6,9 @@ from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
 from typing import Any, List, TYPE_CHECKING, Optional
 import pyproj
-from shapely.geometry import box
 from shapely.ops import transform
-from pydantic import AnyUrl
-import os
 import datetime
-import tqdm
 import shapely.geometry
-from shapely.geometry import Polygon
-from pystac_client import Client
 import requests
 
 
@@ -123,6 +116,10 @@ class SwissTopo(Provider):
         # one line per file by splitting by newline char
         file_list = res.content.decode("utf-8").split("\n")
 
+        if len(file_list) == 0 or (len(file_list) == 1 and file_list[0] == ""):
+            logger.info(f"{self.name}: No results found for query")
+            return []
+
         # We can try and make an assumption that the returned addresses stated:
         # https://<url>/swissimage-dop10_<i>_<j>-<k>/filename.tif can relate to
         # the following:
@@ -131,7 +128,6 @@ class SwissTopo(Provider):
         # k = unknown (tile #?)
         # We can then filter the results based on the year we want to download
         # and then download the files.
-
         filtered_file_list = []
         for url_path in file_list:
             subpath, _filename = url_path.split("/")[-2:]
@@ -153,18 +149,20 @@ class SwissTopo(Provider):
                     " This breaks the assumption of yearly filtering. Please "
                     "report this issue to the developers."
                 )
-        [logger.debug(f"{self.name}: {x}") for x in filtered_file_list]
 
         logger.info(
             f"{self.name}: Found {len(filtered_file_list)} files to download"
         )
 
-        records = self.translate_search_results(filtered_file_list, resolution)
+        records = self.translate_search_results(
+            provider_search_results=filtered_file_list, resolution=resolution
+        )
 
         return records
 
     def translate_search_results(
         self,
+        *,
         provider_search_results: Any,
         resolution: str,
     ) -> List[CommonSearchResult]:
@@ -198,8 +196,8 @@ class SwissTopo(Provider):
         Uses the common download utility with progress bar
         """
 
-        search_results = [str(x.url) for x in search_results]
-        core.utils.download_parallel(search_results, download_dir)
+        urls = [str(x.url) for x in search_results]
+        core.utils.download_parallel(urls, download_dir)
 
 
 swiss_topo: SwissTopo = SwissTopo(

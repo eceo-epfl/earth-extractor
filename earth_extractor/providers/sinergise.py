@@ -1,7 +1,10 @@
 from earth_extractor.providers import Provider
 from earth_extractor import core
 from typing import Any, List, TYPE_CHECKING, Optional
-from sentinelhub import DataCollection, SHConfig, SentinelHubCatalog
+
+# from sentinelhub.api.catalog import SentinelHubCatalog
+# from sentinelhub.config import SHConfig
+from sentinelhub.data_collections import DataCollection
 import logging
 import datetime
 from earth_extractor.satellites import enums
@@ -25,6 +28,11 @@ class SinergiseSentinelHub(Provider):
         end_date: datetime.datetime,
         cloud_cover: Optional[int] = None,
     ) -> List[Any]:
+        """Query the Sinergise Sentinel Hub for data"""
+
+        # Check that the provider's credentials that are needed are set
+        self._check_credentials_exist()
+
         logger.info("Querying Sinergise Sentinel Hub")
         if (
             credentials.SINERGISE_CLIENT_SECRET
@@ -36,11 +44,11 @@ class SinergiseSentinelHub(Provider):
                 "in the config file."
             )
 
-        config = SHConfig(
-            credentials.SINERGISE_CLIENT_ID,
-            credentials.SINERGISE_CLIENT_SECRET,
-        )
-        catalog = SentinelHubCatalog(config=config)
+        # config = SHConfig(
+        #     sh_client_id=credentials.SINERGISE_CLIENT_ID,
+        #     sh_client_secret=credentials.SINERGISE_CLIENT_SECRET,
+        # )
+        # catalog = SentinelHubCatalog(config=config)
 
         logger.info(
             f"Satellite: {satellite.name} ({satellite.name}) "
@@ -73,4 +81,5 @@ sinergise: SinergiseSentinelHub = SinergiseSentinelHub(
             DataCollection.SENTINEL2_L2A
         ],
     },
+    credentials_required=["SINERGISE_CLIENT_SECRET", "SINERGISE_CLIENT_ID"],
 )

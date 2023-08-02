@@ -102,6 +102,10 @@ def roi_from_geojson(geojson: str) -> GeometryCollection:
             "GeoJSON is a collection, only considering first element: "
             f"{geometry}"
         )
+    if geometry is None:
+        raise ValueError(
+            f"Could not extract geometry from GeoJSON file: {geojson}"
+        )
 
     return geometry
 
@@ -212,7 +216,7 @@ def download_by_frequency(
     start_date: datetime.datetime,
     end_date: datetime.datetime,
     frequency: TemporalFrequency,
-    query_results_dict: List[core.models.CommonSearchResult],
+    query_results: List[core.models.CommonSearchResult],
     filter_field: str = "cloud_cover_percentage",
 ) -> List[core.models.CommonSearchResult]:
     """With the given start and end dates and a frequency, choose the
@@ -245,15 +249,16 @@ def download_by_frequency(
     """
 
     # Convert the query results to a list of dicts
-    query_results_dict = [asdict(x) for x in query_results_dict]
+    query_results_dict = [asdict(x) for x in query_results]
 
     # If filter_field is not in the query results, raise an error
-    cleaned_query_results: Dict[Any, Any] = []
+    cleaned_query_results: List[Dict[Any, Any]] = []
     for result in query_results_dict:
         if result[filter_field] is None:
             logger.warning(
                 f"Filter field {filter_field} not in query result "
-                f"for identifier: {result['identifier']}, ignoring."
+                f"for ID: {result['product_id']} ({result['satellite']}), "
+                "ignoring."
             )
             logger.debug(f"Query result ignored: {result}")
         else:
@@ -262,8 +267,9 @@ def download_by_frequency(
     # Raise exception if there are no results
     if len(cleaned_query_results) == 0:
         raise ValueError(
-            f"Filter field {filter_field} not in any query results, "
-            f"cannot filter."
+            f"Filter field '{filter_field}', used to define this frequency "
+            "filter is not in any of the query results, therefore, "
+            "no results are returned and no download will be attempted. "
         )
 
     df = pd.DataFrame.from_dict(cleaned_query_results)
@@ -285,7 +291,7 @@ def download_by_frequency(
         how="inner",
     )
 
-    results = [
+    results: List[CommonSearchResult] = [
         core.models.CommonSearchResult(**x)
         for x in filtered.to_dict("records")
     ]
@@ -300,8 +306,8 @@ def download_by_frequency(
 
     logger.info(
         f"Interval operation filtered {len(query_results_dict)} to "
-        f"{len(results)} results on {result.satellite} "
-        f"({result.processing_level})."
+        f"{len(results)} results on {results[0].satellite} "
+        f"({results[0].processing_level})."
     )
 
     return results
@@ -324,6 +330,12 @@ def download_with_progress(
     The output file is the same filename as the original, and is saved to
     the output_folder.
 
+    This function is used for downloading binary files from data providers. If
+    a HTML content-type is provided, it is assumed that the download failed
+    and the function will raise an error. This is necessary to check for
+    example in the case of NASA where some errors are returned as a 200: OK but
+    with a HTML error message.
+
     Parameters
     ----------
     url : str
@@ -343,7 +355,6 @@ def download_with_progress(
             # We definitely don't want to download HTML when
             # expecting a binary file. This is likely due to
             # an expired token, auth error or NASA issue.
-
             if (  # NASA Error
                 "We are currently having issues verifying "
                 "your request. Please try again later"

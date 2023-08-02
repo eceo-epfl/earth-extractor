@@ -5,14 +5,9 @@ from earth_extractor import core
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
 from typing import Any, List, TYPE_CHECKING, Optional
-from pydantic import AnyUrl
-import os
 import datetime
-import tqdm
 import shapely.geometry
 from shapely.geometry import Polygon
-from pystac_client import Client
-import requests
 
 
 if TYPE_CHECKING:
@@ -35,6 +30,9 @@ class NASACommonMetadataRepository(Provider):
         cloud_cover: Optional[int] = None,
     ) -> List[CommonSearchResult]:
         """Query the NASA Common Metadata Repository with STAC"""
+
+        # Check that the provider's credentials that are needed are set
+        self._check_credentials_exist()
 
         logger.info("Querying NASA Common Metadata Repository")
         features = self.query_stac(
@@ -99,7 +97,11 @@ class NASACommonMetadataRepository(Provider):
         """
 
         # Convert the search results to a list of URIs
-        urls: List[str] = [str(x.url) for x in search_results if x.url]
+
+        # Check that the provider's credentials that are needed are set
+        self._check_credentials_exist()
+
+        urls = [str(x.url) for x in search_results if x.url]
 
         auth_header = {"Authorization": f"Bearer {credentials.NASA_TOKEN}"}
 
@@ -136,4 +138,5 @@ nasa_cmr: NASACommonMetadataRepository = NASACommonMetadataRepository(
         ],
     },
     uri="https://cmr.earthdata.nasa.gov",
+    credentials_required=["NASA_TOKEN"],
 )
