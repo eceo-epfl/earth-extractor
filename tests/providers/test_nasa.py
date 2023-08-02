@@ -4,6 +4,7 @@ from earth_extractor.core.models import BBox, CommonSearchResult
 from earth_extractor.satellites import enums, viirs
 from datetime import datetime
 import shapely.geometry
+import shapely.wkt
 import pytest
 import pytest_mock
 import sentinelsat
@@ -35,5 +36,33 @@ def test_query(
     )
 
     assert isinstance(res, List)
+
+    # Check all items are consistent and match CommonSearchResult, also check
+    # individual object
+    match = False
     for item in res:
         assert isinstance(item, CommonSearchResult)
+        assert isinstance(item.geometry, shapely.geometry.base.BaseGeometry)
+        assert item.url
+        assert "LAADS:" in item.product_id
+        print(item.geometry)
+
+        if item.product_id == "LAADS:7188953671":
+            match = True
+            assert (
+                item.url
+                == "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.0042.021.2022323075217.nc"
+            ), "URL does not match"
+            assert item.geometry == shapely.wkt.loads(
+                """
+                POLYGON ((
+                    55.698326 58.563728,
+                    -4.459558 67.617805,
+                    -1.602174 46.916576,
+                    35.867203 41.203663,
+                    55.698326 58.563728
+                ))
+                """
+            ), "Geometry does not match"
+
+    assert match is True, "Product ID 'LAADS:7188953671' not found in response"
