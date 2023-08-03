@@ -1,7 +1,8 @@
 # flake8: noqa
 import pytest
-from earth_extractor.core.models import BBox
+from earth_extractor.core.models import BBox, CommonSearchResult
 from earth_extractor.core.credentials import Credentials
+from earth_extractor.providers import copernicus_scihub
 import os
 import json
 import shapely.geometry
@@ -209,3 +210,12 @@ def scihub_query_response() -> OrderedDict:
             ),
         ]
     )
+
+
+@pytest.fixture(scope="session")
+def sentinel_query_as_commonsearch_result(
+    scihub_query_response: OrderedDict,
+) -> list[CommonSearchResult]:
+    """A file id for downloading from the ASF API"""
+
+    return copernicus_scihub.translate_search_results(scihub_query_response)
