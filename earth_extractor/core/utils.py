@@ -199,9 +199,18 @@ def parse_roi(
         roi_obj = core.models.Point.from_string(roi).to_shapely()
     else:
         # Otherwise, consider it a path to a GeoJSON file
-        roi_obj = roi_from_geojson(roi)
-        if roi_obj.geom_type == "Point" and buffer == 0:
-            raise ValueError("Buffer must be greater than 0 for a point ROI.")
+        try:
+            roi_obj = roi_from_geojson(roi)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                f"GeoJSON file not found: {roi}. If you are trying to "
+                f"specify a BBox or Point, please ensure you are using the "
+                f"correct format. See the help message for more information."
+            ) from e
+        if roi_obj.geom_type == 'Point' and buffer == 0:
+            raise ValueError(
+                "Buffer must be greater than 0 for a point ROI."
+            )
 
     logger.debug(f"Input ROI: {roi_obj}")
 
