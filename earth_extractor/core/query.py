@@ -164,28 +164,49 @@ def batch_query(
                 filter_field="cloud_cover_percentage",
             )
 
+        msg_summary = (
+            f"Satellite: {sat}, Level: {level.value}. "
+            f"Results qty: ({len(res)})"
+        )
+
         # If the user wants to export the results, do so
         if export != cli_options.ExportMetadataOptions.DISABLED.value:
             # Convert the results to a GeoDataFrame
             gdf = convert_query_results_to_geodataframe(res)
 
             if export == cli_options.ExportMetadataOptions.PIPE.value:
-                logger.info("Printing GeoJSON results to console")
-                print(gdf.to_json())
+                import json
+
+                [print(x) for x in json.loads(gdf.to_json())["features"]]
+
             elif export == cli_options.ExportMetadataOptions.FILE.value:
+                # Warn the user that swiss image 10 and 200cm data is not going
+                # to have the correct geometry. Do this only in the FILE output
+                # as to not corrupt the PIPE output.
+                logger.warning(
+                    "Due to the limits of the SwissImage API, the boundaries "
+                    "of SwissImage will reflect only the geometry of the "
+                    "given ROI in the query. See comments "
+                    "within the code for more information."
+                )
+                logger.info(msg_summary)  # As to not pollute PIPE output
+
+            if sat == cli_options.Satellites.SWISSIMAGE.value:
                 export_query_results_to_geojson(gdf, output_dir)
-
-        if results_only:
-            sys.exit()
-
-        logger.info(
-            f"Satellite: {sat}, Level: {level.value}. "
-            f"Results qty: ({len(res)})"
-        )
+        else:
+            logger.info(msg_summary)  # As to not pollute PIPE output
 
         # Append results to a list with associated satellite in order to use
         # its defined download provider
         all_results.append((sat, res))
+
+    if results_only or export == cli_options.ExportMetadataOptions.PIPE.value:
+        """Exit on results only or PIPE export
+
+        If the application does not exit on PIPE, the user's command will
+        not stop executing
+        """
+        sys.exit()
 
     return all_results
 

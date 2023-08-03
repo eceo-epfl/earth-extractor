@@ -159,6 +159,9 @@ class Provider:
     ) -> Dict[str, str]:
         """A generic STAC query method for providers that support STAC
 
+        Input geometry will be converted to a bounding box as some queries will
+        fail with complex geometries.
+
         Parameters
         ----------
         provider_uri : str
@@ -180,10 +183,13 @@ class Provider:
 
         catalog = Client.open(provider_uri)
 
+        # Convert roi to bbox STAC does not like complicated geometries
+        roi_bbox = shapely.geometry.box(*roi.bounds)
+
         logger.info(f"Querying STAC URI: {provider_uri}")
         search = catalog.search(
             collections=collections,
-            intersects=roi,
+            intersects=roi_bbox,
             datetime=[start_date.isoformat(), end_date.isoformat()],
         )
 

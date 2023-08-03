@@ -36,7 +36,6 @@ class NASACommonMetadataRepository(Provider):
 
         logger.info("Querying NASA Common Metadata Repository")
         res = self.query_stac(
-            # Make URI more generic? MODIS/VIIRS both use LAADS for now
             provider_uri=f"{self.uri}/stac/LAADS",
             collections=self.products[(satellite.name, processing_level)],
             roi=roi,
@@ -59,11 +58,14 @@ class NASACommonMetadataRepository(Provider):
             # Get the satellite and processing level from reversed mapping of
             # the provider's "products" dictionary
             sat, level = self._products_reversed[record["collection"]]
+            datetime_obj = datetime.datetime.strptime(
+                record["properties"]["datetime"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
 
             common_results.append(
                 CommonSearchResult(
                     product_id=record["id"],
-                    time=record["properties"]["datetime"],
+                    time=datetime_obj,
                     geometry=Polygon(record["geometry"]["coordinates"][0]),
                     url=record["assets"]["data"]["href"],
                     processing_level=level,

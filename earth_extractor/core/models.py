@@ -81,7 +81,7 @@ class Point(BaseModel):
         if isinstance(v, str):
             values = [float(x) for x in v.split(",")]
 
-            return cls(lat=values[0], lon=values[1])
+            return cls(lat=values[1], lon=values[0])
 
     def __str__(self):
         return f"{self.lat},{self.lon}"
@@ -123,6 +123,7 @@ class CommonSearchResult:
 
     geometry: Optional[str] = None  # Should be as WKT
     url: Optional[AnyUrl] = None
+    notes: Optional[str] = None
 
     # Create function to convert this dataclass to geojson including all fields
     # and casting enums to their values

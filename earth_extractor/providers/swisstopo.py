@@ -98,9 +98,28 @@ class SwissTopo(Provider):
             f"&xMin={x_min}&yMin={y_min}&xMax={x_max}&yMax={y_max}&csv=true"
         )
 
+        # It is possible to get the geometry via this request, but the data
+        # does not contain any links to crossreference to the download link.
+        # It is also possible to perform a query without geometry_only and csv
+        # to be given a list of links with geometries, but there is a server
+        # limit set that if you hit it, you are returned with no data
+        # and limit=True in the response. Therefore, it is a balance of either
+        # getting the geometry and no links, or links and no geometry. The
+        # latter is preferred as we can at least download the data.
+
+        # url = (
+        #     "https://ogd.swisstopo.admin.ch/services/swiseld/services/assets/"
+        #     f"{product}/search"
+        #     "?format=image/tiff; application=geotiff; "
+        #     f"profile=cloud-optimized&{resolution}&srid={request_epsg}"
+        #     f"&state={year_collection if year_collection is not None else ''}"
+        #     f"&from={start_date_unix}&to={end_date_unix}"
+        #     f"&xMin={x_min}&yMin={y_min}&xMax={x_max}&yMax={y_max}"
+        #     "&geometry_only=true"
+        # )
+
         res = requests.get(url)
         res.raise_for_status()
-
         logger.debug(f"Unix time: {start_date_unix}, {end_date_unix}")
         logger.debug(f"Bounds {x_min}, {y_min}, {x_max}, {y_max}")
 
@@ -155,7 +174,9 @@ class SwissTopo(Provider):
         )
 
         records = self.translate_search_results(
-            provider_search_results=filtered_file_list, resolution=resolution
+            provider_search_results=filtered_file_list,
+            resolution=resolution,
+            roi=roi,
         )
 
         return records
@@ -165,8 +186,20 @@ class SwissTopo(Provider):
         *,
         provider_search_results: Any,
         resolution: str,
+        roi: shapely.geometry.base.BaseGeometry,
     ) -> List[CommonSearchResult]:
-        """Translate search results from a provider to a common format"""
+        """Translate search results from a provider to a common format
+
+        As explained above in comments, the SwissTopo API does not provide any
+        geometry information. Therefore, we must use the ROI that was used to
+        query the API to create a geometry for each result. This is not ideal
+        as the geometry is not the exact geometry of the image, but it is the
+        best we can do with the information provided by the API.
+
+        If this is resolved at a later date it may be worth removing the
+        warning message when doing an export that includes swissimage in
+        query.py.
+        """
 
         sat, level = self._products_reversed[resolution]
 
@@ -178,6 +211,13 @@ class SwissTopo(Provider):
                 CommonSearchResult(
                     url=item,
                     satellite=sat,
+                    geometry=roi.wkt,
+                    processing_level=level,
+                    notes=(
+                        "SwissImage geometry reflects only the given ROI, "
+                        "not the actual boundary of the image. See comments "
+                        "within the code for more information."
+                    ),
                 )
             )
 
