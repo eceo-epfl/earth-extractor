@@ -5,6 +5,7 @@ import logging
 from earth_extractor import core, cli_options
 import os
 import sys
+import orjson
 from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite
 from earth_extractor.core.models import CommonSearchResult
@@ -175,9 +176,7 @@ def batch_query(
             gdf = convert_query_results_to_geodataframe(res)
 
             if export == cli_options.ExportMetadataOptions.PIPE.value:
-                import json
-
-                [print(x) for x in json.loads(gdf.to_json())["features"]]
+                [print(x) for x in orjson.loads(gdf.to_json())["features"]]
 
             elif export == cli_options.ExportMetadataOptions.FILE.value:
                 # Warn the user that swiss image 10 and 200cm data is not going

@@ -4,7 +4,7 @@ from earth_extractor.core.models import BBox, CommonSearchResult
 from earth_extractor.core.credentials import Credentials
 from earth_extractor.providers import copernicus_scihub
 import os
-import json
+import orjson
 import shapely.geometry
 from collections import OrderedDict
 import datetime
@@ -51,7 +51,7 @@ def nasa_stac_query_response(resource_path_query) -> OrderedDict:
     ) as f:
         nasa_stac = f.read()
 
-    return json.loads(nasa_stac)
+    return orjson.loads(nasa_stac)
 
 
 @pytest.fixture(scope="session")
