@@ -21,7 +21,7 @@ better served by the Alaskan Satellite Facility which does not offer such
 filters.
 
 ### Changelog
-Semantic version changes are tracked [here](./CHANGELOG.md).
+Semantic version changes are tracked in the [CHANGELOG](./CHANGELOG.md).
 
 # Getting started
 ## Installation
@@ -58,12 +58,13 @@ Credentials can be obtained from the respective providers:
 * [Copernicus Open Access Hub](https://scihub.copernicus.eu/dhus/#/self-registration)
     * `SCIHUB_USERNAME` and `SCIHUB_PASSWORD`
 
+
 * [Alaskan Satellite Facility](https://asf.alaska.edu/) and [NASA LAADS repository](https://ladsweb.modaps.eosdis.nasa.gov/)
     * `NASA_TOKEN`
     * Obtain the token by registering first at [NASA EarthData](https://urs.earthdata.nasa.gov/users/new), and then in `My Profile`, select `Generate Token` from the top menu and
     `GENERATE TOKEN` from the bottom of the page.
-    * Accept the `Alaska Satellite Facility Data Access` EULA from the `EULAs``
-    menu for access to the ASF data.
+    * Make sure to accept the Alaskan Satellite Facility EULA after registering
+    in [NASA Earth Data: Accept New EULAs](https://urs.earthdata.nasa.gov/users/ejayt/unaccepted_eulas)
 
 * [Sinergise](https://www.sentinel-hub.com)
     * **At the moment this is unused**
@@ -80,9 +81,9 @@ Search for `Sentinel-1 L2` data for Switzerland between the dates
 
 ```bash
 poetry run earth-extractor batch \
-    --roi 45.81 5.95 47.81 10.5 \
+    --roi 45.81,5.95,47.81,10.5 \
     --start 2022-11-19 --end 2022-11-29 \
-    --satellite SENTINEL1:L2
+    --satellite SENTINEL1:L1
 ```
 
 ### SwissImage

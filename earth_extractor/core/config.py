@@ -9,6 +9,7 @@ class Constants(BaseSettings):
     DEFAULT_DOWNLOAD_DIR: str = os.path.join(os.getcwd(), "data")
     GEOJSON_EXPORT_FILENAME: str = f"{COMMON_TIMESTAMP}.geojson"
     MAX_DOWNLOAD_ATTEMPTS: int = 50
+    HIDE_PASSWORD_PROMPT: bool = True
 
     DEFAULT_DOWNLOAD_THREADS: int = 10
     PARRALLEL_PROCESSES_DEFAULT: int = 4

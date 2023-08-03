@@ -122,7 +122,7 @@ def batch(
         help="Output directory for the downloaded files.",
     ),
     cloud_cover: int = typer.Option(
-        100, "--cloud-cover", help=" allowed cloud cover percentage."
+        100, "--cloud-cover", help="Maximum allowed cloud cover percentage."
     ),
     no_confirmation: bool = typer.Option(
         False,
@@ -192,12 +192,14 @@ def batch(
                 logger.info(
                     f"Downloading results for {sat}..." f"({len(res)} items)"
                 )
-
+                
                 # Download the results
                 sat.download_many(
                     search_results=res,
                     download_dir=output_dir,
-                )
+    logger.info(
+        f"Download complete. Your files are in {os.path.abspath(output_dir)}"
+    )
 
 
 @app.command()
@@ -330,6 +332,9 @@ def batch_interval(
                 search_results=res,
                 download_dir=output_dir,
             )
+    logger.info(
+        f"Download complete. Your files are in {os.path.abspath(output_dir)}"
+    )
 
 
 @app.command()
