@@ -192,11 +192,12 @@ def batch(
                 logger.info(
                     f"Downloading results for {sat}..." f"({len(res)} items)"
                 )
-                
+
                 # Download the results
                 sat.download_many(
                     search_results=res,
                     download_dir=output_dir,
+                )
     logger.info(
         f"Download complete. Your files are in {os.path.abspath(output_dir)}"
     )
