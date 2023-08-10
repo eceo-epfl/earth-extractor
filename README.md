@@ -76,7 +76,7 @@ Credentials can be obtained from the respective providers:
 ## Example usage (CLI)
 
 ### Sentinel 1
-Search for `Sentinel-1 L2` data for Switzerland between the dates
+Search for `Sentinel-1 L1` data for Switzerland between the dates
 `2022-11-19` and `2022-11-29`.
 
 ```bash
