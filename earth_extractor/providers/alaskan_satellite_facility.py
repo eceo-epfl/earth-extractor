@@ -17,6 +17,7 @@ class AlaskanSateliteFacility(Provider):
         self,
         search_results: List[core.models.CommonSearchResult],
         download_dir: str,
+        overwrite: bool = False,
         processes: int = 6,
     ) -> None:
         """Download many files from the Alaskan Satellite Facility"""
@@ -59,9 +60,7 @@ class AlaskanSateliteFacility(Provider):
 
             # Download the granules using the ASF API library
             res.download(
-                path=download_dir,
-                session=session,
-                processes=processes
+                path=download_dir, session=session, processes=processes
             )
         except asf_search.ASFAuthenticationError as e:
             logger.error(

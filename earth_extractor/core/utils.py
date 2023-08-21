@@ -207,10 +207,8 @@ def parse_roi(
                 f"specify a BBox or Point, please ensure you are using the "
                 f"correct format. See the help message for more information."
             ) from e
-        if roi_obj.geom_type == 'Point' and buffer == 0:
-            raise ValueError(
-                "Buffer must be greater than 0 for a point ROI."
-            )
+        if roi_obj.geom_type == "Point" and buffer == 0:
+            raise ValueError("Buffer must be greater than 0 for a point ROI.")
 
     logger.debug(f"Input ROI: {roi_obj}")
 
@@ -461,6 +459,7 @@ def download_parallel(
 def download_all_satellites_in_parallel(
     query_results: List[Tuple[Satellite, List[CommonSearchResult]]],
     output_folder: str,
+    overwrite: bool = False,
 ) -> None:
     """Executes each provider download function in parallel
 
@@ -477,6 +476,8 @@ def download_all_satellites_in_parallel(
         The query results, in the internal common format
     output_folder : str
         The output file base directory
+    overwrite : bool, optional
+        Whether to overwrite existing files, by default False
     """
 
     with ThreadPoolExecutor(
@@ -489,6 +490,7 @@ def download_all_satellites_in_parallel(
                 satgroup[0].download_many,
                 search_results=satgroup[1],
                 download_dir=output_folder,
+                overwrite=overwrite,
             ): satgroup
             for satgroup in query_results
         }
@@ -504,3 +506,49 @@ def download_all_satellites_in_parallel(
                 )
             except Exception as e:
                 logger.error(f"{url} generated an exception: {e}")
+
+
+def download(query_results, output_dir, parallel=False, overwrite=False):
+    """The main download function called by the app
+
+    This consolidates the parallel, overwrite functionality and logging that
+    became large enough for the routines that exist in 3+ different CLI
+    commands.
+
+    Parameters
+    ----------
+    query_results : List[Tuple[Satellite, List[CommonSearchResult]]]
+        The query results, in the internal common format
+    output_dir : str
+        The output file base directory
+    parallel : bool, optional
+        Whether to download in parallel, by default False
+    overwrite : bool, optional
+        Whether to overwrite existing files, by default False
+
+    """
+
+    if parallel is True:
+        # Download all of the satellites in parallel at the same time
+        download_all_satellites_in_parallel(
+            query_results,
+            output_dir,
+            overwrite=overwrite,
+        )
+    else:
+        # Download the results using the satellite's download provider
+        for sat, res in query_results:
+            if len(res) > 0:
+                logger.info(
+                    f"Downloading results for {sat}..." f"({len(res)} items)"
+                )
+
+                # Download the results
+                sat.download_many(
+                    search_results=res,
+                    download_dir=output_dir,
+                    overwrite=overwrite,
+                )
+    logger.info(
+        f"Download complete. Your files are in {os.path.abspath(output_dir)}"
+    )

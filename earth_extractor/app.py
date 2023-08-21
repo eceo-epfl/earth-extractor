@@ -47,6 +47,14 @@ def import_geojson(
         "--no-confirmation",
         help="Do not ask for confirmation before downloading",
     ),
+    parallel: bool = typer.Option(
+        True, help="Download all results in parallel"
+    ),
+    overwrite: bool = typer.Option(
+        False,
+        "--overwrite",
+        help="Overwrite existing files in the output directory",
+    ),
 ) -> None:
     """Import a GeoJSON file with metadata to the database
 
@@ -69,18 +77,7 @@ def import_geojson(
             abort=True,
         )
 
-    # Download the results using the satellite's download provider
-    for sat, res in query_results:
-        if len(res) > 0:
-            logger.info(
-                f"Downloading results for {sat}..." f"({len(res)} items)"
-            )
-
-            # Download the results
-            sat.download_many(
-                search_results=res,
-                download_dir=output_dir,
-            )
+    core.utils.download(query_results, output_dir, parallel, overwrite)
 
 
 @app.command()
@@ -143,6 +140,11 @@ def batch(
     parallel: bool = typer.Option(
         True, help="Download all results in parallel"
     ),
+    overwrite: bool = typer.Option(
+        False,
+        "--overwrite",
+        help="Overwrite existing files in the output directory",
+    ),
 ) -> None:
     """Batch download of satellite data with minimal user input"""
 
@@ -180,27 +182,7 @@ def batch(
             abort=True,
         )
 
-    if parallel is True:
-        # Download all of the satellites in parallel at the same time
-        core.utils.download_all_satellites_in_parallel(
-            query_results, output_dir
-        )
-    else:
-        # Download the results using the satellite's download provider
-        for sat, res in query_results:
-            if len(res) > 0:
-                logger.info(
-                    f"Downloading results for {sat}..." f"({len(res)} items)"
-                )
-
-                # Download the results
-                sat.download_many(
-                    search_results=res,
-                    download_dir=output_dir,
-                )
-    logger.info(
-        f"Download complete. Your files are in {os.path.abspath(output_dir)}"
-    )
+    core.utils.download(query_results, output_dir, parallel, overwrite)
 
 
 @app.command()
@@ -271,6 +253,11 @@ def batch_interval(
     parallel: bool = typer.Option(
         True, help="Download all results in parallel"
     ),
+    overwrite: bool = typer.Option(
+        False,
+        "--overwrite",
+        help="Overwrite existing files in the output directory",
+    ),
 ) -> None:
     """Batch download with best cloud cover over a given time period
 
@@ -317,25 +304,7 @@ def batch_interval(
             abort=True,
         )
 
-    if parallel is True:
-        # Download all of the satellites in parallel at the same time
-        core.utils.download_all_satellites_in_parallel(
-            query_results, output_dir
-        )
-    else:
-        # Download the results using the satellite's download provider
-        for sat, res in query_results:
-            logger.info(
-                f"Downloading results for {sat}..." f"({len(res)} items)"
-            )
-            # Download the results
-            sat.download_many(
-                search_results=res,
-                download_dir=output_dir,
-            )
-    logger.info(
-        f"Download complete. Your files are in {os.path.abspath(output_dir)}"
-    )
+    core.utils.download(query_results, output_dir, parallel, overwrite)
 
 
 @app.command()

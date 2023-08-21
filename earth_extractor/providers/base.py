@@ -96,6 +96,7 @@ class Provider:
         self,
         search_results: List[CommonSearchResult],
         download_dir: str,
+        overwrite: bool = False,
         processes: int = 6,
     ) -> Any:
         raise NotImplementedError(
