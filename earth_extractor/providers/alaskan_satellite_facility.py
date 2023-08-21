@@ -59,10 +59,11 @@ class AlaskanSateliteFacility(Provider):
                 return  # nothing to download
 
             # Download the granules using the ASF API library
-            # print(dir(res), type(res))
-            # sys.exit()
             res.download(
-                path=download_dir, session=session, processes=processes
+                path=download_dir,
+                session=session,
+                processes=processes,
+                overwrite=overwrite,
             )
         except asf_search.ASFAuthenticationError as e:
             logger.error(

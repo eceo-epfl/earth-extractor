@@ -39,10 +39,26 @@ from asf_search.exceptions import (
 )
 from asf_search.constants import INTERNAL
 from asf_search.search.error_reporting import report_search_error
+from asf_search.search.search_generator import (
+    preprocess_opts,
+    get_page,
+    process_page,
+)
+from asf_search.download.file_download_type import FileDownloadType
+
+
+""" The following method and class are overriden to support the overwrite
+    argument. Futher below are the functions that this overridden class
+    is injected into
+"""
 
 
 def download_url(
-    url: str, path: str, filename: str = None, session: ASFSession = None
+    url: str,
+    path: str,
+    filename: str = None,
+    session: ASFSession = None,
+    overwrite: bool = False,
 ) -> None:
     """
     Downloads a product from the specified URL to the specified location and (optional) filename.
@@ -51,9 +67,10 @@ def download_url(
     :param path: Local path in which to save the product
     :param filename: Optional filename to be used, extracted from the URL by default
     :param session: The session to use, in most cases should be authenticated beforehand
+    :param overwrite: Whether to overwrite existing files.
     :return:
     """
-    sys.exit("TEST!!!")
+
     if filename is None:
         filename = os.path.split(urllib.parse.urlparse(url).path)[1]
 
@@ -62,11 +79,15 @@ def download_url(
             f"Error downloading {url}: directory not found: {path}"
         )
 
+    # Allow overwriting by modifying the operation of this conditional
     if os.path.isfile(os.path.join(path, filename)):
         warnings.warn(
-            f"File already exists, skipping download: {os.path.join(path, filename)}"
+            f"File already exists: {os.path.join(path, filename)} "
+            f"... {'Overwriting' if overwrite else 'Skipping'}"
         )
-        return
+
+        if not overwrite:  # Don't download
+            return
 
     if session is None:
         session = ASFSession()
@@ -78,29 +99,6 @@ def download_url(
             f.write(chunk)
 
 
-from typing import Iterable
-from copy import copy
-
-# from asf_search.search import search
-from asf_search.ASFSearchOptions import ASFSearchOptions
-from asf_search.ASFSearchResults import ASFSearchResults
-
-from asf_search import ASFProduct
-from asf_search.search.search_generator import (
-    preprocess_opts,
-    get_page,
-    process_page,
-)
-from asf_search.download.file_download_type import FileDownloadType
-
-from typing import Iterable
-from copy import copy
-
-# from asf_search.search import search
-from asf_search.ASFSearchOptions import ASFSearchOptions
-from asf_search.ASFSearchResults import ASFSearchResults
-
-
 class ASFProductExtended(ASFProduct):
     # Extend the class to override the download function
     def download(
@@ -109,6 +107,7 @@ class ASFProductExtended(ASFProduct):
         filename: str = None,
         session: ASFSession = None,
         fileType=FileDownloadType.DEFAULT_FILE,
+        overwrite: bool = False,  # @evanjt Added to support overwriting
     ) -> None:
         """
         Downloads this product to the specified path and optional filename.
@@ -116,7 +115,7 @@ class ASFProductExtended(ASFProduct):
         :param path: The directory into which this product should be downloaded.
         :param filename: Optional filename to use instead of the original filename of this product.
         :param session: The session to use, defaults to the one used to find the results.
-
+        :param overwrite: Whether to overwrite existing files.
         :return: None
         """
 
@@ -159,11 +158,21 @@ class ASFProductExtended(ASFProduct):
             raise ValueError(
                 "Invalid FileDownloadType provided, the valid types are 'DEFAULT_FILE', 'ADDITIONAL_FILES', and 'ALL_FILES'"
             )
-
+        print()
         for filename, url in urls:
             download_url(
-                url=url, path=path, filename=filename, session=session
+                url=url,
+                path=path,
+                filename=filename,
+                session=session,
+                overwrite=overwrite,  # @evanjt Added to support overwriting
             )
+
+
+""" As the search function creates a list of ASFProducts in its return,
+    the following functions are required to inject the ASFProductExtended class
+    containing the overridden download function.
+"""
 
 
 def search_generator(
@@ -254,7 +263,7 @@ def search_generator(
                     items,
                     subquery_max_results,
                     cmr_search_after_header,
-                ) = query_cmr(
+                ) = query_cmr(  # @evanjt: Edited to allow local import
                     opts.session, url, translated_opts, subquery_count
                 )
             except (ASFSearchError, CMRIncompleteError) as e:
@@ -308,7 +317,9 @@ def query_cmr(
     )
 
     items = [
-        ASFProductExtended(f, session=session)
+        ASFProductExtended(  # @evanjt Modified here to support overwriting
+            f, session=session
+        )
         for f in response.json()["items"]
     ]
     hits: int = response.json()[
@@ -425,7 +436,9 @@ def search(
     results = ASFSearchResults([])
 
     # The last page will be marked as complete if results sucessful
-    for page in search_generator(opts=opts):
+    for page in search_generator(  # @evanjt: Use local function for overwrite
+        opts=opts
+    ):
         results.extend(page)
         results.searchComplete = page.searchComplete
         results.searchOptions = page.searchOptions
@@ -455,4 +468,4 @@ def granule_search(
 
     opts.merge_args(granule_list=granule_list)
 
-    return search(opts=opts)
+    return search(opts=opts)  # @evanjt: Use local function for overwrite
