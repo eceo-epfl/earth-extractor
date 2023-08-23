@@ -227,17 +227,29 @@ class SwissTopo(Provider):
         self,
         search_results: List[CommonSearchResult],
         download_dir: str,
+        overwrite: bool = False,
         processes: int = core.config.constants.PARRALLEL_PROCESSES_DEFAULT,
-        *,
-        max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
         """Download many files from the SwissTopo API
 
-        Uses the common download utility with progress bar
+        Parameters
+        ----------
+        search_results : List[str]
+            The search results
+        download_dir : str
+            The directory to download the data to
+        overwrite : bool, optional
+            Whether to overwrite existing files, by default False
+        processes : int, optional
+            The number of processes to use for downloading
+
+        Uses the common download utility with progress bar.
         """
 
         urls = [str(x.url) for x in search_results]
-        core.utils.download_parallel(urls, download_dir)
+        core.utils.download_parallel(
+            urls, download_dir, overwrite=overwrite, processes=processes
+        )
 
 
 swiss_topo: SwissTopo = SwissTopo(
