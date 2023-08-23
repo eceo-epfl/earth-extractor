@@ -15,10 +15,12 @@ Full repository: https://github.com/asfadmin/Discovery-asf_search
 import os.path
 import urllib.parse
 import warnings
+import tqdm
+from earth_extractor import core
 from asf_search.download.download import _try_get_response
 from asf_search.exceptions import ASFDownloadError
-import sys
 import logging
+from multiprocessing import Pool
 from typing import Generator, Union, Iterable, Tuple
 from copy import copy
 from tenacity import (
@@ -37,6 +39,7 @@ from asf_search.exceptions import (
     ASFSearchError,
     CMRIncompleteError,
 )
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from asf_search.constants import INTERNAL
 from asf_search.search.error_reporting import report_search_error
 from asf_search.search.search_generator import (
@@ -46,6 +49,9 @@ from asf_search.search.search_generator import (
 )
 from asf_search.download.file_download_type import FileDownloadType
 
+# We may as well use our internal logger in this case if we have such freedom
+logger = logging.getLogger(__name__)
+logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 """ The following method and class are overriden to support the overwrite
     argument. Futher below are the functions that this overridden class
@@ -81,8 +87,8 @@ def download_url(
 
     # Allow overwriting by modifying the operation of this conditional
     if os.path.isfile(os.path.join(path, filename)):
-        warnings.warn(
-            f"File already exists: {os.path.join(path, filename)} "
+        logger.info(
+            f"File already exists: {os.path.join(filename)} "
             f"... {'Overwriting' if overwrite else 'Skipping'}"
         )
 
@@ -94,9 +100,21 @@ def download_url(
 
     response = _try_get_response(session=session, url=url)
 
-    with open(os.path.join(path, filename), "wb") as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            f.write(chunk)
+    # Improve download process with progress bar
+    total_size = int(response.headers.get("content-length", -1))
+
+    with open(os.path.join(path, filename), "wb") as dest:
+        with tqdm.tqdm(
+            total=total_size,
+            desc=url,
+            unit="iB",
+            unit_scale=True,
+            unit_divisor=1024,
+        ) as bar:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    size = dest.write(chunk)
+                    bar.update(size)
 
 
 class ASFProductExtended(ASFProduct):
@@ -158,7 +176,7 @@ class ASFProductExtended(ASFProduct):
             raise ValueError(
                 "Invalid FileDownloadType provided, the valid types are 'DEFAULT_FILE', 'ADDITIONAL_FILES', and 'ALL_FILES'"
             )
-        print()
+
         for filename, url in urls:
             download_url(
                 url=url,
@@ -469,3 +487,71 @@ def granule_search(
     opts.merge_args(granule_list=granule_list)
 
     return search(opts=opts)  # @evanjt: Use local function for overwrite
+
+
+class ASFSearchResultsExtended(ASFSearchResults):
+    def download(
+        self,
+        path: str,
+        session: ASFSession = None,
+        processes: int = 1,
+        fileType=FileDownloadType.DEFAULT_FILE,
+        overwrite: bool = False,
+    ) -> None:
+        """
+        Iterates over each ASFProduct and downloads them to the specified path.
+
+        :param path: The directory into which the products should be downloaded.
+        :param session: The session to use. Defaults to the session used to fetch the results, or a new one if none was used.
+        :param processes: Number of download processes to use. Defaults to 1 (i.e. sequential download)
+        :param overwrite: Whether to overwrite existing files.
+
+        :return: None
+        """
+        logger.info(
+            f"Started downloading ASFSearchResults of size {len(self)}."
+        )
+        if processes == 1:
+            for product in self:
+                product.download(
+                    path=path,
+                    session=session,
+                    fileType=fileType,
+                    overwrite=overwrite,
+                )
+        else:
+            logger.info(f"Using {processes} threads - starting up pool.")
+
+            with ThreadPoolExecutor(max_workers=processes) as executor:
+                futures = {
+                    executor.submit(
+                        _download_product,
+                        (product, path, session, fileType, overwrite),
+                    )
+                    for product in self
+                }
+                for future in as_completed(futures):
+                    thread_result = futures[future]
+                    try:
+                        result = future.result()
+                        logger.debug(
+                            "Downloaded file successfully (threading): "
+                            f"{thread_result} ({result})"
+                        )
+                    except Exception as e:
+                        logger.error(
+                            f"{thread_result} generated an exception: {e}"
+                        )
+
+    def raise_if_incomplete(self) -> None:
+        if not self.searchComplete:
+            msg = "Results are incomplete due to a search error. See logging for more details. (ASFSearchResults.raise_if_incomplete called)"
+            logger.error(msg)
+            raise ASFSearchError(msg)
+
+
+def _download_product(args) -> None:
+    product, path, session, fileType, overwrite = args
+    product.download(
+        path=path, session=session, fileType=fileType, overwrite=overwrite
+    )

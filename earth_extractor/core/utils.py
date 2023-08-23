@@ -331,6 +331,7 @@ def download_with_progress(
     url: str,
     output_folder: str,
     headers: Dict[str, str] = {},
+    overwrite: bool = False,
 ) -> None:
     """Downloads a file with a progress bar
 
@@ -352,6 +353,8 @@ def download_with_progress(
     headers : Dict[str, str], optional
         The headers to use for the download, by default {}. This is necessary
         for some providers that require authentication.
+    overwrite : bool, optional
+        Whether to overwrite existing files, by default False
     """
 
     with requests.get(url, stream=True, headers=headers) as resp:
@@ -380,6 +383,29 @@ def download_with_progress(
                 )
             raise RuntimeError(error_msg)
         output_file = os.path.join(output_folder, url.split("/")[-1])
+
+        # Check if the file already exists, then apply overwrite policy
+        if os.path.exists(output_file):
+            if overwrite is False:
+                # Check length of existing file matches expected size
+                local_filesize = os.path.getsize(output_file)
+                if total_size != -1 and total_size != local_filesize:
+                    logger.info(
+                        f"File exists {output_file} but does not match "
+                        f"server size (local: {local_filesize} remote: "
+                        f"{total_size}). Redownloading file."
+                    )
+                else:
+                    logger.warning(
+                        f"File already exists: {output_file}, skipping "
+                        "download."
+                    )
+                    return
+            else:
+                logger.warning(
+                    f"File already exists: {output_file}, "
+                    "overwriting existing file."
+                )
 
         with open(output_file, "wb") as dest:
             with tqdm.tqdm(
@@ -416,6 +442,8 @@ def download_parallel(
     urls: List[str],
     output_folder: str,
     headers: Dict[str, str] = {},
+    overwrite: bool = False,
+    processes: int = core.constants.DEFAULT_DOWNLOAD_THREADS,
 ) -> None:
     """Downloads the given URLs in parallel
 
@@ -430,15 +458,18 @@ def download_parallel(
     headers : Dict[str, str], optional
         The headers to use for the download, by default {}. This is necessary
         for some providers that require authentication.
+    overwrite : bool, optional
+        Whether to overwrite existing files, by default False
+    processes : int, optional
+        The number of processes to use for downloading, by default
+        core.constants.DEFAULT_DOWNLOAD_THREADS
     """
 
-    with ThreadPoolExecutor(
-        max_workers=core.constants.DEFAULT_DOWNLOAD_THREADS
-    ) as executor:
+    with ThreadPoolExecutor(max_workers=processes) as executor:
         # Map download_item function to the URLs in the specified column
         futures = {
             executor.submit(
-                download_with_progress, url, output_folder, headers
+                download_with_progress, url, output_folder, headers, overwrite
             ): url
             for url in urls
         }

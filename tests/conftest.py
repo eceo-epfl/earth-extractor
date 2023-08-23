@@ -8,6 +8,7 @@ import orjson
 import shapely.geometry
 from collections import OrderedDict
 import datetime
+from typing import List
 
 
 @pytest.fixture(scope="session")
@@ -215,7 +216,7 @@ def scihub_query_response() -> OrderedDict:
 @pytest.fixture(scope="session")
 def sentinel_query_as_commonsearch_result(
     scihub_query_response: OrderedDict,
-) -> list[CommonSearchResult]:
+) -> List[CommonSearchResult]:
     """A file id for downloading from the ASF API"""
 
     return copernicus_scihub.translate_search_results(scihub_query_response)

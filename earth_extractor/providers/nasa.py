@@ -79,9 +79,8 @@ class NASACommonMetadataRepository(Provider):
         self,
         search_results: List[CommonSearchResult],
         download_dir: str,
+        overwrite: bool = False,
         processes: int = core.config.constants.PARRALLEL_PROCESSES_DEFAULT,
-        *,
-        max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
     ) -> None:
         """Using the search results from query(), download the data
 
@@ -91,7 +90,9 @@ class NASACommonMetadataRepository(Provider):
             The search results
         download_dir : str
             The directory to download the data to
-        processes : int
+        overwrite : bool, optional
+            Whether to overwrite existing files, by default False
+        processes : int, optional
             The number of processes to use for downloading
 
         Returns
@@ -110,7 +111,9 @@ class NASACommonMetadataRepository(Provider):
 
         for url in urls:
             try:
-                core.utils.download_parallel(urls, download_dir, auth_header)
+                core.utils.download_parallel(
+                    urls, download_dir, auth_header, overwrite, processes
+                )
             except RuntimeError as e:
                 # Log the exception and continue to the next file
                 logger.error(e)
