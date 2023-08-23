@@ -11,6 +11,7 @@ def test_authentication_exception(
     sentinel_query_as_commonsearch_result: List[CommonSearchResult],
     mocker: pytest_mock.MockerFixture,
     caplog: pytest.LogCaptureFixture,
+    tmpdir: str,
 ) -> None:
     """Test that an ASFAuthenticationError is raised when the credentials are
     incorrect
@@ -26,7 +27,7 @@ def test_authentication_exception(
 
     # with pytest.raises(asf_search.ASFAuthenticationError):
     asf.download_many(
-        search_results=query, download_dir="asf_testdata", overwrite=False
+        search_results=query, download_dir=str(tmpdir), overwrite=False
     )
 
     for important_text in [
@@ -69,8 +70,8 @@ def test_download_many(
     )
 
     asf.download_many(
-        sentinel_query_as_commonsearch_result,
-        download_dir=tmpdir,
+        search_results=sentinel_query_as_commonsearch_result,
+        download_dir=str(tmpdir),
         overwrite=False,
     )
 
