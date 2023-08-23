@@ -15,7 +15,9 @@ Earthdata STAC service
 - Unit tests for NASA querying
 - Parallelised download common functions in `earth_extractor.core.utils`
 - Progress bar for downloads using the requests library (NASA STAC, SwissTopo)
-
+- Add an `--overwrite` flag to the CLI to overwrite existing files
+- On downloads using the internal download function, if the file size differs,
+the file is redownloaded. This is to prevent incomplete downloads.
 ### Fixed
 - Setting of fake credentials for testing
 
