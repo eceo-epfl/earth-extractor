@@ -26,8 +26,7 @@ def test_authentication_exception(
 
     # with pytest.raises(asf_search.ASFAuthenticationError):
     asf.download_many(
-        search_results=query,
-        download_dir="asf_testdata",
+        search_results=query, download_dir="asf_testdata", overwrite=False
     )
 
     for important_text in [
@@ -69,7 +68,7 @@ def test_download_many(
         autospec=True,
     )
 
-    res = asf.download_many(
+    asf.download_many(
         sentinel_query_as_commonsearch_result,
         download_dir=tmpdir,
         overwrite=False,
@@ -80,4 +79,3 @@ def test_download_many(
         f"Found {len(sentinel_query_as_commonsearch_result)*2} files to "
         "download" in caplog.text
     ), "Expected text not found in log message"
-    os.path.exists(tmpdir)

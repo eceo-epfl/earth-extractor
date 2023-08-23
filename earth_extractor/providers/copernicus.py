@@ -80,7 +80,7 @@ class CopernicusOpenAccessHub(Provider):
 
                 all_products += products
             except sentinelsat.UnauthorizedError as e:
-                logger.error(f"ASF authentication error: {e}")
+                logger.error(f"SentinelSat authentication error: {e}")
                 return []
 
         return all_products
