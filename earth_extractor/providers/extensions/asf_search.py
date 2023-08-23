@@ -451,7 +451,7 @@ def search(
     opts = ASFSearchOptions() if opts is None else copy(opts)
     opts.merge_args(**data)
 
-    results = ASFSearchResults([])
+    results = ASFSearchResultsExtended([])
 
     # The last page will be marked as complete if results sucessful
     for page in search_generator(  # @evanjt: Use local function for overwrite
