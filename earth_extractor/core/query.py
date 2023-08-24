@@ -20,7 +20,7 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 def construct_geojson(
     gdf: gpd.GeoDataFrame,
-    satellites: List[cli_options.SatelliteChoices],
+    satellites: List[str],
     roi: str,
     buffer: float,
     cloud_cover: int,
@@ -41,8 +41,8 @@ def construct_geojson(
     ----------
     gdf : gpd.GeoDataFrame
         The GeoDataFrame
-    satellites : List[cli_options.SatelliteChoices]
-        The satellites
+    satellites : List[str]
+        The satellites IDs as a list of strings
     roi : str
         The ROI
     buffer : float
@@ -63,7 +63,7 @@ def construct_geojson(
 
     geojson_data = orjson.loads(gdf.to_json())
     geojson_data["query_parameters"] = {
-        "satellites": [sat.value for sat in satellites],
+        "satellites": satellites,
         "roi": roi,
         "buffer": buffer,
         "cloud_cover": cloud_cover,
@@ -260,9 +260,19 @@ def batch_query(
 
     if export != cli_options.ExportMetadataOptions.DISABLED.value:
         if export == cli_options.ExportMetadataOptions.FILE.value:
-            # Construct output filename for following function
+            satellite_list = [sat.value for sat in satellites]
+            # Construct output geojson filename
+            # Remove millisecondsfrom the timestamp
+            timestamp = core.config.constants.COMMON_TIMESTAMP.split(".")[0]
+            timestamp = timestamp.replace("-", "")  # Remove symbols
             output_file = os.path.join(
-                output_dir, core.config.constants.GEOJSON_EXPORT_FILENAME
+                # Common timestamp without milliseconds and with summary
+                # of satellites
+                # eg: 20230824T085346_swissimage-cm200_swissimage-cm10.geojson
+                output_dir,
+                f"{timestamp}_"
+                f"{'_'.join(satellite_list).replace(':', '-').lower()}"
+                f".geojson",
             )
         else:
             # Setting as None will print to stdout in construct_geojson()
@@ -270,7 +280,7 @@ def batch_query(
 
         construct_geojson(
             gdf=gdf_all,
-            satellites=satellites,
+            satellites=satellite_list,
             roi=roi,
             buffer=buffer,
             cloud_cover=cloud_cover,
