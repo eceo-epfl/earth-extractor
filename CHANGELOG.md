@@ -18,13 +18,23 @@ Earthdata STAC service
 - Add an `--overwrite` flag to the CLI to overwrite existing files
 - On downloads using the internal download function, if the file size differs,
 the file is redownloaded. This is to prevent incomplete downloads.
+- Metadata to the geojson export file giving the parameters of the search
+query
 ### Fixed
 - Setting of fake credentials for testing
-
+- PIPE output fixed, it was giving a list of the search result objects rather
+than the entire GeoJSON and contains debug msg.
+- GeoJSON output merged together, if there was more than one satellite it
+would be a list of geojsons, now they are just one
+- Isolate the tests from the local keyring by adding the environment variable
+in the pytest properties to use a different keyring.
 ### Changed
 - Type hinting for python 3.8 compatibility by using fixtures in typing module
 - Added `black` for code formatting
-
+- Disable hide prompt in secret generation. Reason: The hidden prompt reduces
+ability to understand if they are typed in correctly and credentials aren't
+very confidential.
+- The geojson filename is a shorter timestamp and includes the satellites.
 
 ## [0.0.2] - 2023-07-17
 
