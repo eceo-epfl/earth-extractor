@@ -3,6 +3,9 @@ from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
 from typing import Any, List, TYPE_CHECKING, Dict, Tuple, Optional
 import sentinelsat
+from earth_extractor.providers.extensions.sentinelsat import (
+    SentinelAPIExtended,
+)
 import logging
 import datetime
 import shapely
@@ -37,7 +40,7 @@ class CopernicusOpenAccessHub(Provider):
         self._check_credentials_exist()
 
         try:
-            api = sentinelsat.SentinelAPI(
+            api = SentinelAPIExtended(
                 credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
             )
         except sentinelsat.UnauthorizedError as e:
@@ -99,6 +102,7 @@ class CopernicusOpenAccessHub(Provider):
         self,
         search_results: List[CommonSearchResult],
         download_dir: str,
+        overwrite: bool = False,
         processes: int = core.config.constants.PARRALLEL_PROCESSES_DEFAULT,
         *,
         max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
@@ -115,6 +119,8 @@ class CopernicusOpenAccessHub(Provider):
             The search results
         download_dir : str
             The directory to download the data to
+        overwrite : bool
+            Whether to overwrite existing files
         processes : int
             The number of processes to use for downloading
 
@@ -130,7 +136,7 @@ class CopernicusOpenAccessHub(Provider):
         # Convert the search results to a list of product ids
         product_ids = [result.product_id for result in search_results]
 
-        api = sentinelsat.SentinelAPI(
+        api = SentinelAPIExtended(
             credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
         )
         api.download_all(
@@ -139,6 +145,7 @@ class CopernicusOpenAccessHub(Provider):
             n_concurrent_dl=processes,
             checksum=True,
             max_attempts=max_attempts,
+            overwrite=overwrite,
         )
 
     def translate_search_results(
