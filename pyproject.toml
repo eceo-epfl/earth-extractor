@@ -9,7 +9,7 @@ readme = "README.md"
 earth-extractor = 'earth_extractor.app:main'
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 botocore = "1.29.133"
 typer = "^0.9.0"
 rich = "^13.3.5"
@@ -37,6 +37,7 @@ black = "^23.7.0"
 pytest-watcher = "^0.3.4"
 autoflake = "^2.2.0"
 requests-mock = "^1.11.0"
+pytest-env = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core"]
