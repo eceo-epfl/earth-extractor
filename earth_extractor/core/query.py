@@ -18,17 +18,70 @@ logger = logging.getLogger(__name__)
 logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
-def export_query_results_to_geojson(
+def construct_geojson(
     gdf: gpd.GeoDataFrame,
-    output_dir: str,
+    satellites: List[cli_options.SatelliteChoices],
+    roi: str,
+    buffer: float,
+    cloud_cover: int,
+    start: datetime.datetime,
+    end: datetime.datetime,
+    interval_frequency: Optional[cli_options.TemporalFrequency] = None,
+    output_file: Optional[str] = None,
 ) -> None:
-    # Convert the results to a GeoDataFrame
+    """Converts a geodataframe to geojson
 
-    output_file = os.path.join(
-        output_dir, core.config.constants.GEOJSON_EXPORT_FILENAME
-    )
-    logger.info(f"Exporting results to GeoJSON: {output_file}")
-    gdf.to_file(output_file, driver="GeoJSON")
+    If output_dir is empty, the geojson is printed to stdout. If output_dir
+    is not empty, the geojson is exported to a file.
+
+    The additional parameters are added to the geojson as the original query
+    parameters in the metadata section `query_parameters`.
+
+    Parameters
+    ----------
+    gdf : gpd.GeoDataFrame
+        The GeoDataFrame
+    satellites : List[cli_options.SatelliteChoices]
+        The satellites
+    roi : str
+        The ROI
+    buffer : float
+        The buffer
+    cloud_cover : int
+        The cloud cover
+    start : datetime.datetime
+        The start date
+    end : datetime.datetime
+        The end date
+    interval_frequency : Optional[cli_options.TemporalFrequency], optional
+        The interval frequency, by default None
+    output_file : Optional[str], optional
+        The output filename, by default None. If None, the geojson is printed
+        to stdout
+
+    """
+
+    geojson_data = orjson.loads(gdf.to_json())
+    geojson_data["query_parameters"] = {
+        "satellites": [sat.value for sat in satellites],
+        "roi": roi,
+        "buffer": buffer,
+        "cloud_cover": cloud_cover,
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+        "interval_frequency": (
+            interval_frequency.value if interval_frequency else None
+        ),
+    }
+    if output_file is None:
+        # Print the geojson to stdout (PIPE option)
+        print(orjson.dumps(geojson_data).decode("utf-8"))
+    else:
+        logger.info(f"Exporting results to GeoJSON: {output_file}")
+
+        # Export the geojson to a file with an indent of 2 spaces
+        with open(os.path.join(output_file), "wb") as f:
+            f.write(orjson.dumps(geojson_data, option=orjson.OPT_INDENT_2))
 
 
 def convert_query_results_to_geodataframe(
@@ -206,11 +259,26 @@ def batch_query(
         all_results.append((sat, res))
 
     if export != cli_options.ExportMetadataOptions.DISABLED.value:
-        if export == cli_options.ExportMetadataOptions.PIPE.value:
-            print(gdf_all.to_json())
-        elif export == cli_options.ExportMetadataOptions.FILE.value:
-            # Export the geodataframe to a geojson file
-            export_query_results_to_geojson(gdf_all, output_dir)
+        if export == cli_options.ExportMetadataOptions.FILE.value:
+            # Construct output filename for following function
+            output_file = os.path.join(
+                output_dir, core.config.constants.GEOJSON_EXPORT_FILENAME
+            )
+        else:
+            # Setting as None will print to stdout in construct_geojson()
+            output_file = None
+
+        construct_geojson(
+            gdf=gdf_all,
+            satellites=satellites,
+            roi=roi,
+            buffer=buffer,
+            cloud_cover=cloud_cover,
+            start=start,
+            end=end,
+            interval_frequency=interval_frequency,
+            output_file=output_file,
+        )
 
     if results_only or export == cli_options.ExportMetadataOptions.PIPE.value:
         """Exit on results only or PIPE export
