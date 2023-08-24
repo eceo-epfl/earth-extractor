@@ -259,9 +259,10 @@ def batch_query(
         all_results.append((sat, res))
 
     if export != cli_options.ExportMetadataOptions.DISABLED.value:
+        satellite_list = [sat.value for sat in satellites]
+        output_file = None  # Default PIPE output
+
         if export == cli_options.ExportMetadataOptions.FILE.value:
-            satellite_list = [sat.value for sat in satellites]
-            # Construct output geojson filename
             # Remove millisecondsfrom the timestamp
             timestamp = core.config.constants.COMMON_TIMESTAMP.split(".")[0]
             timestamp = timestamp.replace("-", "")  # Remove symbols
@@ -274,9 +275,6 @@ def batch_query(
                 f"{'_'.join(satellite_list).replace(':', '-').lower()}"
                 f".geojson",
             )
-        else:
-            # Setting as None will print to stdout in construct_geojson()
-            output_file = None
 
         construct_geojson(
             gdf=gdf_all,

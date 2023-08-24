@@ -135,7 +135,10 @@ def batch(
         case_sensitive=False,
     ),
     results_only: bool = typer.Option(
-        False, help="Only export the results of the query, do not download"
+        False,
+        help="Only export the results of the query, do not download. "
+        "This is useful for exporting the results of a query to a "
+        "GeoJSON file and exiting the program without user input.",
     ),
     parallel: bool = typer.Option(
         True, help="Download all results in parallel"

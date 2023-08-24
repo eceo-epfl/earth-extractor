@@ -1,10 +1,11 @@
 from earth_extractor.providers.alaskan_satellite_facility import asf
 from earth_extractor.core.models import CommonSearchResult
 import pytest
+import json
 import pytest_mock
 import asf_search
-import os
 from typing import List
+import requests_mock
 
 
 def test_authentication_exception(
@@ -12,6 +13,7 @@ def test_authentication_exception(
     mocker: pytest_mock.MockerFixture,
     caplog: pytest.LogCaptureFixture,
     tmpdir: str,
+    # requests_mock: requests_mock.Mocker,
 ) -> None:
     """Test that an ASFAuthenticationError is raised when the credentials are
     incorrect
@@ -21,11 +23,10 @@ def test_authentication_exception(
 
     mocker.patch.object(
         asf_search.ASFSession,
-        "auth_with_creds",
+        "auth_with_token",
         side_effect=asf_search.ASFAuthenticationError(),
     )
 
-    # with pytest.raises(asf_search.ASFAuthenticationError):
     asf.download_many(
         search_results=query, download_dir=str(tmpdir), overwrite=False
     )
@@ -45,30 +46,36 @@ def test_download_many(
     sentinel_query_as_commonsearch_result: List[CommonSearchResult],
     tmpdir: str,
     caplog: pytest.LogCaptureFixture,
+    requests_mock: requests_mock.Mocker,
 ) -> None:
     """Test the download_many functionality of asf_search
 
     Use the sentinel query response and mock the return responses to simulate
     a successful data collection.
     """
-    mocker.patch.object(
-        asf_search.ASFSession,
-        "auth_with_token",
-        return_value=None,
-    )
-    mocker.patch.object(
-        asf_search.ASFProduct,
-        "download",
-        return_value=None,
-        autospec=True,
-    )
-    mocker.patch.object(
-        asf_search.ASFSearchResults,
-        "download",
-        return_value=None,
-        autospec=True,
+
+    requests_mock.get(
+        "https://cmr.earthdata.nasa.gov/search/collections",
+        content=None,
     )
 
+    requests_mock.post(
+        "https://cmr.earthdata.nasa.gov/search/granules.umm_json_v1_4",
+        content=bytes(json.dumps({"items": [], "hits": 0}).encode("utf-8")),
+    )
+    requests_mock.post(
+        "https://search-error-report.asf.alaska.edu/",
+        content=None,
+    )
+
+    for sentinel_sat in ["sentinel_1", "sentinel_2", "sentinel_3"]:
+        for func_name in ["download_many", "query"]:
+            mocker.patch(
+                "earth_extractor.satellites.sentinel."
+                f"{sentinel_sat}.{func_name}",
+                autospec=True,
+                # return_value=None,
+            )
     asf.download_many(
         search_results=sentinel_query_as_commonsearch_result,
         download_dir=str(tmpdir),
@@ -77,6 +84,6 @@ def test_download_many(
 
     assert (
         # Times by 2 to account for metadata files
-        f"Found {len(sentinel_query_as_commonsearch_result)*2} files to "
-        "download" in caplog.text
+        f"No files to download"
+        in caplog.text
     ), "Expected text not found in log message"

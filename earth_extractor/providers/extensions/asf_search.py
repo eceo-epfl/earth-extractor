@@ -531,16 +531,15 @@ class ASFSearchResultsExtended(ASFSearchResults):
                     for product in self
                 }
                 for future in as_completed(futures):
-                    thread_result = futures[future]
                     try:
                         result = future.result()
                         logger.debug(
                             "Downloaded file successfully (threading): "
-                            f"{thread_result} ({result})"
+                            f"({result})"
                         )
                     except Exception as e:
                         logger.error(
-                            f"{thread_result} generated an exception: {e}"
+                            f"ASF downloading generated an exception: {e}"
                         )
 
     def raise_if_incomplete(self) -> None:
