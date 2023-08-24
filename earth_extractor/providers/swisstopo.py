@@ -220,7 +220,7 @@ class SwissTopo(Provider):
                     ),
                 )
             )
-        print(common_results)
+
         return common_results
 
     def download_many(

@@ -10,6 +10,7 @@ from earth_extractor.satellites import enums
 from earth_extractor.satellites.base import Satellite
 from earth_extractor.core.models import CommonSearchResult
 import geopandas as gpd
+import pandas as pd
 
 
 # Define logger for this module
@@ -134,6 +135,12 @@ def batch_query(
 
     # Perform a query for each satellite and level and append it to a list
     all_results = []
+
+    # Create an empty geodataframe to hold data that can be appended
+    # with all the satellite results
+    gdf_all = gpd.GeoDataFrame()
+
+    # Process each satellite and level
     for sat, level in satellite_operations:
         logger.debug(
             f"Querying satellite Satellite: {sat}, Level: {level.value}"
@@ -172,32 +179,38 @@ def batch_query(
 
         # If the user wants to export the results, do so
         if export != cli_options.ExportMetadataOptions.DISABLED.value:
-            # Convert the results to a GeoDataFrame
-            gdf = convert_query_results_to_geodataframe(res)
-
-            if export == cli_options.ExportMetadataOptions.PIPE.value:
-                [print(x) for x in orjson.loads(gdf.to_json())["features"]]
-
-            elif export == cli_options.ExportMetadataOptions.FILE.value:
-                # Warn the user that swiss image 10 and 200cm data is not going
-                # to have the correct geometry. Do this only in the FILE output
-                # as to not corrupt the PIPE output.
-                logger.warning(
-                    "Due to the limits of the SwissImage API, the boundaries "
-                    "of SwissImage will reflect only the geometry of the "
-                    "given ROI in the query. See comments "
-                    "within the code for more information."
+            # Add the results to the geodataframe
+            results = convert_query_results_to_geodataframe(res)
+            if not results.empty:
+                gdf_all = pd.concat([gdf_all, results])
+            else:
+                logger.info(
+                    f"No results for satellite {sat} and level {level.value}"
                 )
-                logger.info(msg_summary)  # As to not pollute PIPE output
+                continue
 
             if sat == cli_options.Satellites.SWISSIMAGE.value:
-                export_query_results_to_geojson(gdf, output_dir)
-        else:
-            logger.info(msg_summary)  # As to not pollute PIPE output
+                # Warn the user that swiss image 10 and 200cm data is not
+                # going to have the correct geometry. Do this only in the
+                # FILE output as to not corrupt the PIPE output.
+                logger.warning(
+                    "Due to the limits of the SwissImage API, the "
+                    "boundaries of SwissImage will reflect only the "
+                    "geometry of the given ROI in the query. See comments "
+                    "within the code for more information."
+                )
+        logger.info(msg_summary)  # As to not pollute PIPE output
 
         # Append results to a list with associated satellite in order to use
         # its defined download provider
         all_results.append((sat, res))
+
+    if export != cli_options.ExportMetadataOptions.DISABLED.value:
+        if export == cli_options.ExportMetadataOptions.PIPE.value:
+            print(gdf_all.to_json())
+        elif export == cli_options.ExportMetadataOptions.FILE.value:
+            # Export the geodataframe to a geojson file
+            export_query_results_to_geojson(gdf_all, output_dir)
 
     if results_only or export == cli_options.ExportMetadataOptions.PIPE.value:
         """Exit on results only or PIPE export
