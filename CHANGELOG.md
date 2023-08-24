@@ -5,9 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.1] - 2023-08-24
+### Added
+- Add an `--overwrite` flag to the CLI to overwrite existing files
+- On downloads using the internal download function, if the file size differs,
+the file is redownloaded. This is to prevent incomplete downloads.
+- Metadata to the geojson export file giving the parameters of the search
+query
 
-## [0.1.0] - 2023-08-24
+### Fixed
+- PIPE output fixed, it was giving a list of the search result objects rather
+than the entire GeoJSON and contains debug msg.
+- GeoJSON output merged together, if there was more than one satellite it
+would be a list of geojsons, now they are just one
+- Isolate the tests from the local keyring by adding the environment variable
+in the pytest properties to use a different keyring.
+
+### Changed
+- Disable hide prompt in secret generation. Reason: The hidden prompt reduces
+ability to understand if they are typed in correctly and credentials aren't
+very confidential.
+- The geojson filename is a shorter timestamp and includes the satellites.
+
+## [0.1.0] - 2023-08-02
 ### Added
 - MODIS and VIIRS satellites by querying and downloading from the NASA
 Earthdata STAC service
@@ -15,26 +35,13 @@ Earthdata STAC service
 - Unit tests for NASA querying
 - Parallelised download common functions in `earth_extractor.core.utils`
 - Progress bar for downloads using the requests library (NASA STAC, SwissTopo)
-- Add an `--overwrite` flag to the CLI to overwrite existing files
-- On downloads using the internal download function, if the file size differs,
-the file is redownloaded. This is to prevent incomplete downloads.
-- Metadata to the geojson export file giving the parameters of the search
-query
+
 ### Fixed
 - Setting of fake credentials for testing
-- PIPE output fixed, it was giving a list of the search result objects rather
-than the entire GeoJSON and contains debug msg.
-- GeoJSON output merged together, if there was more than one satellite it
-would be a list of geojsons, now they are just one
-- Isolate the tests from the local keyring by adding the environment variable
-in the pytest properties to use a different keyring.
+
 ### Changed
 - Type hinting for python 3.8 compatibility by using fixtures in typing module
 - Added `black` for code formatting
-- Disable hide prompt in secret generation. Reason: The hidden prompt reduces
-ability to understand if they are typed in correctly and credentials aren't
-very confidential.
-- The geojson filename is a shorter timestamp and includes the satellites.
 
 ## [0.0.2] - 2023-07-17
 
