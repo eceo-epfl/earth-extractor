@@ -3,7 +3,7 @@ import datetime
 import typer
 from typing import Annotated, List
 import logging
-from earth_extractor import core, cli_options
+from earth_extractor import core, cli_options, __version__
 import atexit
 import os
 import sys
@@ -333,8 +333,23 @@ def credentials(
     core.credentials.show_credential_list(show_secret=show_secrets)
 
 
+def version_cb() -> None:
+    """Prints the version number of earth-extractor"""
+
+    typer.echo(f"earth-extractor {__version__}")
+    sys.exit()
+
+
 @app.callback()
-def menu():
+def menu(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        help="Prints the version number of earth-extractor",
+        callback=version_cb,
+        is_eager=True,
+    ),
+):
     """EarthExtractor - A tool for downloading satellite data from various
     providers. It is designed to be simple to use, and to provide a consistent
     interface for downloading data from different providers.
