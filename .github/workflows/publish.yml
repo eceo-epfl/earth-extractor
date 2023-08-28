@@ -41,6 +41,5 @@ jobs:
       with:
         python-version: 3.8
         poetry-version: 1.5.1
-        repo: testpypi
         token: ${{ secrets.PYPI_TOKEN }}
         build: true
