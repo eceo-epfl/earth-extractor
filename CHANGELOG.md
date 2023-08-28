@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2023-08-28
+### Changed
+- Updated README to reflect deployment on PyPI
+
+### Removed
+- Uses of `poetry run` in documentation, as it is not required
+
 ## [0.1.1] - 2023-08-24
 ### Added
 - Add an `--overwrite` flag to the CLI to overwrite existing files

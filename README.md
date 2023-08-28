@@ -26,7 +26,18 @@ Semantic version changes are tracked in the [CHANGELOG](./CHANGELOG.md).
 # Getting started
 ## Installation
 
-### Install from git
+### Install from PyPI
+
+In your local environment, install the package with:
+
+```bash
+pip install earth-extractor
+```
+
+The package repository can be found at
+[PyPI: earth-extractor](https://pypi.org/project/earth-extractor/).
+
+### Install from git (development)
 
 If poetry is not installed locally, install it first with:
 
@@ -51,7 +62,7 @@ and are retrieved by the library when required.
 In order to define them, use the following command:
 
 ```bash
-poetry run earth-extractor credentials --set
+earth-extractor credentials --set
 ```
 
 Credentials can be obtained from the respective providers:
@@ -80,7 +91,7 @@ Search for `Sentinel-1 L1` data for Switzerland between the dates
 `2022-11-19` and `2022-11-29`.
 
 ```bash
-poetry run earth-extractor batch \
+earth-extractor batch \
     --roi 45.81,5.95,47.81,10.5 \
     --start 2022-11-19 --end 2022-11-29 \
     --satellite SENTINEL1:L1
@@ -98,7 +109,7 @@ satellites in the same query (although SwissImage is not technically a
 "satellite" product).
 
 ```bash
-poetry run earth-extractor batch \
+earth-extractor batch \
     --start 2020-10-06 --end 2023-01-01 \
     --roi 7.35999,46.22457 --buffer 200 \
     --satellite swissimage:cm200 \
@@ -113,7 +124,7 @@ around longitude: `7.35999°` and latitude: `46.22457°` between the dates
 `2022-10-06` and `2023-01-01`.
 
 ```bash
-poetry run earth-extractor batch \
+earth-extractor batch \
     --start 2022-10-06 --end 2022-10-07 \
     --roi 7.35999,46.22457 --buffer 2000 \
     --satellite VIIRS:L1 \
