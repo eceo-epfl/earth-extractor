@@ -1,0 +1,1265 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "id": "LAADS:7188953671",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VJ103IMG.v2.1",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            55.698326,
+                            58.563728
+                        ],
+                        [
+                            -4.459558,
+                            67.617805
+                        ],
+                        [
+                            -1.602174,
+                            46.916576
+                        ],
+                        [
+                            35.867203,
+                            41.203663
+                        ],
+                        [
+                            55.698326,
+                            58.563728
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -4.459558,
+                41.203663,
+                55.698326,
+                68.022193
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1/items/LAADS:7188953671"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438377-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438377-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T00:42:00.000Z",
+                "start_datetime": "2022-11-19T00:42:00.000Z",
+                "end_datetime": "2022-11-19T00:48:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.0042.021.2022323075217.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.0042.021.2022323075217.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438377-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7188953687",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VJ103MOD.v2.1",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            55.689098,
+                            58.563313
+                        ],
+                        [
+                            -4.448246,
+                            67.614868
+                        ],
+                        [
+                            -1.596681,
+                            46.920376
+                        ],
+                        [
+                            35.864536,
+                            41.208607
+                        ],
+                        [
+                            55.689098,
+                            58.563313
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -4.448246,
+                41.208607,
+                55.689098,
+                68.018459
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1/items/LAADS:7188953687"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438403-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438403-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T00:42:00.000Z",
+                "start_datetime": "2022-11-19T00:42:00.000Z",
+                "end_datetime": "2022-11-19T00:48:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103MOD/2022/323/VJ103MOD.A2022323.0042.021.2022323075217.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5201/VJ103MOD/2022/323/VJ103MOD.A2022323.0042.021.2022323075217.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438403-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7188953672",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VJ103IMG.v2.1",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            35.930103,
+                            41.312851
+                        ],
+                        [
+                            -1.614998,
+                            47.040054
+                        ],
+                        [
+                            -3.284811,
+                            26.240797
+                        ],
+                        [
+                            26.062727,
+                            21.727539
+                        ],
+                        [
+                            35.930103,
+                            41.312851
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -3.284811,
+                21.727539,
+                35.930103,
+                47.065213
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1/items/LAADS:7188953672"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438382-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438382-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T00:48:00.000Z",
+                "start_datetime": "2022-11-19T00:48:00.000Z",
+                "end_datetime": "2022-11-19T00:54:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.0048.021.2022323075220.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.0048.021.2022323075220.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438382-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7188953688",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VJ103MOD.v2.1",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            35.923206,
+                            41.311245
+                        ],
+                        [
+                            -1.609402,
+                            47.036499
+                        ],
+                        [
+                            -3.280459,
+                            26.244259
+                        ],
+                        [
+                            26.06011,
+                            21.731977
+                        ],
+                        [
+                            35.923206,
+                            41.311245
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -3.280459,
+                21.731977,
+                35.923206,
+                47.061521
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1/items/LAADS:7188953688"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438404-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438404-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T00:48:00.000Z",
+                "start_datetime": "2022-11-19T00:48:00.000Z",
+                "end_datetime": "2022-11-19T00:54:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103MOD/2022/323/VJ103MOD.A2022323.0048.021.2022323075220.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5201/VJ103MOD/2022/323/VJ103MOD.A2022323.0048.021.2022323075220.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550438404-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189119990",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VNP03IMG.v2",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            34.038372,
+                            52.406864
+                        ],
+                        [
+                            -15.236259,
+                            59.924931
+                        ],
+                        [
+                            -14.777133,
+                            39.200111
+                        ],
+                        [
+                            19.16346,
+                            33.977524
+                        ],
+                        [
+                            34.038372,
+                            52.406864
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -15.236259,
+                33.977524,
+                34.038372,
+                60.137769
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2/items/LAADS:7189119990"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550439791-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550439791-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T01:36:00.000Z",
+                "start_datetime": "2022-11-19T01:36:00.000Z",
+                "end_datetime": "2022-11-19T01:42:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5200/VNP03IMG/2022/323/VNP03IMG.A2022323.0136.002.2022323095613.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5200/VNP03IMG/2022/323/VNP03IMG.A2022323.0136.002.2022323095613.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550439791-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189120011",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VNP03MOD.v2",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            34.029636,
+                            52.406067
+                        ],
+                        [
+                            -15.227912,
+                            59.921665
+                        ],
+                        [
+                            -14.772206,
+                            39.203823
+                        ],
+                        [
+                            19.16083,
+                            33.982334
+                        ],
+                        [
+                            34.029636,
+                            52.406067
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -15.227912,
+                33.982334,
+                34.029636,
+                60.133997
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2/items/LAADS:7189120011"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550439845-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550439845-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T01:36:00.000Z",
+                "start_datetime": "2022-11-19T01:36:00.000Z",
+                "end_datetime": "2022-11-19T01:42:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5200/VNP03MOD/2022/323/VNP03MOD.A2022323.0136.002.2022323095613.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5200/VNP03MOD/2022/323/VNP03MOD.A2022323.0136.002.2022323095613.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550439845-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189175395",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VJ103IMG.v2.1",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            27.909998,
+                            57.258678
+                        ],
+                        [
+                            -29.153751,
+                            65.867546
+                        ],
+                        [
+                            -27.020788,
+                            45.234055
+                        ],
+                        [
+                            9.461108,
+                            39.666607
+                        ],
+                        [
+                            27.909998,
+                            57.258678
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -29.153751,
+                39.666607,
+                27.909998,
+                66.215199
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1/items/LAADS:7189175395"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550440628-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550440628-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T02:24:00.000Z",
+                "start_datetime": "2022-11-19T02:24:00.000Z",
+                "end_datetime": "2022-11-19T02:30:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.0224.021.2022323103559.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.0224.021.2022323103559.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550440628-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189175404",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VJ103MOD.v2.1",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            27.900476,
+                            57.258381
+                        ],
+                        [
+                            -29.143372,
+                            65.864517
+                        ],
+                        [
+                            -27.015617,
+                            45.237823
+                        ],
+                        [
+                            9.458175,
+                            39.671593
+                        ],
+                        [
+                            27.900476,
+                            57.258381
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -29.143372,
+                39.671593,
+                27.900476,
+                66.211464
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1/items/LAADS:7189175404"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550440638-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550440638-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T02:24:00.000Z",
+                "start_datetime": "2022-11-19T02:24:00.000Z",
+                "end_datetime": "2022-11-19T02:30:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103MOD/2022/323/VJ103MOD.A2022323.0224.021.2022323103559.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5201/VJ103MOD/2022/323/VJ103MOD.A2022323.0224.021.2022323103559.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550440638-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189861520",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VNP03IMG.v2",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            3.633782,
+                            40.852699
+                        ],
+                        [
+                            41.428661,
+                            46.563137
+                        ],
+                        [
+                            44.240459,
+                            67.174286
+                        ],
+                        [
+                            -15.921861,
+                            58.139969
+                        ],
+                        [
+                            3.633782,
+                            40.852699
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -15.921861,
+                40.852699,
+                44.240459,
+                67.601523
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2/items/LAADS:7189861520"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550447425-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550447425-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T11:24:00.000Z",
+                "start_datetime": "2022-11-19T11:24:00.000Z",
+                "end_datetime": "2022-11-19T11:30:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5200/VNP03IMG/2022/323/VNP03IMG.A2022323.1124.002.2022323184915.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5200/VNP03IMG/2022/323/VNP03IMG.A2022323.1124.002.2022323184915.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550447425-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189861527",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VNP03MOD.v2",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            3.636287,
+                            40.857666
+                        ],
+                        [
+                            41.42342,
+                            46.566975
+                        ],
+                        [
+                            44.228611,
+                            67.171349
+                        ],
+                        [
+                            -15.911808,
+                            58.139896
+                        ],
+                        [
+                            3.636287,
+                            40.857666
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -15.911808,
+                40.857666,
+                44.228611,
+                67.597719
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2/items/LAADS:7189861527"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550447436-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550447436-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T11:24:00.000Z",
+                "start_datetime": "2022-11-19T11:24:00.000Z",
+                "end_datetime": "2022-11-19T11:30:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5200/VNP03MOD/2022/323/VNP03MOD.A2022323.1124.002.2022323184915.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5200/VNP03MOD/2022/323/VNP03MOD.A2022323.1124.002.2022323184915.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550447436-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189923564",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VJ103IMG.v2.1",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -5.312111,
+                            35.44828
+                        ],
+                        [
+                            28.789148,
+                            40.568604
+                        ],
+                        [
+                            29.499966,
+                            61.274529
+                        ],
+                        [
+                            -20.910738,
+                            53.728855
+                        ],
+                        [
+                            -5.312111,
+                            35.44828
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -20.910738,
+                35.44828,
+                29.499966,
+                61.515676
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1/items/LAADS:7189923564"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103IMG.v2.1"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550448829-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550448829-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T12:12:00.000Z",
+                "start_datetime": "2022-11-19T12:12:00.000Z",
+                "end_datetime": "2022-11-19T12:18:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.1212.021.2022323193329.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5201/VJ103IMG/2022/323/VJ103IMG.A2022323.1212.021.2022323193329.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550448829-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189923577",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VJ103MOD.v2.1",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -5.310398,
+                            35.452717
+                        ],
+                        [
+                            28.784365,
+                            40.572285
+                        ],
+                        [
+                            29.49095,
+                            61.271358
+                        ],
+                        [
+                            -20.902153,
+                            53.728058
+                        ],
+                        [
+                            -5.310398,
+                            35.452717
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -20.902153,
+                35.452717,
+                29.49095,
+                61.511947
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1/items/LAADS:7189923577"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VJ103MOD.v2.1"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550448881-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550448881-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T12:12:00.000Z",
+                "start_datetime": "2022-11-19T12:12:00.000Z",
+                "end_datetime": "2022-11-19T12:18:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5201/VJ103MOD/2022/323/VJ103MOD.A2022323.1212.021.2022323193329.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5201/VJ103MOD/2022/323/VJ103MOD.A2022323.1212.021.2022323193329.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550448881-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189977482",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VNP03IMG.v2",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -12.549616,
+                            23.002745
+                        ],
+                        [
+                            17.51388,
+                            27.553455
+                        ],
+                        [
+                            16.044352,
+                            48.464302
+                        ],
+                        [
+                            -22.955873,
+                            42.570862
+                        ],
+                        [
+                            -12.549616,
+                            23.002745
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -22.955873,
+                23.002745,
+                17.51388,
+                48.512295
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2/items/LAADS:7189977482"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03IMG.v2"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550450343-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550450343-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T13:00:00.000Z",
+                "start_datetime": "2022-11-19T13:00:00.000Z",
+                "end_datetime": "2022-11-19T13:06:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5200/VNP03IMG/2022/323/VNP03IMG.A2022323.1300.002.2022323201517.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5200/VNP03IMG/2022/323/VNP03IMG.A2022323.1300.002.2022323201517.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550450343-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LAADS:7189977496",
+            "stac_version": "1.0.0",
+            "stac_extensions": [],
+            "collection": "VNP03MOD.v2",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -12.546815,
+                            23.007336
+                        ],
+                        [
+                            17.509386,
+                            27.556973
+                        ],
+                        [
+                            16.03866,
+                            48.460743
+                        ],
+                        [
+                            -22.949099,
+                            42.569164
+                        ],
+                        [
+                            -12.546815,
+                            23.007336
+                        ]
+                    ]
+                ]
+            },
+            "bbox": [
+                -22.949099,
+                23.007336,
+                17.509386,
+                48.508544
+            ],
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2/items/LAADS:7189977496"
+                },
+                {
+                    "rel": "parent",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2"
+                },
+                {
+                    "rel": "collection",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS/collections/VNP03MOD.v2"
+                },
+                {
+                    "rel": "root",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/"
+                },
+                {
+                    "rel": "provider",
+                    "href": "https://cmr.earthdata.nasa.gov/stac/LAADS"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550450358-LAADS.json"
+                },
+                {
+                    "rel": "via",
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550450358-LAADS.umm_json"
+                }
+            ],
+            "properties": {
+                "datetime": "2022-11-19T13:00:00.000Z",
+                "start_datetime": "2022-11-19T13:00:00.000Z",
+                "end_datetime": "2022-11-19T13:06:00.000Z"
+            },
+            "assets": {
+                "data": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/5200/VNP03MOD/2022/323/VNP03MOD.A2022323.1300.002.2022323201517.nc",
+                    "type": "application/x-netcdf"
+                },
+                "opendap": {
+                    "href": "https://ladsweb.modaps.eosdis.nasa.gov/opendap/RemoteResources/laads/allData/5200/VNP03MOD/2022/323/VNP03MOD.A2022323.1300.002.2022323201517.nc.html",
+                    "type": "text/html",
+                    "title": "This file may be accessed using OPeNDAP directly from this link (OPENDAP DATA)"
+                },
+                "metadata": {
+                    "href": "https://cmr.earthdata.nasa.gov/search/concepts/G2550450358-LAADS.xml",
+                    "type": "application/xml"
+                }
+            }
+        }
+    ]
+}

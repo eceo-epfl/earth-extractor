@@ -1,8 +1,10 @@
-
 from earth_extractor.providers import Provider
 from earth_extractor import core
-from typing import Any, List, TYPE_CHECKING
-from sentinelhub import DataCollection, SHConfig, SentinelHubCatalog
+from typing import Any, List, TYPE_CHECKING, Optional
+
+# from sentinelhub.api.catalog import SentinelHubCatalog
+# from sentinelhub.config import SHConfig
+from sentinelhub.data_collections import DataCollection
 import logging
 import datetime
 from earth_extractor.satellites import enums
@@ -24,8 +26,12 @@ class SinergiseSentinelHub(Provider):
         roi: core.models.BBox,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
-        cloud_cover: int | None = None,
+        cloud_cover: Optional[int] = None,
     ) -> List[Any]:
+        """Query the Sinergise Sentinel Hub for data"""
+
+        # Check that the provider's credentials that are needed are set
+        self._check_credentials_exist()
 
         logger.info("Querying Sinergise Sentinel Hub")
         if (
@@ -38,21 +44,16 @@ class SinergiseSentinelHub(Provider):
                 "in the config file."
             )
 
-        config = SHConfig(
-            credentials.SINERGISE_CLIENT_ID,
-            credentials.SINERGISE_CLIENT_SECRET
+        # config = SHConfig(
+        #     sh_client_id=credentials.SINERGISE_CLIENT_ID,
+        #     sh_client_secret=credentials.SINERGISE_CLIENT_SECRET,
+        # )
+        # catalog = SentinelHubCatalog(config=config)
+
+        logger.info(
+            f"Satellite: {satellite.name} ({satellite.name}) "
+            f"{processing_level.value}"
         )
-        catalog = SentinelHubCatalog(config=config)
-
-        if satellite.name not in self.satellites:
-            raise ValueError(
-                f"Satellite {satellite.name} not supported by Copernicus "
-                f"Open Access Hub. Available satellites: {self.satellites}"
-            )
-
-        logger.info(f"Satellite: {satellite.name} "
-                    f"({self.satellites[satellite.name]}"
-                    f"{processing_level.value}")
 
         product_type = self.products.get(
             (satellite.name, processing_level), None
@@ -66,28 +67,19 @@ class SinergiseSentinelHub(Provider):
             )
 
         raise NotImplementedError("Sinergise Sentinel Hub not implemented")
-        # catalog.get_feature(product_type, )
-        # products = api.query(
-        #     roi.to_wkt(),
-        #     platformname=self.satellites[satellite.name],
-        #     # producttype=product_type,
-        #     # processinglevel=processing_level.value,
-        #     cloudcoverpercentage=(0, cloud_cover) if cloud_cover else None,
-        #     date=(start_date, end_date),
-        # )
-
-        # return products
 
 
 sinergise: SinergiseSentinelHub = SinergiseSentinelHub(
     name="Sinergise",
     description="Sinergise Sentinel Hub",
-    satellites={enums.Satellite.SENTINEL2: ''},
     uri="https://www.sinergise.com",
     products={
-        (enums.Satellite.SENTINEL2,
-         enums.ProcessingLevel.L1C): [DataCollection.SENTINEL2_L1C],
-        (enums.Satellite.SENTINEL2,
-         enums.ProcessingLevel.L2A): [DataCollection.SENTINEL2_L2A],
-    }
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): [
+            DataCollection.SENTINEL2_L1C
+        ],
+        (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): [
+            DataCollection.SENTINEL2_L2A
+        ],
+    },
+    credentials_required=["SINERGISE_CLIENT_SECRET", "SINERGISE_CLIENT_ID"],
 )

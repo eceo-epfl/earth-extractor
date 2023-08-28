@@ -1,5 +1,4 @@
 from earth_extractor.providers import Provider
-from earth_extractor.satellites import enums
 import logging
 from typing import List
 import asf_search
@@ -18,11 +17,19 @@ class AlaskanSateliteFacility(Provider):
         self,
         search_results: List[core.models.CommonSearchResult],
         download_dir: str,
-        processes: int = 6
+        processes: int = 6,
     ) -> None:
+        """Download many files from the Alaskan Satellite Facility"""
+
+        # Check that the provider's credentials that are needed are set
+        self._check_credentials_exist()
 
         # Extract the file ids from the search results
-        search_file_ids = [result.identifier for result in search_results]
+        search_file_ids = [
+            result.identifier
+            for result in search_results
+            if result.identifier is not None
+        ]
 
         logger.info("Downloading from Alaskan Satellite Facility")
         logger.debug(f"Search file ids: {search_file_ids}")
@@ -35,9 +42,8 @@ class AlaskanSateliteFacility(Provider):
 
         # Authenticate with ASF
         try:
-            session = asf_search.ASFSession().auth_with_creds(
-                username=credentials.NASA_USERNAME,
-                password=credentials.NASA_PASSWORD
+            session = asf_search.ASFSession().auth_with_token(
+                token=credentials.NASA_TOKEN,
             )
 
             # Search for the granules
@@ -71,6 +77,6 @@ class AlaskanSateliteFacility(Provider):
 asf: AlaskanSateliteFacility = AlaskanSateliteFacility(
     name="Alaskan Satellite Facility",
     description="Alaskan Satellite Facility",
-    satellites={enums.Satellite.SENTINEL1: ''},
-    uri="https://asf.alaska.edu"
+    uri="https://asf.alaska.edu",
+    credentials_required=["NASA_TOKEN"],
 )

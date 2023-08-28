@@ -58,22 +58,26 @@ Credentials can be obtained from the respective providers:
 * [Copernicus Open Access Hub](https://scihub.copernicus.eu/dhus/#/self-registration)
     * `SCIHUB_USERNAME` and `SCIHUB_PASSWORD`
 
-* [Alaskan Satellite Facility](https://urs.earthdata.nasa.gov/users/new)
-    * `NASA_USERNAME` and `NASA_PASSWORD`
+
+* [Alaskan Satellite Facility](https://asf.alaska.edu/) and [NASA LAADS repository](https://ladsweb.modaps.eosdis.nasa.gov/)
+    * `NASA_TOKEN`
+    * Obtain the token by registering first at [NASA EarthData](https://urs.earthdata.nasa.gov/users/new), and then in `My Profile`, select `Generate Token` from the top menu and
+    `GENERATE TOKEN` from the bottom of the page.
     * Make sure to accept the Alaskan Satellite Facility EULA after registering
     in [NASA Earth Data: Accept New EULAs](https://urs.earthdata.nasa.gov/users/ejayt/unaccepted_eulas)
 
 * [Sinergise](https://www.sentinel-hub.com)
+    * **At the moment this is unused**
     * `SINERGISE_CLIENT_ID` and `SINERGISE_CLIENT_SECRET`
-    * At the moment this is unused
     * Obtain an [OAuth2 Client ID and Secret](https://docs.sentinel-hub.com/api/latest/api/overview/authentication/)
     from the [user dashboard](https://apps.sentinel-hub.com/dashboard/#/account/settings)
 
 
 ## Example usage (CLI)
 
-Search for Sentinel-1 L2 data for Switzerland between the dates
-2022-11-19 and 2022-11-29.
+### Sentinel 1
+Search for `Sentinel-1 L1` data for Switzerland between the dates
+`2022-11-19` and `2022-11-29`.
 
 ```bash
 poetry run earth-extractor batch \
@@ -82,7 +86,40 @@ poetry run earth-extractor batch \
     --satellite SENTINEL1:L1
 ```
 
+### SwissImage
 
+Search and download `SwissImage` `0.1m` and `2.0m` resolution data for a
+`200 metre` buffered region around longitude: `7.35999°` and latitude:
+`46.22457°` between the dates `2022-11-19` and `2022-11-29`.
+
+Note: In this example the download will start without user intervention, by
+using the `--no-confirmation` flag. We can also see the first use of multiple
+satellites in the same query (although SwissImage is not technically a
+"satellite" product).
+
+```bash
+poetry run earth-extractor batch \
+    --start 2020-10-06 --end 2023-01-01 \
+    --roi 7.35999,46.22457 --buffer 200 \
+    --satellite swissimage:cm200 \
+    --satellite swissimage:cm10 \
+    --no-confirmation
+```
+
+### MODIS and VIIRS
+
+Search for VIIRS (L1) and MODIS Terra (L1B) data with a `2km` buffered region
+around longitude: `7.35999°` and latitude: `46.22457°` between the dates
+`2022-10-06` and `2023-01-01`.
+
+```bash
+poetry run earth-extractor batch \
+    --start 2022-10-06 --end 2023-01-01 \
+    --roi 7.35999,46.22457 --buffer 2000 \
+    --satellite VIIRS:L1 \
+    --satellite MODIS_TERRA:L1B \
+    --no-confirmation
+```
 
 # Technical specifications
 
@@ -91,25 +128,31 @@ poetry run earth-extractor batch \
 The following satellites and respective processing levels are
 included in the design:
 
-* Sentinel-1
-    * Level 1 (GRD)
-    * Level 2 (GRD_SIGMA0)
-* Sentinel-2
-    * Level 1C
-    * Level 2A
-* Sentinel-3
-    * Level 1B
-    * Level 2
-        * LFR Atmos (Land)
-        * WFR Atmos (Water)
+
+| **Satellite** | **Levels**            | **Search provider**               | **Download provider**             |
+|---------------|-----------------------|-----------------------------------|-----------------------------------|
+| **Sentinel-1**| 1 (GRD)               | SCIHUB                            | Alaskan Satellite Facility        |
+|               | 2 (GRD_SIGMA0)        | SCIHUB                            | SCIHUB                            |
+| **Sentinel-2**| 1C                    | SCIHUB                            | SCIHUB                            |
+|               | 2A                    | SCIHUB                            | SCIHUB                            |
+| **Sentinel-3**| 1B                    | SCIHUB                            | SCIHUB                            |
+|               | 2                     | SCIHUB                            | SCIHUB                            |
+|               | 3 LFR Atmos (Land)    | SCIHUB                            | SCIHUB                            |
+|               | 3 WFR Atmos (Water)   | SCIHUB                            | SCIHUB                            |
+| **MODIS Terra**| 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
+| **MODIS Aqua** | 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
+| **VIIRS**      | 1                    | NASA Common Metadata Repository   | NASA LAADS                        |
+
+
+
 
 ### Providers
 
 * Copernicus Open Access Hub (SCIHUB)
     * For searching capabilities
 * Alaskan Satellite Facility
-    * Sentinel 1
+    * Sentinel 1 (Used for Sentinel-1 data), generally faster than SCIHUB
 * Sinergise
-    * Sentinel 2
+    * Sentinel 2 (Not yet implemented)
 * NASA Common Metadata Repository
     * Sentinel 3

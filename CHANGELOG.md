@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2023-08-02
+### Added
+- MODIS and VIIRS satellites by querying and downloading from the NASA
+Earthdata STAC service
+- SwissImage data from SwissTopo
+- Unit tests for NASA querying
+- Parallelised download common functions in `earth_extractor.core.utils`
+- Progress bar for downloads using the requests library (NASA STAC, SwissTopo)
+
+### Fixed
+- Setting of fake credentials for testing
+
+### Changed
+- Type hinting for python 3.8 compatibility by using fixtures in typing module
+- Added `black` for code formatting
+
+
 ## [0.0.2] - 2023-07-17
 
 ### Fixed

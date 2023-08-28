@@ -19,7 +19,7 @@ def setup_file_logger(output_folder):
 
 
 class ErrorFlagHandler(logging.Handler):
-    ''' Catches ERRORs to allow app to know if an error occurred at exit '''
+    """Catches ERRORs to allow app to know if an error occurred at exit"""
 
     def __init__(self):
         super().__init__()
