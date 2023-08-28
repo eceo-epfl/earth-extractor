@@ -34,11 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
-        uses: actions/checkout@v3
+      uses: actions/checkout@v3
 
     - name: Publish Package
-        uses: celsiusnarhwal/poetry-publish@v2
-        with:
+      uses: celsiusnarhwal/poetry-publish@v2
+      with:
         python-version: 3.8
         poetry-version: 1.5.1
         repo: testpypi
