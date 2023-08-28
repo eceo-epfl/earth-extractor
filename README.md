@@ -55,6 +55,19 @@ poetry install
 
 ### Define user credentials
 
+There are two methods to store the provider secrets required to access the
+data:
+
+1. [System keyring (recommended)](#option-1-system-keyring-recommended)
+2. [.env file](#option-2-env-file)
+
+#### Option 1: System keyring (recommended)
+
+This method requires that your operating system has a secret keyring installed.
+This is usually the case, but if you're operating a server linux installation,
+or using WSL on Windows, for example, one may not exist. In this case, you can
+use the `.env` file method.
+
 User credentials are managed by the `keyring` library which make use of your
 operating system's secret keyring. The credentials are stored in the system
 and are retrieved by the library when required.
@@ -64,6 +77,21 @@ In order to define them, use the following command:
 ```bash
 earth-extractor credentials --set
 ```
+
+#### Option 2: .env file
+
+In the folder you are working in, place an .env file with the keys and values
+as follows (the necessary keys can be found in the [credential sources](#credential-sources) section underneath):
+
+```bash
+SCIHUB_USERNAME=
+SCIHUB_PASSWORD=
+NASA_TOKEN=
+SINERGISE_CLIENT_ID=
+SINERGISE_CLIENT_SECRET=
+```
+
+# Credential sources
 
 Credentials can be obtained from the respective providers:
 * [Copernicus Open Access Hub](https://scihub.copernicus.eu/dhus/#/self-registration)

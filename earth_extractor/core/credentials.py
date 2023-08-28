@@ -1,4 +1,5 @@
 import keyring
+from keyring.errors import KeyringError
 import typer
 import logging
 import sys
@@ -27,15 +28,28 @@ class Credentials(BaseSettings):
     SINERGISE_CLIENT_ID: Optional[str] = None
     SINERGISE_CLIENT_SECRET: Optional[str] = None
 
+    # Read from .env file
+    class Config:
+        env_file = ".env"  # Populate from .env file before requesting keyring
+
     @root_validator
     def populate_credentials_from_keyring(
         cls, values: Dict[str, Optional[str]]
     ) -> Dict[str, Optional[str]]:
         """Populate the credentials from the keyring"""
         for key in values.keys():
-            values[key] = keyring.get_password(
-                core.config.constants.KEYRING_ID, key
-            )
+            if values[key] is None:
+                # If key is not None, then the key is already set (from .env).
+                # So now request the keyring for the value
+                try:
+                    values[key] = keyring.get_password(
+                        core.config.constants.KEYRING_ID, key
+                    )
+                except KeyringError as e:
+                    logger.warning(
+                        f"Keyring error when getting key '{key}': {e}"
+                    )
+                    values[key] = None
         if "pytest" in sys.modules:  # Populate fake credentials for unit tests
             return {
                 "SCIHUB_USERNAME": "test",
