@@ -16,7 +16,8 @@ def test_wait_on_download_exception(
     """
 
     mocker.patch(
-        "sentinelsat.SentinelAPI.download_all",
+        "earth_extractor.providers.extensions.sentinelsat.SentinelAPIExtended."
+        "download_all",
         side_effect=sentinelsat.exceptions.ServerError("Test exception"),
     )
     results_common_format = copernicus_scihub.translate_search_results(

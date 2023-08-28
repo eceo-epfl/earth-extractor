@@ -9,6 +9,7 @@ from typing import Dict, Optional
 from earth_extractor import core
 import jwt
 import datetime
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
@@ -97,7 +98,7 @@ def set_one_credential(
     key,
     hide_prompt=core.config.constants.HIDE_PASSWORD_PROMPT,
 ) -> None:
-    ''' Set a single credential key in the keyring
+    """Set a single credential key in the keyring
 
     Parameters
     ----------
@@ -106,16 +107,15 @@ def set_one_credential(
     hide_prompt : bool
         If True, the prompt is hidden. If False, the prompt is shown.
 
-    '''
+    """
 
     if key not in get_credentials().__fields__:
         raise ValueError(f"Key '{key}' does not exist")
 
-    secret = keyring.get_password(core.config.constants.KEYRING_ID, key)
+    secret = getattr(get_credentials(), key)
+
     new_secret = typer.prompt(
-        key,
-        default='' if secret is None else secret,
-        hide_input=hide_prompt
+        key, default="" if secret is None else secret, hide_input=hide_prompt
     )
 
     if new_secret == "":
@@ -140,5 +140,6 @@ def delete_credential(key) -> None:
     keyring.delete_password(core.config.constants.KEYRING_ID, key)
 
 
+@lru_cache
 def get_credentials() -> Credentials:
     return Credentials()

@@ -5,11 +5,14 @@ import datetime
 
 
 class Constants(BaseSettings):
-    COMMON_TIMESTAMP: str = f"{datetime.datetime.utcnow().isoformat()}"
+    COMMON_TIMESTAMP: str = (
+        # Windows doesn't like colons in filenames
+        f"{datetime.datetime.utcnow().isoformat().replace(':', '-')}"
+    )
     DEFAULT_DOWNLOAD_DIR: str = os.path.join(os.getcwd(), "data")
     GEOJSON_EXPORT_FILENAME: str = f"{COMMON_TIMESTAMP}.geojson"
     MAX_DOWNLOAD_ATTEMPTS: int = 50
-    HIDE_PASSWORD_PROMPT: bool = True
+    HIDE_PASSWORD_PROMPT: bool = False
 
     DEFAULT_DOWNLOAD_THREADS: int = 10
     PARRALLEL_PROCESSES_DEFAULT: int = 4

@@ -4,7 +4,7 @@ from typing import List
 import asf_search
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor import core
-
+from earth_extractor.providers.extensions.asf_search import granule_search
 
 logger = logging.getLogger(__name__)
 logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
@@ -17,6 +17,7 @@ class AlaskanSateliteFacility(Provider):
         self,
         search_results: List[core.models.CommonSearchResult],
         download_dir: str,
+        overwrite: bool = False,
         processes: int = 6,
     ) -> None:
         """Download many files from the Alaskan Satellite Facility"""
@@ -47,7 +48,7 @@ class AlaskanSateliteFacility(Provider):
             )
 
             # Search for the granules
-            res = asf_search.granule_search(search_file_ids)
+            res = granule_search(search_file_ids)
             logger.info(
                 f"Found {len(res)} files to download (may include "
                 "metadata files)"
@@ -61,7 +62,8 @@ class AlaskanSateliteFacility(Provider):
             res.download(
                 path=download_dir,
                 session=session,
-                processes=processes
+                processes=processes,
+                overwrite=overwrite,
             )
         except asf_search.ASFAuthenticationError as e:
             logger.error(

@@ -114,7 +114,7 @@ around longitude: `7.35999°` and latitude: `46.22457°` between the dates
 
 ```bash
 poetry run earth-extractor batch \
-    --start 2022-10-06 --end 2023-01-01 \
+    --start 2022-10-06 --end 2022-10-07 \
     --roi 7.35999,46.22457 --buffer 2000 \
     --satellite VIIRS:L1 \
     --satellite MODIS_TERRA:L1B \
