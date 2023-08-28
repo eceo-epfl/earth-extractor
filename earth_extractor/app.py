@@ -333,17 +333,24 @@ def credentials(
     core.credentials.show_credential_list(show_secret=show_secrets)
 
 
-def version_cb() -> None:
-    """Prints the version number of earth-extractor"""
+def version_cb(value: bool) -> None:
+    """Prints the version number of earth-extractor
 
-    typer.echo(f"earth-extractor {__version__}")
-    sys.exit()
+    Parameters
+    ----------
+    value : bool
+        The value of the --version option
+    """
+
+    if value:  # Only run on when --version is set
+        typer.echo(f"earth-extractor {__version__}")
+        sys.exit()
 
 
 @app.callback()
 def menu(
     version: bool = typer.Option(
-        None,
+        False,
         "--version",
         help="Prints the version number of earth-extractor",
         callback=version_cb,
