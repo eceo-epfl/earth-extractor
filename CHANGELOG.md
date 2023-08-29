@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the ability to use a `.env` file to store credentials. This is useful
 for systems that do not have a keyring installed, such as a server or WSL.
 
+# Removed
+- The provider `Sinergise` that was not being used.
+
 ## [0.1.2] - 2023-08-28
 ### Added
 - Added a `version` flag to the CLI to show the version

@@ -87,8 +87,6 @@ as follows (the necessary keys can be found in the [credential sources](#credent
 SCIHUB_USERNAME=
 SCIHUB_PASSWORD=
 NASA_TOKEN=
-SINERGISE_CLIENT_ID=
-SINERGISE_CLIENT_SECRET=
 ```
 
 # Credential sources
@@ -104,13 +102,6 @@ Credentials can be obtained from the respective providers:
     `GENERATE TOKEN` from the bottom of the page.
     * Make sure to accept the Alaskan Satellite Facility EULA after registering
     in [NASA Earth Data: Accept New EULAs](https://urs.earthdata.nasa.gov/users/ejayt/unaccepted_eulas)
-
-* [Sinergise](https://www.sentinel-hub.com)
-    * **At the moment this is unused**
-    * `SINERGISE_CLIENT_ID` and `SINERGISE_CLIENT_SECRET`
-    * Obtain an [OAuth2 Client ID and Secret](https://docs.sentinel-hub.com/api/latest/api/overview/authentication/)
-    from the [user dashboard](https://apps.sentinel-hub.com/dashboard/#/account/settings)
-
 
 ## Example usage (CLI)
 
@@ -163,7 +154,7 @@ earth-extractor batch \
 # Technical specifications
 
 ## Components
-### Satellites
+### Satellites and providers
 The following satellites and respective processing levels are
 included in the design:
 
@@ -181,17 +172,3 @@ included in the design:
 | **MODIS Terra**| 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
 | **MODIS Aqua** | 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
 | **VIIRS**      | 1                    | NASA Common Metadata Repository   | NASA LAADS                        |
-
-
-
-
-### Providers
-
-* Copernicus Open Access Hub (SCIHUB)
-    * For searching capabilities
-* Alaskan Satellite Facility
-    * Sentinel 1 (Used for Sentinel-1 data), generally faster than SCIHUB
-* Sinergise
-    * Sentinel 2 (Not yet implemented)
-* NASA Common Metadata Repository
-    * Sentinel 3

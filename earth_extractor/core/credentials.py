@@ -24,10 +24,6 @@ class Credentials(BaseSettings):
     # NASA (For Alaska Satellite Facility and NASA Common Metadata Repository)
     NASA_TOKEN: Optional[str] = None
 
-    # Sinergise Sentinel Hub
-    SINERGISE_CLIENT_ID: Optional[str] = None
-    SINERGISE_CLIENT_SECRET: Optional[str] = None
-
     # Read from .env file
     class Config:
         env_file = ".env"  # Populate from .env file before requesting keyring
@@ -64,8 +60,6 @@ class Credentials(BaseSettings):
                     "secret",
                     algorithm="HS256",
                 ),
-                "SINERGISE_CLIENT_ID": "test",
-                "SINERGISE_CLIENT_SECRET": "test",
             }
 
         return values
