@@ -45,23 +45,7 @@ class SwissTopo(Provider):
 
         logger.info(f"{self.name}: Querying API")
 
-        # Convert datetime to unix time 1601942400000 represents 2020-10-06
-        # two hours after midnight (Zurich time) representing an offset of 7200
-        # seconds. Therefore an incoming date of 2020-10-06 will be converted
-        # to 1601942400000. The unix timestamp here is also represented in
-        # milliseconds, so we multiply by 1000.
-        start_date_unix = int(
-            (start_date + datetime.timedelta(hours=2)).timestamp() * 1000
-        )
-
-        # I have a suspicion that start time is offset by +2 hours, to
-        # Europe/Zurich but the end_time is still UTC +0 hours. There is no
-        # adjustment here for this, but it may be worth investigating in the
-        # future.
-        end_date_unix = int(
-            (end_date + datetime.timedelta(hours=2)).timestamp() * 1000
-        )
-        request_epsg = 2056
+        request_epsg = 2056  # CH1903+
 
         # Get the resolution from the products dictionary based on CLI choice
         # Normally this would be a satellite processing level, but in this case
@@ -83,9 +67,12 @@ class SwissTopo(Provider):
 
         # Options seem to be 2017, 2018, 2019, 2020, 2021, 2022 and "current".
         # If set to None, it will return all years which is confusing because
-        # we can also query for time period. We can do a string filter
-        # on the results to only return the years we want (faster queries but
-        # a bit hacky). Ensure the assumptions are tested at runtime.
+        # we can also query for time period, but this relates to "published
+        # since" and "published before". What we want is just the year of the
+        # release. So we can do a string filter on the results to only return
+        # the years we want that fit in the query, as this is the date that
+        # we're interested in. We should print a warning to the user to note
+        # this expectation. Therefore set to None for now.
         year_collection = None
 
         url = (
@@ -94,8 +81,13 @@ class SwissTopo(Provider):
             "?format=image/tiff; application=geotiff; "
             f"profile=cloud-optimized&{resolution}&srid={request_epsg}"
             f"&state={year_collection if year_collection is not None else ''}"
-            f"&from={start_date_unix}&to={end_date_unix}"
             f"&xMin={x_min}&yMin={y_min}&xMax={x_max}&yMax={y_max}&csv=true"
+        )
+        logger.warning(
+            "SwissTopo API queries by year of release, not full date, so your "
+            f"input query of {start_date} to {end_date} will be converted to "
+            f"the year of {start_date.year} to {end_date.year}. This may "
+            "result in more data being returned than expected."
         )
 
         # It is possible to get the geometry via this request, but the data
@@ -120,7 +112,6 @@ class SwissTopo(Provider):
 
         res = requests.get(url)
         res.raise_for_status()
-        logger.debug(f"Unix time: {start_date_unix}, {end_date_unix}")
         logger.debug(f"Bounds {x_min}, {y_min}, {x_max}, {y_max}")
 
         # Get the CSV path from JSON response
