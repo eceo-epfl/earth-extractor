@@ -5,12 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.1.4] - 2023-09-06
+### Removed
+- Filtering by time in the SwissTopo queries. This relates to publishing date
+and not the collection date.
+
+### Added
+- Extra messaging to the user when querying SwissTopo to let them know that
+the query date is filtered by year and not by the exact date.
+
 ## [0.1.3] - 2023-08-28
 ### Added
 - Added the ability to use a `.env` file to store credentials. This is useful
 for systems that do not have a keyring installed, such as a server or WSL.
 
-# Removed
+### Removed
 - The provider `Sinergise` that was not being used.
 
 ## [0.1.2] - 2023-08-28
