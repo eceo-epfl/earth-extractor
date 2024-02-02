@@ -70,10 +70,6 @@ def test_batch_query_export_only_pipe(
 
     """
 
-    mocker.patch(
-        "sentinelsat.SentinelAPI.query", return_value=scihub_query_response
-    )
-
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         query.batch_query(
             start=datetime.datetime(2020, 1, 1),

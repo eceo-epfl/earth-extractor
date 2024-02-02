@@ -4,10 +4,8 @@ from earth_extractor.core import utils
 from pytest_mock import MockerFixture
 from typing import List
 from earth_extractor.core.models import CommonSearchResult
-import asf_search
 import requests
 import os
-import sentinelsat
 import requests_mock
 
 # from earth_extractor.providers import swiss_topo
@@ -19,24 +17,24 @@ def test_sentinel1_single_sat_bbox_roi(
     tmpdir: str,
     mocker: MockerFixture,
 ) -> None:
-    mocker.patch.object(
-        asf_search.ASFSession,
-        "auth_with_token",
-        return_value=None,
-    )
-    mocker.patch.object(
-        asf_search.ASFProduct,
-        "download",
-        return_value=None,
-        autospec=True,
-    )
-    mocker.patch.object(
-        asf_search.ASFSearchResults,
-        "download",
-        return_value=None,
-        autospec=True,
-    )
-    mocker.patch.object(sentinelsat, "SentinelAPI", autospec=True)
+    # mocker.patch.object(
+    #     asf_search.ASFSession,
+    #     "auth_with_token",
+    #     return_value=None,
+    # )
+    # mocker.patch.object(
+    #     asf_search.ASFProduct,
+    #     "download",
+    #     return_value=None,
+    #     autospec=True,
+    # )
+    # mocker.patch.object(
+    #     asf_search.ASFSearchResults,
+    #     "download",
+    #     return_value=None,
+    #     autospec=True,
+    # )
+    # mocker.patch.object(sentinelsat, "SentinelAPI", autospec=True)
 
     result = runner.invoke(
         app,
