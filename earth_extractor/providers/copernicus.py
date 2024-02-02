@@ -242,13 +242,15 @@ class CopernicusDataSpace(Provider):
                 "https://zipper.dataspace.copernicus.eu/odata/v1/"
                 f"Products({props.get('Id')})/$value"
             )
+            identifier = props.get("Name").split(".")[0]
+
             common_results.append(
                 CommonSearchResult(
                     geometry=geometry_shapely,
                     product_id=props.get("Id"),
                     link=props.get("S3Path"),
                     url=url,
-                    identifier=props.get("Id"),
+                    identifier=identifier,
                     filename=props.get("Name"),
                     size=props.get("ContentLength"),
                     time=datetime.datetime.strptime(
@@ -258,7 +260,6 @@ class CopernicusDataSpace(Provider):
                     satellite=sat,
                 )
             )
-            print(common_results[0].time)
         return common_results
 
 

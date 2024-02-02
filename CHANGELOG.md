@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2024-01-24
 ### Removed
-- Scihub and Alaskan Satellite Facility as providers
+- Scihub as provider
 
 ### Changed
 - All SENTINEL constellations will query and download from the Copernicus
