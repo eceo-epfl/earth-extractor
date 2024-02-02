@@ -154,7 +154,7 @@ class Provider:
         self,
         provider_uri: str,
         collections: List[str],
-        roi: shapely.geometry.base.BaseGeometry,
+        roi: shapely.geometry,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
     ) -> Dict[str, str]:

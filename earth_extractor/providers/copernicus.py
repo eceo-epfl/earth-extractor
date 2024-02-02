@@ -2,7 +2,6 @@ from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
 from typing import Any, List, TYPE_CHECKING, Dict, Optional
-import sentinelsat
 import logging
 import datetime
 import shapely
@@ -142,8 +141,8 @@ class CopernicusDataSpace(Provider):
                     count += 1
                     logger.info(f"Querying page {count}")
 
-            except sentinelsat.UnauthorizedError as e:
-                logger.error(f"SentinelSat authentication error: {e}")
+            except Exception as e:
+                logger.error(f"Authentication error: {e}")
                 return []
 
         return all_products
