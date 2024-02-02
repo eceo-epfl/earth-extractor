@@ -169,6 +169,7 @@ def batch(
         export=export,
         results_only=results_only,
     )
+
     # Sum results from all query results
     total_qty = sum([len(res) for sat, res in query_results])
 

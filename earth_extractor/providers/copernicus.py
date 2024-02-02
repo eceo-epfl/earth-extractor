@@ -128,7 +128,7 @@ class CopernicusDataSpace(Provider):
 
                 # Query the API
                 products = requests.get(query_url).json()
-
+                print(products)
                 # Translate the results to a common format
                 all_products += self.translate_search_results(products)
                 count = 1
