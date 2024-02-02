@@ -382,7 +382,19 @@ def download_with_progress(
                     f"This is most likely a server error. "
                 )
             raise RuntimeError(error_msg)
-        output_file = os.path.join(output_folder, url.split("/")[-1])
+
+        # Usually the output file is the same as the URL filename but for
+        # if it's in the header, let's use that
+        if (
+            "Content-Disposition" in resp.headers
+            and "filename" in resp.headers["Content-Disposition"]
+        ):
+            output_file = os.path.join(
+                output_folder,
+                resp.headers["Content-Disposition"].split("=")[-1],
+            )
+        else:
+            output_file = os.path.join(output_folder, url.split("/")[-1])
 
         # Check if the file already exists, then apply overwrite policy
         if os.path.exists(output_file):

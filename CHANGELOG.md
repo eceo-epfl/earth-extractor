@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2024-01-24
+### Removed
+- Scihub as provider
+
+### Changed
+- All SENTINEL constellations will query and download from the Copernicus
+Data Space using the OData API.
+- The output filename is first attempted to be retrieved from the
+Content-Disposition header element, otherwise reverts to the original strategy
+of splitting the URL and getting the last element.
+
 
 ## [0.1.4] - 2023-09-06
 ### Removed

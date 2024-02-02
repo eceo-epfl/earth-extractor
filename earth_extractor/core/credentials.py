@@ -18,8 +18,8 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 class Credentials(BaseSettings):
     # User tokens
-    SCIHUB_USERNAME: Optional[str] = None
-    SCIHUB_PASSWORD: Optional[str] = None
+    COPERNICUS_USERNAME: Optional[str] = None
+    COPERNICUS_PASSWORD: Optional[str] = None
 
     # NASA (For Alaska Satellite Facility and NASA Common Metadata Repository)
     NASA_TOKEN: Optional[str] = None
@@ -48,8 +48,8 @@ class Credentials(BaseSettings):
                     values[key] = None
         if "pytest" in sys.modules:  # Populate fake credentials for unit tests
             return {
-                "SCIHUB_USERNAME": "test",
-                "SCIHUB_PASSWORD": "test",
+                "COPERNICUS_USERNAME": "test",
+                "COPERNICUS_PASSWORD": "test",
                 "NASA_TOKEN": jwt.encode(  # JSON Web token
                     {
                         "some": "test",

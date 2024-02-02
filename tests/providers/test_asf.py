@@ -64,6 +64,11 @@ def test_download_many(
         content=bytes(json.dumps({"items": [], "hits": 0}).encode("utf-8")),
     )
     requests_mock.post(
+        "https://cmr.earthdata.nasa.gov/search/granules.umm_json",
+        content=bytes(json.dumps({"items": [], "hits": 0}).encode("utf-8")),
+    )
+
+    requests_mock.post(
         "https://search-error-report.asf.alaska.edu/",
         content=None,
     )

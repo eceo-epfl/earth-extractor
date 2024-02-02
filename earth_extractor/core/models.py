@@ -122,7 +122,7 @@ class CommonSearchResult:
     sensor: Optional["Sensor"] = None
 
     geometry: Optional[str] = None  # Should be as WKT
-    url: Optional[AnyUrl] = None
+    url: Optional[AnyUrl | str] = None
     notes: Optional[str] = None
 
     # Create function to convert this dataclass to geojson including all fields

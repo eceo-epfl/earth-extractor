@@ -84,16 +84,16 @@ In the folder you are working in, place an .env file with the keys and values
 as follows (the necessary keys can be found in the [credential sources](#credential-sources) section underneath):
 
 ```bash
-SCIHUB_USERNAME=
-SCIHUB_PASSWORD=
+COPERNICUS_USERNAME=
+COPERNICUS_PASSWORD=
 NASA_TOKEN=
 ```
 
 # Credential sources
 
 Credentials can be obtained from the respective providers:
-* [Copernicus Open Access Hub](https://scihub.copernicus.eu/dhus/#/self-registration)
-    * `SCIHUB_USERNAME` and `SCIHUB_PASSWORD`
+* [Copernicus Data Space](https://dataspace.copernicus.eu/)
+    * `COPERNICUS_USERNAME` and `COPERNICUS_PASSWORD`
 
 
 * [Alaskan Satellite Facility](https://asf.alaska.edu/) and [NASA LAADS repository](https://ladsweb.modaps.eosdis.nasa.gov/)
@@ -161,14 +161,14 @@ included in the design:
 
 | **Satellite** | **Levels**            | **Search provider**               | **Download provider**             |
 |---------------|-----------------------|-----------------------------------|-----------------------------------|
-| **Sentinel-1**| 1 (GRD)               | SCIHUB                            | Alaskan Satellite Facility        |
-|               | 2 (GRD_SIGMA0)        | SCIHUB                            | SCIHUB                            |
-| **Sentinel-2**| 1C                    | SCIHUB                            | SCIHUB                            |
-|               | 2A                    | SCIHUB                            | SCIHUB                            |
-| **Sentinel-3**| 1B                    | SCIHUB                            | SCIHUB                            |
-|               | 2                     | SCIHUB                            | SCIHUB                            |
-|               | 3 LFR Atmos (Land)    | SCIHUB                            | SCIHUB                            |
-|               | 3 WFR Atmos (Water)   | SCIHUB                            | SCIHUB                            |
+| **Sentinel-1**| 1 (GRD)               | Copernicus Data Space             | Alaskan Satellite Facility        |
+|               | 2 (GRD_SIGMA0)        | Copernicus Data Space             | Copernicus Data Space             |
+| **Sentinel-2**| 1C                    | Copernicus Data Space             | Copernicus Data Space             |
+|               | 2A                    | Copernicus Data Space             | Copernicus Data Space             |
+| **Sentinel-3**| 1B                    | Copernicus Data Space             | Copernicus Data Space             |
+|               | 2                     | Copernicus Data Space             | Copernicus Data Space             |
+|               | 3 LFR Atmos (Land)    | Copernicus Data Space             | Copernicus Data Space             |
+|               | 3 WFR Atmos (Water)   | Copernicus Data Space             | Copernicus Data Space             |
 | **MODIS Terra**| 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
 | **MODIS Aqua** | 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
 | **VIIRS**      | 1                    | NASA Common Metadata Repository   | NASA LAADS                        |

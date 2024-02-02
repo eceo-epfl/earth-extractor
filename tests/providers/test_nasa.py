@@ -5,10 +5,7 @@ from earth_extractor.satellites import enums, viirs
 from datetime import datetime
 import shapely.geometry
 import shapely.wkt
-import pytest
 import pytest_mock
-import sentinelsat
-import tenacity
 from typing import List
 from collections import OrderedDict
 
