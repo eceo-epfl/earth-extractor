@@ -18,8 +18,8 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 class Credentials(BaseSettings):
     # User tokens
-    SCIHUB_USERNAME: Optional[str] = None
-    SCIHUB_PASSWORD: Optional[str] = None
+    COPERNICUS_USERNAME: Optional[str] = None
+    COPERNICUS_PASSWORD: Optional[str] = None
 
     # NASA (For Alaska Satellite Facility and NASA Common Metadata Repository)
     NASA_TOKEN: Optional[str] = None

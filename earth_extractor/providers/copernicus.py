@@ -1,19 +1,17 @@
 from earth_extractor.providers import Provider
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor.core.models import CommonSearchResult
-from typing import Any, List, TYPE_CHECKING, Dict, Tuple, Optional
+from typing import Any, List, TYPE_CHECKING, Dict, Optional
 import sentinelsat
-from earth_extractor.providers.extensions.sentinelsat import (
-    SentinelAPIExtended,
-)
 import logging
 import datetime
 import shapely
 import shapely.geometry
+from shapely import wkt
 from earth_extractor.satellites import enums
 from earth_extractor import core
-import tenacity
-
+import requests
+from earth_extractor.core.config import constants
 
 if TYPE_CHECKING:
     from earth_extractor.satellites.base import Satellite
@@ -24,7 +22,38 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 credentials = get_credentials()
 
 
-class CopernicusOpenAccessHub(Provider):
+class CopernicusDataSpace(Provider):
+    def get_access_token(
+        self: "CopernicusDataSpace",
+        username: str | None,
+        password: str | None,
+        client_id: str = constants.COPERNICUS_APPLICATION_ID,
+    ) -> str:
+
+        if username is None or password is None:
+            raise ValueError(
+                "Username and password are required to get an access token"
+            )
+        data = {
+            "client_id": client_id,  # Set unique id for this application
+            "username": username,
+            "password": password,
+            "grant_type": "password",
+        }
+        try:
+            r = requests.post(
+                "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/"
+                "protocol/openid-connect/token",
+                data=data,
+            )
+            r.raise_for_status()
+        except Exception as e:
+            raise Exception(
+                "Access token creation failed. Exception raised from the "
+                f"server was: {e}"
+            )
+        return r.json()["access_token"]
+
     def query(
         self,
         satellite: "Satellite",
@@ -34,22 +63,14 @@ class CopernicusOpenAccessHub(Provider):
         end_date: datetime.datetime,
         cloud_cover: Optional[int] = None,
     ) -> List[Dict[Any, Any]]:
-        """Query the Copernicus Open Access Hub for data"""
+        """Query the Copernicus Data Space for data
 
-        # Check that the provider's credentials that are needed are set
-        self._check_credentials_exist()
-
-        try:
-            api = SentinelAPIExtended(
-                credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
-            )
-        except sentinelsat.UnauthorizedError as e:
-            logger.error(f"ASF authentication error: {e}")
-            return []
+        No credentials are required to query
+        """
 
         # If cloud cover percentage is 100, set to None for API
-        if cloud_cover == 100:
-            cloud_cover = None
+        if cloud_cover is None:
+            cloud_cover = 100
 
         # Variable to combine all CommonSearchResult objects into one
         all_products = []
@@ -64,54 +85,77 @@ class CopernicusOpenAccessHub(Provider):
             if not product_type:
                 raise ValueError(
                     f"Processing level {processing_level.value} not supported "
-                    f"by Copernicus Open Access Hub for satellite "
+                    f"by Copernicus Data Space for satellite "
                     f"{satellite.name}. Available processing levels: "
                     f"{self.products}"
                 )
 
+            # Build the query URL
+            base_url = (
+                "https://catalogue.dataspace.copernicus.eu/odata/v1/"
+                "Products?$filter="
+            )
+            query_elements = []
             try:
-                products = api.query(
-                    roi.wkt,
-                    producttype=product_type,
-                    cloudcoverpercentage=(0, cloud_cover)
-                    if cloud_cover
-                    else None,
-                    date=(start_date, end_date),
+                if cloud_cover and cloud_cover < 100:
+                    query_elements.append(
+                        f"Attributes/OData.CSC.DoubleAttribute/"
+                        "any(att:att/Name eq 'cloudCover' "
+                        "and att/OData.CSC.DoubleAttribute/Value"
+                        f" le {cloud_cover:.2f})"
+                    )
+                if roi:
+                    query_elements.append(
+                        "OData.CSC.Intersects("
+                        f"area=geography'SRID=4326;{roi.wkt}')"
+                    )
+                query_elements.append(
+                    f"Attributes/OData.CSC.StringAttribute/"
+                    "any(att:att/Name eq 'productType' "
+                    "and att/OData.CSC.StringAttribute/Value eq "
+                    f"'{product_type}')"
                 )
-                # Translate the results to a common format
-                products = self.translate_search_results(products)
+                query_elements.append(
+                    f"ContentDate/Start gt {start_date.isoformat()}.000Z"
+                )
+                query_elements.append(
+                    f"ContentDate/Start lt {end_date.isoformat()}.000Z"
+                )
 
-                all_products += products
+                query_url = (
+                    f"{base_url}{' and '.join(query_elements)}"
+                    "&$expand=Assets&$expand=Attributes&$top=1000"
+                )
+
+                # Query the API
+                products = requests.get(query_url).json()
+
+                # Translate the results to a common format
+                all_products += self.translate_search_results(products)
+                count = 1
+
+                next_page = products.get("@odata.nextLink", None)
+                while next_page:
+                    products = requests.get(next_page).json()
+                    all_products += self.translate_search_results(products)
+                    next_page = products.get("@odata.nextLink", None)
+                    count += 1
+                    logger.info(f"Querying page {count}")
+
             except sentinelsat.UnauthorizedError as e:
                 logger.error(f"SentinelSat authentication error: {e}")
                 return []
 
         return all_products
 
-    @tenacity.retry(
-        retry=tenacity.retry_if_exception_type(
-            sentinelsat.exceptions.ServerError
-        ),
-        stop=tenacity.stop_after_attempt(
-            core.config.constants.MAX_DOWNLOAD_ATTEMPTS
-        ),
-        wait=tenacity.wait_fixed(90),  # API rate limit is 90req/60s
-        reraise=True,
-    )
     def download_many(
         self,
         search_results: List[CommonSearchResult],
         download_dir: str,
         overwrite: bool = False,
-        processes: int = core.config.constants.PARRALLEL_PROCESSES_DEFAULT,
-        *,
-        max_attempts: int = core.config.constants.MAX_DOWNLOAD_ATTEMPTS,
+        processes: int = constants.PARRALLEL_PROCESSES_DEFAULT,
     ) -> None:
         """Using the search results from query(), download the data
-
-        Function will retry if the API returns a 500 error. This can happen
-        when the API is under heavy load or when the API rate limit is exceeded
-        which is defined at time of writing to be 90 requests per minute.
 
         Parameters
         ----------
@@ -119,34 +163,44 @@ class CopernicusOpenAccessHub(Provider):
             The search results
         download_dir : str
             The directory to download the data to
-        overwrite : bool
-            Whether to overwrite existing files
-        processes : int
+        overwrite : bool, optional
+            Whether to overwrite existing files, by default False
+        processes : int, optional
             The number of processes to use for downloading
 
         Returns
         -------
         None
         """
+
+        # Convert the search results to a list of URIs
+
         # Check that the provider's credentials that are needed are set
         self._check_credentials_exist()
 
-        logger.addHandler(sentinelsat.SentinelAPI.logger)
+        try:
+            access_token = self.get_access_token(
+                credentials.COPERNICUS_USERNAME,
+                credentials.COPERNICUS_PASSWORD,
+            )
+        except Exception as e:
+            raise ValueError(
+                f"Copernicus Data Space access token creation failed: {e}"
+            )
 
-        # Convert the search results to a list of product ids
-        product_ids = [result.product_id for result in search_results]
+        urls = [str(x.url) for x in search_results if x.url]
 
-        api = SentinelAPIExtended(
-            credentials.SCIHUB_USERNAME, credentials.SCIHUB_PASSWORD
-        )
-        api.download_all(
-            product_ids,
-            directory_path=download_dir,
-            n_concurrent_dl=processes,
-            checksum=True,
-            max_attempts=max_attempts,
-            overwrite=overwrite,
-        )
+        auth_header = {"Authorization": f"Bearer {access_token}"}
+
+        for url in urls:
+            try:
+                core.utils.download_parallel(
+                    urls, download_dir, auth_header, overwrite, processes
+                )
+            except RuntimeError as e:
+                # Log the exception and continue to the next file
+                logger.error(e)
+                continue
 
     def translate_search_results(
         self, provider_search_results: Dict[Any, Any]
@@ -165,35 +219,53 @@ class CopernicusOpenAccessHub(Provider):
         """
 
         common_results = []
-        for id, props in provider_search_results.items():
+
+        for props in provider_search_results["value"]:
             # Get the satellite and processing level from reversed mapping of
             # the provider's "products" dictionary
-            sat, level = self._products_reversed[props["producttype"]]
+            sat, level = None, None
+            for odata_props in props["Attributes"]:
+                if odata_props["Name"] == "productType":
+                    sat, level = self._products_reversed[odata_props["Value"]]
 
+            if sat is None or level is None:
+                logger.warn(
+                    "Satellite and processing level could not be determined "
+                    "from the search results"
+                )
+                continue
+
+            # Geometry is encoded with SRID, split, remove trailing apostrophe
+            wkt_geometry = props.get("Footprint").split(";")[-1][:-1]
+            geometry_shapely = wkt.loads(wkt_geometry)
+
+            url = (
+                "https://zipper.dataspace.copernicus.eu/odata/v1/"
+                f"Products({props.get('Id')})/$value"
+            )
             common_results.append(
                 CommonSearchResult(
-                    geometry=props.get("footprint"),
-                    product_id=id,
-                    link=props.get("link_alternative"),
-                    identifier=props.get("identifier"),
-                    filename=props.get("filename"),
-                    size=props.get("size"),
-                    time=props.get("beginposition"),
-                    cloud_cover_percentage=props.get("cloudcoverpercentage"),
+                    geometry=geometry_shapely,
+                    product_id=props.get("Id"),
+                    link=props.get("S3Path"),
+                    url=url,
+                    identifier=props.get("Id"),
+                    filename=props.get("Name"),
+                    size=props.get("ContentLength"),
+                    time=props.get("OriginDate"),
                     processing_level=level,
                     satellite=sat,
                 )
             )
-
         return common_results
 
 
-copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
+copernicus_dataspace: CopernicusDataSpace = CopernicusDataSpace(
     name="scihub",
-    description="Copernicus Open Access Hub",
-    uri="https://scihub.copernicus.eu",
+    description="Copernicus Data Space",
+    uri="https://dataspace.copernicus.eu",
     products={
-        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): ["GRD"],
+        (enums.Satellite.SENTINEL1, enums.ProcessingLevel.L1): ["IW_GRDH_1S"],
         (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L1C): ["S2MSI1C"],
         (enums.Satellite.SENTINEL2, enums.ProcessingLevel.L2A): ["S2MSI2A"],
         (enums.Satellite.SENTINEL3, enums.ProcessingLevel.L1): ["OL_1_EFR___"],
@@ -202,5 +274,5 @@ copernicus_scihub: CopernicusOpenAccessHub = CopernicusOpenAccessHub(
             "OL_2_WFR___",
         ],
     },
-    credentials_required=["SCIHUB_USERNAME", "SCIHUB_PASSWORD"],
+    credentials_required=["COPERNICUS_USERNAME", "COPERNICUS_PASSWORD"],
 )

@@ -18,6 +18,7 @@ class Constants(BaseSettings):
     PARRALLEL_PROCESSES_DEFAULT: int = 4
 
     KEYRING_ID: str = "earth-extractor"
+    COPERNICUS_APPLICATION_ID: str = "cdse-public"
 
     # Logging
     LOGLEVEL_MODULE_DEFAULT: int = logging.DEBUG

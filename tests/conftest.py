@@ -3,7 +3,7 @@ import pytest
 from earth_extractor.core.models import BBox, CommonSearchResult
 from earth_extractor.core.credentials import Credentials
 from earth_extractor.satellites.enums import Satellite, ProcessingLevel
-from earth_extractor.providers import copernicus_scihub
+from earth_extractor.providers import copernicus_dataspace
 import os
 import orjson
 import shapely.geometry
@@ -220,7 +220,7 @@ def sentinel_query_as_commonsearch_result(
 ) -> List[CommonSearchResult]:
     """A file id for downloading from the ASF API"""
 
-    return copernicus_scihub.translate_search_results(scihub_query_response)
+    return copernicus_dataspace.translate_search_results(scihub_query_response)
 
 
 @pytest.fixture

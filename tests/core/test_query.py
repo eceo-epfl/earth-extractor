@@ -130,26 +130,3 @@ def test_pair_all_cli_options() -> None:
 
         assert sat in [sat.value for sat in cli_options.Satellites]
         assert level in [level.value for level in enums.ProcessingLevel]
-
-
-# def test_export_all_cli_options(
-#     roi_switzerland: shapely.geometry.base.BaseGeometry,
-# ) -> None:
-#     """Test that all cli options can be exported
-
-#     At the moment this is a live query, need to change to mocked server
-#     response
-#     """
-
-#     for option in cli_options.SatelliteChoices:
-#         query.batch_query(
-#             start=datetime.datetime(2020, 1, 1),
-#             end=datetime.datetime(2020, 1, 31),
-#             satellites=[option],
-#             roi="45.81,5.95,47.81,10.5",
-#             buffer=0,
-#             cloud_cover=10,
-#             output_dir="data",
-#             export=cli_options.ExportMetadataOptions.PIPE,
-#             results_only=True,
-#         )
