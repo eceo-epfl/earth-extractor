@@ -16,9 +16,9 @@ The library creates a framework around providers and satellites, allowing
 a satellite to have separate providers for querying and downloading. This
 provides the benefit of searching with an API allowing more comprehensive
 filters than those that are available in the download provider. For example,
-the Copernicus Open Access Hub allows cloud coverage filters, but the data is
-better served by the Alaskan Satellite Facility which does not offer such
-filters.
+the Copernicus Data Space allows cloud coverage filters, but for
+Sentinel 1, the data is better served by the Alaskan Satellite Facility 
+which does not offer such filters.
 
 ### Changelog
 Semantic version changes are tracked in the [CHANGELOG](./CHANGELOG.md).
