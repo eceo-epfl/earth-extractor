@@ -251,11 +251,14 @@ class CopernicusDataSpace(Provider):
                     identifier=props.get("Id"),
                     filename=props.get("Name"),
                     size=props.get("ContentLength"),
-                    time=props.get("OriginDate"),
+                    time=datetime.datetime.strptime(
+                        props.get("OriginDate"), "%Y-%m-%dT%H:%M:%S.%fZ"
+                    ),
                     processing_level=level,
                     satellite=sat,
                 )
             )
+            print(common_results[0].time)
         return common_results
 
 
