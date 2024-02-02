@@ -48,8 +48,8 @@ class Credentials(BaseSettings):
                     values[key] = None
         if "pytest" in sys.modules:  # Populate fake credentials for unit tests
             return {
-                "SCIHUB_USERNAME": "test",
-                "SCIHUB_PASSWORD": "test",
+                "COPERNICUS_USERNAME": "test",
+                "COPERNICUS_PASSWORD": "test",
                 "NASA_TOKEN": jwt.encode(  # JSON Web token
                     {
                         "some": "test",
