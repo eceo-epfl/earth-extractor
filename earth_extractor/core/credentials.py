@@ -5,7 +5,8 @@ import logging
 import sys
 from rich.console import Console
 from rich.table import Table
-from pydantic import BaseSettings, root_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import model_validator
 from typing import Dict, Optional
 from earth_extractor import core
 import jwt
@@ -17,6 +18,8 @@ logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
 
 
 class Credentials(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
     # User tokens
     COPERNICUS_USERNAME: Optional[str] = None
     COPERNICUS_PASSWORD: Optional[str] = None
@@ -24,19 +27,14 @@ class Credentials(BaseSettings):
     # NASA (For Alaska Satellite Facility and NASA Common Metadata Repository)
     NASA_TOKEN: Optional[str] = None
 
-    # Read from .env file
-    class Config:
-        env_file = ".env"  # Populate from .env file before requesting keyring
-
-    @root_validator
+    @model_validator(mode="before")
+    @classmethod
     def populate_credentials_from_keyring(
         cls, values: Dict[str, Optional[str]]
     ) -> Dict[str, Optional[str]]:
         """Populate the credentials from the keyring"""
-        for key in values.keys():
-            if values[key] is None:
-                # If key is not None, then the key is already set (from .env).
-                # So now request the keyring for the value
+        for key in cls.model_fields:
+            if values.get(key) is None:
                 try:
                     values[key] = keyring.get_password(
                         core.config.constants.KEYRING_ID, key
@@ -46,15 +44,19 @@ class Credentials(BaseSettings):
                         f"Keyring error when getting key '{key}': {e}"
                     )
                     values[key] = None
-        if "pytest" in sys.modules:  # Populate fake credentials for unit tests
+
+        # Provide fake credentials during unit tests when none are configured
+        if "pytest" in sys.modules and all(
+            v is None for k, v in values.items() if k in cls.model_fields
+        ):
             return {
                 "COPERNICUS_USERNAME": "test",
                 "COPERNICUS_PASSWORD": "test",
-                "NASA_TOKEN": jwt.encode(  # JSON Web token
+                "NASA_TOKEN": jwt.encode(
                     {
                         "some": "test",
-                        "iat": datetime.datetime.utcnow(),
-                        "exp": datetime.datetime.utcnow()
+                        "iat": datetime.datetime.now(datetime.timezone.utc),
+                        "exp": datetime.datetime.now(datetime.timezone.utc)
                         + datetime.timedelta(days=1),
                     },
                     "secret",
@@ -89,7 +91,7 @@ def show_credential_list(show_secret=False) -> None:
     else:
         table.add_column("Value is set", justify="center")
 
-    for cred_key in credentials.__fields__:
+    for cred_key in Credentials.model_fields:
         if show_secret:
             value = getattr(credentials, cred_key)
         else:
@@ -117,7 +119,7 @@ def set_one_credential(
 
     """
 
-    if key not in get_credentials().__fields__:
+    if key not in Credentials.model_fields:
         raise ValueError(f"Key '{key}' does not exist")
 
     secret = getattr(get_credentials(), key)
@@ -127,7 +129,6 @@ def set_one_credential(
     )
 
     if new_secret == "":
-        # Don't store '' in the keyring in case there are any, just delete
         if secret == "":
             keyring.delete_password(core.config.constants.KEYRING_ID, key)
     else:
@@ -137,15 +138,17 @@ def set_one_credential(
 def set_all_credentials() -> None:
     """Set all credential keys in the keyring"""
 
-    for cred_key in get_credentials().__fields__:
+    for cred_key in Credentials.model_fields:
         set_one_credential(cred_key)
+    get_credentials.cache_clear()
 
 
 def delete_credential(key) -> None:
-    if key not in get_credentials().__fields__:
+    if key not in Credentials.model_fields:
         raise ValueError(f"Key '{key}' does not exist")
 
     keyring.delete_password(core.config.constants.KEYRING_ID, key)
+    get_credentials.cache_clear()
 
 
 @lru_cache

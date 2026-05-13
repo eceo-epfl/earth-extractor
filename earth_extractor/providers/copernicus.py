@@ -191,15 +191,12 @@ class CopernicusDataSpace(Provider):
 
         auth_header = {"Authorization": f"Bearer {access_token}"}
 
-        for url in urls:
-            try:
-                core.utils.download_parallel(
-                    urls, download_dir, auth_header, overwrite, processes
-                )
-            except RuntimeError as e:
-                # Log the exception and continue to the next file
-                logger.error(e)
-                continue
+        try:
+            core.utils.download_parallel(
+                urls, download_dir, auth_header, overwrite, processes
+            )
+        except RuntimeError as e:
+            logger.error(e)
 
     def translate_search_results(
         self, provider_search_results: Dict[Any, Any]

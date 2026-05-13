@@ -6,7 +6,7 @@
             "id": "LAADS:7188953671",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VJ103IMG.v2.1",
+            "collection": "VJ103IMG_2.1",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -96,7 +96,7 @@
             "id": "LAADS:7188953687",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VJ103MOD.v2.1",
+            "collection": "VJ103MOD_2.1",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -186,7 +186,7 @@
             "id": "LAADS:7188953672",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VJ103IMG.v2.1",
+            "collection": "VJ103IMG_2.1",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -276,7 +276,7 @@
             "id": "LAADS:7188953688",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VJ103MOD.v2.1",
+            "collection": "VJ103MOD_2.1",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -366,7 +366,7 @@
             "id": "LAADS:7189119990",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VNP03IMG.v2",
+            "collection": "VNP03IMG_2",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -456,7 +456,7 @@
             "id": "LAADS:7189120011",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VNP03MOD.v2",
+            "collection": "VNP03MOD_2",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -546,7 +546,7 @@
             "id": "LAADS:7189175395",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VJ103IMG.v2.1",
+            "collection": "VJ103IMG_2.1",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -636,7 +636,7 @@
             "id": "LAADS:7189175404",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VJ103MOD.v2.1",
+            "collection": "VJ103MOD_2.1",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -726,7 +726,7 @@
             "id": "LAADS:7189861520",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VNP03IMG.v2",
+            "collection": "VNP03IMG_2",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -816,7 +816,7 @@
             "id": "LAADS:7189861527",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VNP03MOD.v2",
+            "collection": "VNP03MOD_2",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -906,7 +906,7 @@
             "id": "LAADS:7189923564",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VJ103IMG.v2.1",
+            "collection": "VJ103IMG_2.1",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -996,7 +996,7 @@
             "id": "LAADS:7189923577",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VJ103MOD.v2.1",
+            "collection": "VJ103MOD_2.1",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -1086,7 +1086,7 @@
             "id": "LAADS:7189977482",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VNP03IMG.v2",
+            "collection": "VNP03IMG_2",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [
@@ -1176,7 +1176,7 @@
             "id": "LAADS:7189977496",
             "stac_version": "1.0.0",
             "stac_extensions": [],
-            "collection": "VNP03MOD.v2",
+            "collection": "VNP03MOD_2",
             "geometry": {
                 "type": "Polygon",
                 "coordinates": [

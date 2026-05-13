@@ -149,7 +149,6 @@ class CommonSearchResult:
         if self.time is not None:
             d["time"] = self.time.isoformat()
 
-        d.pop("geometry")  # Don't include geometry in the properties
+        d.pop("geometry")
 
-        # Convert the dictionary to a geojson
-        return geojson.Feature(geometry=geom, **d)
+        return geojson.Feature(geometry=geom, properties=d)

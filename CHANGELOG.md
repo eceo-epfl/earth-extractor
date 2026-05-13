@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-05-13
+### Changed
+- Migrated package management from Poetry to uv
+- Migrated from Pydantic v1 to v2 (`pydantic-settings` for BaseSettings)
+- Upgraded minimum Python version from 3.8 to 3.11
+- Upgraded all dependencies to current versions (typer, pystac-client, 
+  asf-search, geopandas, etc.)
+- SwissTopo now queries the official STAC API at data.geo.admin.ch instead of
+  the undocumented CSV-based endpoint. This provides proper per-tile geometry
+  and eliminates the need for coordinate reprojection during search.
+- NASA CMR collection IDs updated to current underscore format
+  (e.g. `MOD02QKM_6.1` instead of `MOD02QKM.v6.1`)
+- NASA CMR asset key lookup updated to handle the new dynamic key format
+- Simplified the ASF search extension from ~550 lines to ~60 by using the
+  standard `asf_search.granule_search()` and only overriding download behaviour
+- CI workflows updated from Poetry to uv
+- Replaced deprecated `datetime.utcnow()` with `datetime.now(timezone.utc)`
+
+### Fixed
+- Copernicus `download_many` was downloading all files N times due to a loop
+  bug
+- Credential cache not clearing after `credentials --set`, causing stale
+  values to be displayed
+- Empty GeoDataFrame export crash when query returns no results
+- GeoDataFrame construction using `from_features()` for compatibility with
+  newer geopandas
+
+### Removed
+- `botocore` dependency pin (was not directly imported)
+- `poetry.lock` (replaced by `uv.lock`)
+
+### Added
+- End-to-end test suite (`tests/e2e/`) for validating live API queries and
+  downloads. Tests are gated on credential availability and excluded from the
+  default test run.
+
 ## [0.2.0] - 2024-01-24
 ### Removed
 - Scihub as provider

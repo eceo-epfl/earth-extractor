@@ -54,15 +54,16 @@ def test_download_many(
     a successful data collection.
     """
 
+    requests_mock.post(
+        "https://urs.earthdata.nasa.gov/oauth/tokens/user",
+        json={"uid": "test_user"},
+    )
+
     requests_mock.get(
         "https://cmr.earthdata.nasa.gov/search/collections",
         content=None,
     )
 
-    requests_mock.post(
-        "https://cmr.earthdata.nasa.gov/search/granules.umm_json_v1_4",
-        content=bytes(json.dumps({"items": [], "hits": 0}).encode("utf-8")),
-    )
     requests_mock.post(
         "https://cmr.earthdata.nasa.gov/search/granules.umm_json",
         content=bytes(json.dumps({"items": [], "hits": 0}).encode("utf-8")),

@@ -55,19 +55,26 @@ class NASACommonMetadataRepository(Provider):
 
         common_results = []
         for record in provider_search_results:
-            # Get the satellite and processing level from reversed mapping of
-            # the provider's "products" dictionary
             sat, level = self._products_reversed[record["collection"]]
             datetime_obj = datetime.datetime.strptime(
                 record["properties"]["datetime"], "%Y-%m-%dT%H:%M:%S.%fZ"
             )
+
+            # Find the data download asset — the key is a dynamic timestamp,
+            # so we filter out known non-data assets
+            url = None
+            non_data_prefixes = ("browse", "thumbnail", "metadata", "s3_")
+            for key, asset in record.get("assets", {}).items():
+                if not key.startswith(non_data_prefixes):
+                    url = asset.get("href")
+                    break
 
             common_results.append(
                 CommonSearchResult(
                     product_id=record["id"],
                     time=datetime_obj,
                     geometry=Polygon(record["geometry"]["coordinates"][0]),
-                    url=record["assets"]["data"]["href"],
+                    url=url,
                     processing_level=level,
                     satellite=sat,
                 )
@@ -125,22 +132,22 @@ nasa_cmr: NASACommonMetadataRepository = NASACommonMetadataRepository(
     description="NASA Common Metadata Repository",
     products={
         (enums.Satellite.MODIS_TERRA, enums.ProcessingLevel.L1B): [
-            "MOD02QKM.v6.1",
-            "MOD02HKM.v6.1",
-            "MOD021KM.v6.1",
-            "MOD03.v6.1",
+            "MOD02QKM_6.1",
+            "MOD02HKM_6.1",
+            "MOD021KM_6.1",
+            "MOD03_6.1",
         ],
         (enums.Satellite.MODIS_AQUA, enums.ProcessingLevel.L1B): [
-            "MYD02QKM.v6.1",
-            "MYD02HKM.v6.1",
-            "MYD021KM.v6.1",
-            "MYD03.v6.1",
+            "MYD02QKM_6.1",
+            "MYD02HKM_6.1",
+            "MYD021KM_6.1",
+            "MYD03_6.1",
         ],
         (enums.Satellite.VIIRS, enums.ProcessingLevel.L1): [
-            "VNP03IMG.v2",
-            "VJ103IMG.v2.1",
-            "VNP03MOD.v2",
-            "VJ103MOD.v2.1",
+            "VNP03IMG_2",
+            "VJ103IMG_2.1",
+            "VNP03MOD_2",
+            "VJ103MOD_2.1",
         ],
     },
     uri="https://cmr.earthdata.nasa.gov",

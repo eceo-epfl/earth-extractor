@@ -14,7 +14,7 @@ def test_credential_output():
 
     # Get fields from credentials
     credentials = Credentials()
-    cred_fields = credentials.__fields__
+    cred_fields = Credentials.model_fields
 
     for field in cred_fields:
         assert field in result.stdout, f"Field {field} not found in output"
@@ -25,7 +25,7 @@ def test_credential_output_show_secrets():
 
     # Get fields from credentials
     credentials = Credentials()
-    cred_fields = credentials.__fields__
+    cred_fields = Credentials.model_fields
 
     for field in cred_fields:
         assert field in result.stdout, f"Field {field} not found in output"
@@ -44,11 +44,11 @@ def test_credential_output_show_secrets():
 
 
 def test_credential_output_set():
-    result = runner.invoke(app, ["credentials", "--set"])
+    result = runner.invoke(app, ["credentials", "--set"], input="\n\n\n")
 
     # Get fields from credentials
     credentials = Credentials()
-    cred_fields = credentials.__fields__
+    cred_fields = Credentials.model_fields
     print(result.stdout)
     for field in cred_fields:
         assert field in result.stdout, f"Field {field} not found in output"

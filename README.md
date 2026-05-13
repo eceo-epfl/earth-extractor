@@ -39,18 +39,13 @@ The package repository can be found at
 
 ### Install from git (development)
 
-If poetry is not installed locally, install it first with:
-
-```bash
-pip install poetry
-```
-
-Then clone the repository and install the package dependencies with:
+Clone the repository and install the package dependencies with
+[uv](https://docs.astral.sh/uv/):
 
 ```bash
 git clone https://github.com/eceo-epfl/earth-extractor
 cd earth-extractor
-poetry install
+uv sync
 ```
 
 ### Define user credentials
@@ -94,6 +89,7 @@ NASA_TOKEN=
 Credentials can be obtained from the respective providers:
 * [Copernicus Data Space](https://dataspace.copernicus.eu/)
     * `COPERNICUS_USERNAME` and `COPERNICUS_PASSWORD`
+    * Register at the [Copernicus Data Space registration page](https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/registrations?client_id=cdse-public&response_type=code&redirect_uri=https%3A%2F%2Fdataspace.copernicus.eu)
 
 
 * [Alaskan Satellite Facility](https://asf.alaska.edu/) and [NASA LAADS repository](https://ladsweb.modaps.eosdis.nasa.gov/)
@@ -151,6 +147,27 @@ earth-extractor batch \
     --no-confirmation
 ```
 
+# Testing
+
+## Unit tests
+
+Run the unit tests with:
+
+```bash
+uv run pytest
+```
+
+## End-to-end tests
+
+The end-to-end tests validate queries and downloads against the live APIs.
+They require credentials to be configured (see [credential sources](#credential-sources)).
+Tests for providers whose credentials are not set will be skipped
+automatically.
+
+```bash
+uv run pytest tests/e2e/ -v
+```
+
 # Technical specifications
 
 ## Components
@@ -162,13 +179,12 @@ included in the design:
 | **Satellite** | **Levels**            | **Search provider**               | **Download provider**             |
 |---------------|-----------------------|-----------------------------------|-----------------------------------|
 | **Sentinel-1**| 1 (GRD)               | Copernicus Data Space             | Alaskan Satellite Facility        |
-|               | 2 (GRD_SIGMA0)        | Copernicus Data Space             | Copernicus Data Space             |
 | **Sentinel-2**| 1C                    | Copernicus Data Space             | Copernicus Data Space             |
 |               | 2A                    | Copernicus Data Space             | Copernicus Data Space             |
-| **Sentinel-3**| 1B                    | Copernicus Data Space             | Copernicus Data Space             |
-|               | 2                     | Copernicus Data Space             | Copernicus Data Space             |
-|               | 3 LFR Atmos (Land)    | Copernicus Data Space             | Copernicus Data Space             |
-|               | 3 WFR Atmos (Water)   | Copernicus Data Space             | Copernicus Data Space             |
+| **Sentinel-3**| 1                     | Copernicus Data Space             | Copernicus Data Space             |
+|               | 2 LFR (Land)          | Copernicus Data Space             | Copernicus Data Space             |
+|               | 2 WFR (Water)         | Copernicus Data Space             | Copernicus Data Space             |
 | **MODIS Terra**| 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
 | **MODIS Aqua** | 1B                   | NASA Common Metadata Repository   | NASA LAADS                        |
 | **VIIRS**      | 1                    | NASA Common Metadata Repository   | NASA LAADS                        |
+| **SwissImage** | 10cm, 2m             | SwissTopo STAC API                | SwissTopo                         |

@@ -10,36 +10,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
+    - uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
 
-    - name: Install poetry
-      uses: abatilo/actions-poetry@v2
-      with:
-        poetry-version: 1.5.1
+    - name: Set up Python
+      run: uv python install 3.12
 
     - name: Install project dependencies
-      run: poetry install
+      run: uv sync
 
     - name: Run pytest with coverage
       env:
         PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
-      run: poetry run pytest --cov=earth_extractor --cov-report term-missing
+      run: uv run pytest --cov=earth_extractor --cov-report term-missing
 
   publish:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
 
-    - name: Publish Package
-      uses: celsiusnarhwal/poetry-publish@v2
-      with:
-        python-version: 3.8
-        poetry-version: 1.5.1
-        token: ${{ secrets.PYPI_TOKEN }}
-        build: true
+    - name: Set up Python
+      run: uv python install 3.12
+
+    - name: Build package
+      run: uv build
+
+    - name: Publish to PyPI
+      run: uv publish
+      env:
+        UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}

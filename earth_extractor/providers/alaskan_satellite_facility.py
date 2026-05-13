@@ -4,7 +4,10 @@ from typing import List
 import asf_search
 from earth_extractor.core.credentials import get_credentials
 from earth_extractor import core
-from earth_extractor.providers.extensions.asf_search import granule_search
+from earth_extractor.providers.extensions.asf_search import (
+    granule_search,
+    download_results,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(core.config.constants.LOGLEVEL_MODULE_DEFAULT)
@@ -47,7 +50,6 @@ class AlaskanSateliteFacility(Provider):
                 token=credentials.NASA_TOKEN,
             )
 
-            # Search for the granules
             res = granule_search(search_file_ids)
             logger.info(
                 f"Found {len(res)} files to download (may include "
@@ -56,10 +58,10 @@ class AlaskanSateliteFacility(Provider):
 
             if len(res) == 0:
                 logger.info("No files to download, skipping")
-                return  # nothing to download
+                return
 
-            # Download the granules using the ASF API library
-            res.download(
+            download_results(
+                results=res,
                 path=download_dir,
                 session=session,
                 processes=processes,

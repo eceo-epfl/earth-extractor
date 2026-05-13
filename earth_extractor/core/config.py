@@ -1,4 +1,5 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from typing import ClassVar
 import logging
 import os
 import datetime
@@ -7,7 +8,7 @@ import datetime
 class Constants(BaseSettings):
     COMMON_TIMESTAMP: str = (
         # Windows doesn't like colons in filenames
-        f"{datetime.datetime.utcnow().isoformat().replace(':', '-')}"
+        f"{datetime.datetime.now(datetime.timezone.utc).isoformat().replace(':', '-')}"
     )
     DEFAULT_DOWNLOAD_DIR: str = os.path.join(os.getcwd(), "data")
     GEOJSON_EXPORT_FILENAME: str = f"{COMMON_TIMESTAMP}.geojson"
@@ -25,10 +26,10 @@ class Constants(BaseSettings):
     LOGFILE_NAME: str = f"{COMMON_TIMESTAMP}.log"
     LOGLEVEL_FILE: int = logging.DEBUG
     LOGLEVEL_CONSOLE: int = logging.INFO
-    LOGFORMAT_CONSOLE: logging.Formatter = logging.Formatter(
+    LOGFORMAT_CONSOLE: ClassVar[logging.Formatter] = logging.Formatter(
         "%(asctime)s [%(levelname)-7.7s] %(message)s"
     )
-    LOGFORMAT_FILE = logging.Formatter(
+    LOGFORMAT_FILE: ClassVar[logging.Formatter] = logging.Formatter(
         "%(asctime)s [%(levelname)-7.7s] (%(name)25.25s) %(message)s"
     )
 

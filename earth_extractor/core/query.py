@@ -100,11 +100,9 @@ def convert_query_results_to_geodataframe(
         The query results as a GeoDataFrame
     """
 
-    # Convert the query results to a list of dicts
     query_results_geojson = [x.to_geojson() for x in query_results]
 
-    # Convert the query results to a GeoDataFrame
-    gdf = gpd.GeoDataFrame.from_dict(query_results_geojson)
+    gdf = gpd.GeoDataFrame.from_features(query_results_geojson)
 
     return gdf
 
@@ -128,8 +126,6 @@ def convert_geodataframe_to_query_results(
         The query results
     """
 
-    # Convert the GeoDataFrame to a list of dicts
-    query_results = [x for x in gdf.to_dict("records")]
     query_results = []
     for idx, row in gdf.iterrows():
         query_results.append(
@@ -258,7 +254,7 @@ def batch_query(
         # its defined download provider
         all_results.append((sat, res))
 
-    if export != cli_options.ExportMetadataOptions.DISABLED.value:
+    if export != cli_options.ExportMetadataOptions.DISABLED.value and not gdf_all.empty:
         satellite_list = [sat.value for sat in satellites]
         output_file = None  # Default PIPE output
 
